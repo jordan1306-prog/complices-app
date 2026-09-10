@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Complices</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1116">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Complices">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1c1116;
+    --bg-2: #241620;
+    --card: #2c1a26;
+    --card-2: #33202b;
+    --gold: #c9a24d;
+    --gold-soft: #ddc088;
+    --rose: #d88c9a;
+    --rose-deep: #b8637a;
+    --cream: #f2e9e2;
+    --muted: #b8a29f;
+    --line: rgba(242,233,226,0.12);
+    --danger: #d9756a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(ellipse at top, #2a1720 0%, var(--bg) 55%);
+    color: var(--cream);
+    font-family: 'Manrope', sans-serif;
+    min-height:100vh;
+    padding-bottom: 60px;
+  }
+  h1,h2,h3,.serif{ font-family: 'Cormorant Garamond', serif; }
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 32px 20px 20px; }
+
+  header{ text-align:center; margin-bottom: 22px; position:relative; }
+  header h1{
+    font-size: 46px; font-weight:600; margin:0 0 8px;
+    letter-spacing: 0.5px; color: var(--gold-soft);
+    text-shadow: 0 0 28px rgba(216,140,154,0.45), 0 0 60px rgba(201,162,77,0.18);
+  }
+  header .flourish{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin-bottom: 10px; color: var(--rose-deep); font-size:13px; letter-spacing:2px;
+  }
+  header .flourish::before, header .flourish::after{
+    content:''; height:1px; width:34px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  header p{ margin:0; color: var(--muted); font-size:14.5px; letter-spacing: 0.3px; font-style:italic; }
+
+  .invite-btn{
+    display:block; margin: 14px auto 0; width:fit-content;
+    background: rgba(216,140,154,0.12); border:1px solid rgba(216,140,154,0.4);
+    color: var(--rose); font-family:'Manrope',sans-serif; font-weight:600; font-size:12.5px;
+    padding: 9px 18px; border-radius: 20px; cursor:pointer; letter-spacing:0.3px;
+  }
+
+  .secret-box{
+    background: linear-gradient(160deg, var(--card), var(--card-2));
+    border: 0.5px solid rgba(201,162,77,0.35);
+    border-radius: 16px; padding: 20px 18px; margin-bottom: 18px;
+  }
+  .secret-box h3{ margin:0 0 4px; font-size:20px; color: var(--gold-soft); font-weight:600; }
+  .secret-box .sub{ font-size:12.5px; color: var(--muted); margin-bottom:14px; line-height:1.5; }
+  .secret-box textarea{
+    width:100%; min-height:90px; resize:vertical;
+    background: var(--bg-2); border:0.5px solid var(--line); border-radius:10px;
+    padding:12px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+    margin-bottom:10px;
+  }
+  .secret-status{ font-size:11px; color: var(--muted); margin-top:8px; text-align:right; }
+  .secret-teaser{
+    background: linear-gradient(160deg, rgba(216,140,154,0.14), rgba(201,162,77,0.08));
+    border: 0.5px solid rgba(216,140,154,0.35);
+    border-radius: 16px; padding: 16px 18px; display:flex; align-items:center; gap:12px;
+  }
+  .secret-teaser .icon{ font-size:26px; }
+  .secret-teaser .txt{ font-size:13.5px; color: var(--cream); line-height:1.4; }
+  .secret-teaser .txt b{ color: var(--rose); }
+
+  .players{
+    display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom: 26px;
+  }
+  .player{
+    background: linear-gradient(160deg, var(--card), var(--card-2));
+    border: 0.5px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align:center;
+    position:relative;
+  }
+  .player .name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px; font-weight:600; color:var(--cream);
+    background:transparent; border:none; text-align:center;
+    width:100%; outline:none; border-bottom: 1px solid transparent;
+    padding: 2px 0;
+  }
+  .player .name:focus{ border-bottom: 1px solid var(--gold); }
+  .player .score{
+    font-size: 34px; font-weight:700; color: var(--gold);
+    margin: 8px 0 2px; font-family:'Cormorant Garamond',serif;
+  }
+  .player .score-label{ font-size:11px; color:var(--muted); letter-spacing:0.5px; }
+
+  nav{
+    display:flex; gap:8px; margin-bottom: 20px;
+    border-bottom: 0.5px solid var(--line);
+  }
+  nav button{
+    flex:1; background:none; border:none; color: var(--muted);
+    font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600;
+    padding: 10px 1px; cursor:pointer; border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  nav button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
+
+  section{ display:none; }
+  section.active{ display:block; }
+
+  .card{
+    background: var(--card);
+    border: 0.5px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display:flex; align-items:center; gap: 12px;
+  }
+  .card .info{ flex:1; min-width:0; }
+  .card .info .t{ font-size:15px; font-weight:600; color: var(--cream); }
+  .card .info .m{ font-size:12px; color: var(--muted); margin-top:2px; }
+  .pts{
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px;
+    color: var(--gold); white-space:nowrap;
+  }
+  .btn{
+    border:none; border-radius:10px; padding:9px 14px;
+    font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
+    cursor:pointer; white-space:nowrap;
+  }
+  .btn-gold{ background: var(--gold); color: #2c1a10; }
+  .btn-gold:disabled{ background:#5a5148; color:#8a8178; cursor:not-allowed; }
+  .btn-rose{ background: var(--rose); color: #3a141f; }
+  .btn-ghost{ background:none; border:1px solid var(--line); color: var(--muted); }
+  .btn-danger{ background:none; color: var(--danger); font-size:18px; padding:4px 8px; }
+
+  .assign{
+    display:flex; gap:6px; margin-top:6px;
+  }
+  .assign button{
+    flex:1; font-size:11px; padding:6px; border-radius:8px;
+    border:1px solid var(--line); background:none; color:var(--muted); cursor:pointer;
+  }
+  .assign button.picked{ background: var(--rose); color:#3a141f; border-color:var(--rose); }
+
+  .add-form{
+    background: var(--bg-2); border:0.5px dashed var(--line); border-radius:14px;
+    padding:16px; margin-bottom:18px;
+  }
+  .add-form .row{ display:flex; gap:8px; margin-bottom:8px; }
+  .add-form input[type=text]{
+    flex:1; background: var(--card); border:0.5px solid var(--line); border-radius:8px;
+    padding:9px 10px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+  }
+  .add-form input[type=number]{
+    width:70px; background: var(--card); border:0.5px solid var(--line); border-radius:8px;
+    padding:9px 8px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+  }
+  .add-form input::placeholder{ color: var(--muted); }
+  .empty{ text-align:center; color: var(--muted); font-size:13px; padding: 30px 10px; }
+
+  .hist-item{
+    display:flex; justify-content:space-between; padding: 10px 0;
+    border-bottom: 0.5px solid var(--line); font-size:13px;
+  }
+  .hist-item .who{ color: var(--rose-deep); font-weight:600; }
+  .hist-item .when{ color: var(--muted); font-size:11px; }
+  .hist-pts{ font-weight:700; }
+  .hist-pts.plus{ color: var(--gold); }
+  .hist-pts.minus{ color: var(--rose); }
+
+  .err{ color: var(--danger); font-size:12px; margin-top:4px; display:none; }
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background: var(--gold); color:#2c1a10; padding:10px 20px; border-radius:20px;
+    font-weight:600; font-size:13px; opacity:0; transition: all 0.25s; pointer-events:none;
+    z-index:10;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  #login-view{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    background: var(--card); border:0.5px solid var(--line); border-radius:16px;
+    padding:32px 24px; width:100%; max-width:340px; text-align:center;
+  }
+  .login-card h1{ color: var(--gold-soft); font-size:32px; margin:0 0 6px; }
+  .login-card p{ color: var(--muted); font-size:13px; margin:0 0 20px; }
+  .login-card input{
+    width:100%; background: var(--bg-2); border:0.5px solid var(--line); border-radius:8px;
+    padding:11px 12px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+    margin-bottom:10px;
+  }
+  .login-card .btn{ width:100%; margin-bottom:8px; }
+  .login-card .err{ display:none; text-align:left; margin-bottom:8px; }
+  .signout{
+    position:fixed; top:16px; right:16px; background:none; border:0.5px solid var(--line);
+    color: var(--muted); border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer;
+    font-family:'Manrope',sans-serif;
+  }
+
+  .chat-box{
+    display:flex; flex-direction:column; gap:10px;
+    height: 50vh; min-height:320px; overflow-y:auto;
+    padding: 10px 4px 16px;
+    margin-bottom: 10px;
+  }
+  .msg{ max-width: 78%; display:flex; flex-direction:column; }
+  .msg.me{ align-self:flex-end; align-items:flex-end; }
+  .msg.them{ align-self:flex-start; align-items:flex-start; }
+  .msg .bubble{
+    border-radius: 16px; padding: 9px 13px; font-size:14px; line-height:1.4;
+    word-break: break-word;
+  }
+  .msg.me .bubble{ background: var(--rose); color:#3a141f; border-bottom-right-radius:4px; }
+  .msg.them .bubble{ background: var(--card-2); color: var(--cream); border-bottom-left-radius:4px; }
+  .msg .when{ font-size:10px; color: var(--muted); margin-top:3px; }
+
+  .chat-input-row{
+    display:flex; gap:8px; align-items:center;
+    position: sticky; bottom: 0; background: var(--bg);
+    padding-top: 6px;
+  }
+  .chat-input-row input[type=text]{
+    flex:1; background: var(--card); border:0.5px solid var(--line); border-radius:20px;
+    padding:11px 16px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+  }
+  .icon-btn{
+    background: var(--card); border:0.5px solid var(--line); border-radius:50%;
+    width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color: var(--gold-soft); font-size:18px; flex-shrink:0;
+  }
+  .icon-btn.send{ background: var(--gold); color:#2c1a10; }
+</style>
+</head>
+<body>
+<div id="login-view">
+  <div class="login-card">
+    <h1>Complices</h1>
+    <p>Espace privé — connectez-vous pour continuer.</p>
+    <input type="email" id="login-email" placeholder="Adresse e-mail" autocomplete="username">
+    <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
+    <div class="err" id="login-err">Identifiants invalides.</div>
+    <button class="btn btn-gold" id="login-btn">Se connecter</button>
+    <button class="btn btn-ghost" id="signup-btn">Créer un compte</button>
+  </div>
+</div>
+
+<button class="signout" id="signout-btn" style="display:none;">Déconnexion</button>
+
+<div id="app-view" style="display:none;">
+<div class="wrap">
+  <header>
+    <div class="flourish">à deux, en secret</div>
+    <h1>Complices</h1>
+    <p>Un jeu de désir, de patience et de petites promesses tenues.</p>
+    <button class="invite-btn" id="invite-btn">💌 Viens me rejoindre</button>
+  </header>
+
+  <div class="players">
+    <div class="player">
+      <input class="name" id="name-a" value="Elle" maxlength="16">
+      <div class="score" id="score-a">0</div>
+      <div class="score-label">points</div>
+    </div>
+    <div class="player">
+      <input class="name" id="name-b" value="Lui" maxlength="16">
+      <div class="score" id="score-b">0</div>
+      <div class="score-label">points</div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="tab-btn active" data-tab="defis">Défis</button>
+    <button class="tab-btn" data-tab="boutique">Boutique</button>
+    <button class="tab-btn" data-tab="secret">Secret</button>
+    <button class="tab-btn" data-tab="messages">Messages</button>
+    <button class="tab-btn" data-tab="historique">Historique</button>
+  </nav>
+
+  <section id="tab-defis" class="active">
+    <div class="add-form">
+      <div class="row">
+        <input type="text" id="new-defi-name" placeholder="Nom du défi (ex : massage surprise)">
+        <input type="number" id="new-defi-pts" placeholder="pts" value="10" min="1">
+      </div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">Pour qui ce défi est-il proposé ?</div>
+      <div class="assign" id="new-defi-assign"></div>
+      <div class="err" id="defi-err">Donne un nom au défi et choisis un(e) destinataire.</div>
+      <button class="btn btn-gold" id="add-defi-btn" style="margin-top:10px; width:100%;">Ajouter le défi</button>
+    </div>
+    <div id="defis-list"></div>
+  </section>
+
+  <section id="tab-boutique">
+    <div class="add-form">
+      <div class="row">
+        <input type="text" id="new-reward-name" placeholder="Nom de la récompense (ex : massage 20 min)">
+        <input type="number" id="new-reward-pts" placeholder="pts" value="50" min="1">
+      </div>
+      <div class="err" id="reward-err">Donne un nom et un coût en points.</div>
+      <button class="btn btn-gold" id="add-reward-btn" style="margin-top:2px; width:100%;">Ajouter à la boutique</button>
+    </div>
+    <div id="rewards-list"></div>
+  </section>
+
+  <section id="tab-secret">
+    <div class="secret-box">
+      <h3>Ton envie secrète 🔒</h3>
+      <div class="sub">Écris-la ici — elle reste invisible pour ton ou ta complice. Iel saura seulement qu'une envie t'attend... à lui de venir la découvrir.</div>
+      <textarea id="secret-text" placeholder="Ce que tu gardes pour toi, pour l'instant..." maxlength="500"></textarea>
+      <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en secret</button>
+      <div class="secret-status" id="secret-status"></div>
+    </div>
+    <div class="secret-teaser" id="secret-teaser" style="display:none;">
+      <div class="icon">💌</div>
+      <div class="txt"><b>Ton ou ta complice</b> a laissé une envie secrète... elle ne se dévoile qu'en personne.</div>
+    </div>
+  </section>
+
+  <section id="tab-messages">
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-text-input" placeholder="Écris un message...">
+      <button class="icon-btn send" id="chat-send-btn" title="Envoyer">➤</button>
+    </div>
+  </section>
+
+  <section id="tab-historique">
+    <div id="history-list"></div>
+  </section>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5ye41NsNnDrCHHbMuB0X_pY8gPFJk6nE",
+  authDomain: "complices-52bca.firebaseapp.com",
+  projectId: "complices-52bca",
+  storageBucket: "complices-52bca.firebasestorage.app",
+  messagingSenderId: "263531076147",
+  appId: "1:263531076147:web:cdf755151df06234d06146",
+  measurementId: "G-W64YDDZXK0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const stateDocRef = doc(db, "complices", "state");
+
+const loginView = document.getElementById('login-view');
+const appView = document.getElementById('app-view');
+const signoutBtn = document.getElementById('signout-btn');
+let unsubMessages = null;
+let unsubSecretFlags = null;
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    loginView.style.display = 'none';
+    appView.style.display = 'block';
+    signoutBtn.style.display = 'block';
+    loadState();
+    startMessageListener();
+    startSecretFlagListener();
+    loadOwnSecret();
+  } else {
+    loginView.style.display = 'flex';
+    appView.style.display = 'none';
+    signoutBtn.style.display = 'none';
+    if(unsubMessages){ unsubMessages(); unsubMessages = null; }
+    if(unsubSecretFlags){ unsubSecretFlags(); unsubSecretFlags = null; }
+  }
+});
+
+function loginErr(msg){
+  const err = document.getElementById('login-err');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if(!email || !password){ loginErr('Entrez un e-mail et un mot de passe.'); return; }
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    loginErr('Connexion impossible : ' + (e.code || e.message));
+  }
+});
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if(!email || !password){ loginErr('Entrez un e-mail et un mot de passe (6 caractères min).'); return; }
+  try{
+    await createUserWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    loginErr('Compte impossible à créer : ' + (e.code || e.message));
+  }
+});
+
+signoutBtn.addEventListener('click', () => signOut(auth));
+
+const defaultState = () => ({
+  names: { a: 'Elle', b: 'Lui' },
+  scores: { a: 0, b: 0 },
+  defis: [
+    { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a' },
+    { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b' },
+    { id: cryptoId(), text: "Offrir un massage des épaules de 10 minutes", pts: 15, for: 'a' },
+    { id: cryptoId(), text: "Préparer une danse sensuelle surprise", pts: 20, for: 'b' },
+    { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a' },
+  ],
+  rewards: [
+    { id: cryptoId(), text: "Massage complet de 20 minutes", pts: 40 },
+    { id: cryptoId(), text: "Choix des préliminaires pour la soirée", pts: 60 },
+    { id: cryptoId(), text: "Choix de la position pour la prochaine fois", pts: 50 },
+    { id: cryptoId(), text: "Strip-tease privé", pts: 55 },
+    { id: cryptoId(), text: "Soirée à thème au choix", pts: 100 },
+  ],
+  history: [],
+  newDefiAssign: 'a',
+});
+
+function cryptoId(){ return Math.random().toString(36).slice(2,10); }
+
+let state = null;
+let saveTimer = null;
+
+async function loadState(){
+  try{
+    const snap = await getDoc(stateDocRef);
+    state = snap.exists() ? snap.data() : defaultState();
+  }catch(e){
+    console.error(e);
+    state = defaultState();
+    showToast("Connexion à Firebase impossible, mode local");
+  }
+  render();
+}
+
+function persist(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try{
+      await setDoc(stateDocRef, state);
+    }catch(e){
+      console.error(e);
+      showToast("Erreur de sauvegarde");
+    }
+  }, 250);
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+function fmtDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ' · ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function addHistory(entry){
+  state.history.unshift({ ...entry, ts: Date.now() });
+  if(state.history.length > 100) state.history.pop();
+}
+
+function render(){
+  document.getElementById('name-a').value = state.names.a;
+  document.getElementById('name-b').value = state.names.b;
+  document.getElementById('score-a').textContent = state.scores.a;
+  document.getElementById('score-b').textContent = state.scores.b;
+
+  renderAssignPicker();
+  renderDefis();
+  renderRewards();
+  renderHistory();
+}
+
+function renderAssignPicker(){
+  const wrap = document.getElementById('new-defi-assign');
+  wrap.innerHTML = '';
+  ['a','b'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = 'Pour ' + state.names[k];
+    b.className = state.newDefiAssign === k ? 'picked' : '';
+    b.onclick = () => { state.newDefiAssign = k; renderAssignPicker(); };
+    wrap.appendChild(b);
+  });
+}
+
+function renderDefis(){
+  const list = document.getElementById('defis-list');
+  list.innerHTML = '';
+  if(state.defis.length === 0){
+    list.innerHTML = '<div class="empty">Aucun défi pour le moment. Ajoutez-en un ci-dessus.</div>';
+    return;
+  }
+  state.defis.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="info">
+        <div class="t">${escapeHtml(d.text)}</div>
+        <div class="m">Défi pour ${escapeHtml(state.names[d.for])}</div>
+      </div>
+      <div class="pts">+${d.pts}</div>
+    `;
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.flexDirection = 'column';
+    btnWrap.style.gap = '4px';
+
+    const doneBtn = document.createElement('button');
+    doneBtn.className = 'btn btn-gold';
+    doneBtn.textContent = 'Réalisé';
+    doneBtn.onclick = () => completeDefi(d.id);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => {
+      state.defis = state.defis.filter(x => x.id !== d.id);
+      persist(); render();
+    };
+
+    btnWrap.appendChild(doneBtn);
+    btnWrap.appendChild(delBtn);
+    card.appendChild(btnWrap);
+    list.appendChild(card);
+  });
+}
+
+function completeDefi(id){
+  const d = state.defis.find(x => x.id === id);
+  if(!d) return;
+  state.scores[d.for] += d.pts;
+  addHistory({ type:'defi', who: d.for, label: d.text, pts: d.pts });
+  state.defis = state.defis.filter(x => x.id !== id);
+  persist(); render();
+  showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
+}
+
+function renderRewards(){
+  const list = document.getElementById('rewards-list');
+  list.innerHTML = '';
+  if(state.rewards.length === 0){
+    list.innerHTML = '<div class="empty">Aucune récompense dans la boutique.</div>';
+    return;
+  }
+  state.rewards.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="info">
+        <div class="t">${escapeHtml(r.text)}</div>
+        <div class="m">${r.pts} points</div>
+      </div>
+    `;
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.flexDirection = 'column';
+    btnWrap.style.gap = '4px';
+
+    ['a','b'].forEach(k => {
+      const buyBtn = document.createElement('button');
+      buyBtn.className = 'btn btn-rose';
+      buyBtn.textContent = state.names[k];
+      buyBtn.style.opacity = state.scores[k] < r.pts ? '0.4' : '1';
+      buyBtn.onclick = () => redeemReward(r.id, k);
+      btnWrap.appendChild(buyBtn);
+    });
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => {
+      state.rewards = state.rewards.filter(x => x.id !== r.id);
+      persist(); render();
+    };
+    btnWrap.appendChild(delBtn);
+
+    card.appendChild(btnWrap);
+    list.appendChild(card);
+  });
+}
+
+function redeemReward(id, who){
+  const r = state.rewards.find(x => x.id === id);
+  if(!r) return;
+  if(state.scores[who] < r.pts){
+    showToast('Pas assez de points pour ' + state.names[who]);
+    return;
+  }
+  state.scores[who] -= r.pts;
+  addHistory({ type:'reward', who, label: r.text, pts: -r.pts });
+  persist(); render();
+  showToast(state.names[who] + ' échange ' + r.pts + ' points');
+}
+
+function renderHistory(){
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  if(state.history.length === 0){
+    list.innerHTML = '<div class="empty">Rien pour le moment. Complétez un défi ou échangez une récompense.</div>';
+    return;
+  }
+  state.history.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'hist-item';
+    row.innerHTML = `
+      <div>
+        <div><span class="who">${escapeHtml(state.names[h.who])}</span> — ${escapeHtml(h.label)}</div>
+        <div class="when">${fmtDate(h.ts)}</div>
+      </div>
+      <div class="hist-pts ${h.pts > 0 ? 'plus' : 'minus'}">${h.pts > 0 ? '+' : ''}${h.pts}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById('name-a').addEventListener('change', e => {
+  state.names.a = e.target.value.trim() || 'Elle';
+  persist(); render();
+});
+document.getElementById('name-b').addEventListener('change', e => {
+  state.names.b = e.target.value.trim() || 'Lui';
+  persist(); render();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('add-defi-btn').addEventListener('click', () => {
+  const nameInput = document.getElementById('new-defi-name');
+  const ptsInput = document.getElementById('new-defi-pts');
+  const err = document.getElementById('defi-err');
+  const text = nameInput.value.trim();
+  const pts = parseInt(ptsInput.value, 10);
+  if(!text || !pts || pts <= 0){
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  state.defis.push({ id: cryptoId(), text, pts, for: state.newDefiAssign });
+  nameInput.value = '';
+  ptsInput.value = '10';
+  persist(); render();
+});
+
+document.getElementById('add-reward-btn').addEventListener('click', () => {
+  const nameInput = document.getElementById('new-reward-name');
+  const ptsInput = document.getElementById('new-reward-pts');
+  const err = document.getElementById('reward-err');
+  const text = nameInput.value.trim();
+  const pts = parseInt(ptsInput.value, 10);
+  if(!text || !pts || pts <= 0){
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  state.rewards.push({ id: cryptoId(), text, pts });
+  nameInput.value = '';
+  ptsInput.value = '50';
+  persist(); render();
+});
+
+['new-defi-name','new-defi-pts'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById('defi-err').style.display = 'none';
+  });
+});
+['new-reward-name','new-reward-pts'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById('reward-err').style.display = 'none';
+  });
+});
+
+function startMessageListener(){
+  const chatBox = document.getElementById('chat-box');
+  const q = query(collection(db, 'messages'), orderBy('ts', 'asc'));
+  unsubMessages = onSnapshot(q, snap => {
+    chatBox.innerHTML = '';
+    snap.forEach(docSnap => {
+      const m = docSnap.data();
+      const isMe = m.senderEmail === auth.currentUser.email;
+      const row = document.createElement('div');
+      row.className = 'msg ' + (isMe ? 'me' : 'them');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = m.text || '';
+      row.appendChild(bubble);
+      const when = document.createElement('div');
+      when.className = 'when';
+      when.textContent = m.ts && m.ts.toDate ? fmtDate(m.ts.toDate().getTime()) : '';
+      row.appendChild(when);
+      chatBox.appendChild(row);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, err => {
+    showToast("Impossible de charger les messages");
+  });
+}
+
+async function sendTextMessage(){
+  const input = document.getElementById('chat-text-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    await addDoc(collection(db, 'messages'), {
+      type: 'text',
+      text,
+      senderEmail: auth.currentUser.email,
+      ts: serverTimestamp()
+    });
+  }catch(e){
+    showToast("Message non envoyé");
+  }
+}
+
+document.getElementById('chat-send-btn').addEventListener('click', sendTextMessage);
+document.getElementById('chat-text-input').addEventListener('keydown', e => {
+  if(e.key === 'Enter') sendTextMessage();
+});
+
+function sanitizeKey(email){
+  return email.replace(/[.#$/\[\]]/g, '_');
+}
+
+async function loadOwnSecret(){
+  try{
+    const key = sanitizeKey(auth.currentUser.email);
+    const snap = await getDoc(doc(db, 'secrets', key));
+    if(snap.exists()){
+      document.getElementById('secret-text').value = snap.data().text || '';
+      const ts = snap.data().updatedAt;
+      if(ts && ts.toDate){
+        document.getElementById('secret-status').textContent = 'Enregistré le ' + fmtDate(ts.toDate().getTime());
+      }
+    }
+  }catch(e){
+    console.error(e);
+  }
+}
+
+document.getElementById('secret-save-btn').addEventListener('click', async () => {
+  const textarea = document.getElementById('secret-text');
+  const text = textarea.value.trim();
+  const key = sanitizeKey(auth.currentUser.email);
+  try{
+    await setDoc(doc(db, 'secrets', key), { text, updatedAt: serverTimestamp() });
+    await setDoc(doc(db, 'secretFlags', key), { hasSecret: text.length > 0, updatedAt: serverTimestamp() });
+    document.getElementById('secret-status').textContent = 'Enregistré à l\'instant, rien qu\'à toi 🔒';
+    showToast(text.length > 0 ? 'Ton envie secrète est en sécurité' : 'Envie secrète effacée');
+  }catch(e){
+    console.error(e);
+    showToast("Impossible d'enregistrer");
+  }
+});
+
+function startSecretFlagListener(){
+  const teaser = document.getElementById('secret-teaser');
+  unsubSecretFlags = onSnapshot(collection(db, 'secretFlags'), snap => {
+    const myKey = sanitizeKey(auth.currentUser.email);
+    let partnerHasSecret = false;
+    snap.forEach(docSnap => {
+      if(docSnap.id !== myKey && docSnap.data().hasSecret){
+        partnerHasSecret = true;
+      }
+    });
+    teaser.style.display = partnerHasSecret ? 'flex' : 'none';
+  }, err => {
+    console.error(err);
+  });
+}
+
+document.getElementById('invite-btn').addEventListener('click', async () => {
+  const shareData = {
+    title: 'Complices',
+    text: 'Rejoins-moi sur notre appli Complices 💕',
+    url: window.location.href
+  };
+  if(navigator.share){
+    try{ await navigator.share(shareData); }catch(e){ /* annulé, rien à faire */ }
+  } else {
+    try{
+      await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url);
+      showToast('Lien copié — colle-le où tu veux 💌');
+    }catch(e){
+      showToast(shareData.url);
+    }
+  }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
