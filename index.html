@@ -107,14 +107,15 @@
   .player .score-label{ font-size:11px; color:var(--muted); letter-spacing:0.5px; }
 
   nav{
-    display:flex; gap:8px; margin-bottom: 20px;
+    display:flex; gap:4px; margin-bottom: 20px;
     border-bottom: 0.5px solid var(--line);
+    overflow-x:auto;
   }
   nav button{
-    flex:1; background:none; border:none; color: var(--muted);
-    font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600;
-    padding: 10px 1px; cursor:pointer; border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
+    flex:1 0 auto; background:none; border:none; color: var(--muted);
+    font-family:'Manrope',sans-serif; font-size:11px; font-weight:600;
+    padding: 10px 6px; cursor:pointer; border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s; white-space:nowrap;
   }
   nav button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
 
@@ -170,7 +171,46 @@
     padding:9px 8px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
   }
   .add-form input::placeholder{ color: var(--muted); }
+  .add-form input[type=date]{
+    width:100%; background: var(--card); border:0.5px solid var(--line); border-radius:8px;
+    padding:9px 10px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:13px;
+    color-scheme: dark;
+  }
+  .defi-deadline{ font-size:11px; color: var(--rose); margin-top:3px; }
+  .defi-deadline.soon{ color: var(--danger); font-weight:600; }
   .empty{ text-align:center; color: var(--muted); font-size:13px; padding: 30px 10px; }
+
+  .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .cal-nav button{
+    background: var(--card); border:0.5px solid var(--line); color: var(--gold-soft);
+    border-radius:8px; padding:6px 12px; font-size:16px; cursor:pointer;
+  }
+  .cal-nav .label{ font-family:'Cormorant Garamond',serif; font-size:19px; color: var(--gold-soft); font-weight:600; text-transform:capitalize; }
+  .cal-grid{ display:grid; grid-template-columns: repeat(7,1fr); gap:4px; margin-bottom:18px; }
+  .cal-dow{ text-align:center; font-size:10px; color: var(--muted); padding-bottom:4px; }
+  .cal-day{
+    aspect-ratio:1; background: var(--card); border-radius:8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:11.5px; color: var(--cream); position:relative; border:0.5px solid transparent;
+  }
+  .cal-day.empty-cell{ background:none; }
+  .cal-day.today{ border-color: var(--gold); }
+  .cal-day .dots{ display:flex; gap:2px; margin-top:3px; }
+  .cal-day .dot{ width:5px; height:5px; border-radius:50%; }
+  .cal-day .dot.done{ background: var(--gold); }
+  .cal-day .dot.expired{ background: var(--danger); }
+  .cal-list-item{
+    display:flex; align-items:center; gap:10px; padding:10px 0;
+    border-bottom:0.5px solid var(--line); font-size:13px;
+  }
+  .cal-list-item .cdate{
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; color: var(--gold);
+    width:34px; text-align:center; flex-shrink:0;
+  }
+  .cal-list-item .cinfo{ flex:1; }
+  .cal-list-item .cinfo .who{ color: var(--rose-deep); font-weight:600; }
+  .cal-list-item .status-done{ color: var(--gold); font-size:11px; }
+  .cal-list-item .status-expired{ color: var(--danger); font-size:11px; }
 
   .hist-item{
     display:flex; justify-content:space-between; padding: 10px 0;
@@ -284,21 +324,24 @@
   </div>
 
   <nav>
-    <button class="tab-btn active" data-tab="defis">Défis</button>
+    <button class="tab-btn" data-tab="defis">Défis</button>
     <button class="tab-btn" data-tab="boutique">Boutique</button>
     <button class="tab-btn" data-tab="secret">Secret</button>
-    <button class="tab-btn" data-tab="messages">Messages</button>
+    <button class="tab-btn active" data-tab="messages">Messages</button>
+    <button class="tab-btn" data-tab="calendrier">Calendrier</button>
     <button class="tab-btn" data-tab="historique">Historique</button>
   </nav>
 
-  <section id="tab-defis" class="active">
+  <section id="tab-defis">
     <div class="add-form">
       <div class="row">
         <input type="text" id="new-defi-name" placeholder="Nom du défi (ex : massage surprise)">
         <input type="number" id="new-defi-pts" placeholder="pts" value="10" min="1">
       </div>
-      <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">Pour qui ce défi est-il proposé ?</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Pour qui ce défi est-il proposé ?</div>
       <div class="assign" id="new-defi-assign"></div>
+      <div style="font-size:11px; color:var(--muted); margin:10px 0 6px;">À relever avant le :</div>
+      <input type="date" id="new-defi-deadline">
       <div class="err" id="defi-err">Donne un nom au défi et choisis un(e) destinataire.</div>
       <button class="btn btn-gold" id="add-defi-btn" style="margin-top:10px; width:100%;">Ajouter le défi</button>
     </div>
@@ -331,12 +374,22 @@
     </div>
   </section>
 
-  <section id="tab-messages">
+  <section id="tab-messages" class="active">
     <div class="chat-box" id="chat-box"></div>
     <div class="chat-input-row">
       <input type="text" id="chat-text-input" placeholder="Écris un message...">
       <button class="icon-btn send" id="chat-send-btn" title="Envoyer">➤</button>
     </div>
+  </section>
+
+  <section id="tab-calendrier">
+    <div class="cal-nav">
+      <button id="cal-prev">‹</button>
+      <div class="label" id="cal-label"></div>
+      <button id="cal-next">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div id="cal-list"></div>
   </section>
 
   <section id="tab-historique">
@@ -421,15 +474,21 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
 
 signoutBtn.addEventListener('click', () => signOut(auth));
 
+function daysFromNow(n){
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+
 const defaultState = () => ({
   names: { a: 'Elle', b: 'Lui' },
   scores: { a: 0, b: 0 },
   defis: [
-    { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a' },
-    { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b' },
-    { id: cryptoId(), text: "Offrir un massage des épaules de 10 minutes", pts: 15, for: 'a' },
-    { id: cryptoId(), text: "Préparer une danse sensuelle surprise", pts: 20, for: 'b' },
-    { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a' },
+    { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a', deadline: daysFromNow(1) },
+    { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b', deadline: daysFromNow(3) },
+    { id: cryptoId(), text: "Offrir un massage des épaules de 10 minutes", pts: 15, for: 'a', deadline: daysFromNow(3) },
+    { id: cryptoId(), text: "Préparer une danse sensuelle surprise", pts: 20, for: 'b', deadline: daysFromNow(5) },
+    { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a', deadline: daysFromNow(2) },
   ],
   rewards: [
     { id: cryptoId(), text: "Massage complet de 20 minutes", pts: 40 },
@@ -456,6 +515,8 @@ async function loadState(){
     state = defaultState();
     showToast("Connexion à Firebase impossible, mode local");
   }
+  checkExpiredDefis();
+  document.getElementById('new-defi-deadline').value = daysFromNow(3);
   render();
 }
 
@@ -498,6 +559,7 @@ function render(){
   renderDefis();
   renderRewards();
   renderHistory();
+  renderCalendar();
 }
 
 function renderAssignPicker(){
@@ -522,10 +584,18 @@ function renderDefis(){
   state.defis.forEach(d => {
     const card = document.createElement('div');
     card.className = 'card';
+    let deadlineHtml = '';
+    if(d.deadline){
+      const daysLeft = Math.ceil((new Date(d.deadline + 'T23:59:59') - new Date()) / 86400000);
+      const soonClass = daysLeft <= 1 ? ' soon' : '';
+      const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
+      deadlineHtml = `<div class="defi-deadline${soonClass}">À relever avant le ${deadlineTxt}</div>`;
+    }
     card.innerHTML = `
       <div class="info">
         <div class="t">${escapeHtml(d.text)}</div>
         <div class="m">Défi pour ${escapeHtml(state.names[d.for])}</div>
+        ${deadlineHtml}
       </div>
       <div class="pts">+${d.pts}</div>
     `;
@@ -558,10 +628,31 @@ function completeDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
   state.scores[d.for] += d.pts;
-  addHistory({ type:'defi', who: d.for, label: d.text, pts: d.pts });
+  addHistory({ type:'defi', who: d.for, label: d.text, pts: d.pts, status:'completed' });
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
   showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
+}
+
+function checkExpiredDefis(){
+  const now = new Date();
+  const stillGoing = [];
+  let anyExpired = false;
+  state.defis.forEach(d => {
+    if(d.deadline && new Date(d.deadline + 'T23:59:59') < now){
+      const other = d.for === 'a' ? 'b' : 'a';
+      state.scores[other] += d.pts;
+      addHistory({ type:'defi', who: other, label: d.text + ' (non relevé à temps)', pts: d.pts, status:'expired', missedBy: d.for });
+      anyExpired = true;
+    } else {
+      stillGoing.push(d);
+    }
+  });
+  if(anyExpired){
+    state.defis = stillGoing;
+    persist();
+    showToast('Un défi non relevé a transféré ses points 🕰️');
+  }
 }
 
 function renderRewards(){
@@ -668,6 +759,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 document.getElementById('add-defi-btn').addEventListener('click', () => {
   const nameInput = document.getElementById('new-defi-name');
   const ptsInput = document.getElementById('new-defi-pts');
+  const deadlineInput = document.getElementById('new-defi-deadline');
   const err = document.getElementById('defi-err');
   const text = nameInput.value.trim();
   const pts = parseInt(ptsInput.value, 10);
@@ -676,9 +768,11 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
     return;
   }
   err.style.display = 'none';
-  state.defis.push({ id: cryptoId(), text, pts, for: state.newDefiAssign });
+  const deadline = deadlineInput.value || daysFromNow(3);
+  state.defis.push({ id: cryptoId(), text, pts, for: state.newDefiAssign, deadline });
   nameInput.value = '';
   ptsInput.value = '10';
+  deadlineInput.value = daysFromNow(3);
   persist(); render();
 });
 
@@ -826,6 +920,112 @@ document.getElementById('invite-btn').addEventListener('click', async () => {
     }
   }
 });
+
+let calViewDate = new Date();
+calViewDate.setDate(1);
+
+const MOIS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const DOW_FR = ['L','M','M','J','V','S','D'];
+
+document.getElementById('cal-prev').addEventListener('click', () => {
+  calViewDate.setMonth(calViewDate.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click', () => {
+  calViewDate.setMonth(calViewDate.getMonth() + 1);
+  renderCalendar();
+});
+
+function renderCalendar(){
+  if(!state) return;
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-label');
+  const list = document.getElementById('cal-list');
+  if(!grid || !label || !list) return;
+
+  const year = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+  label.textContent = MOIS_FR[month] + ' ' + year;
+
+  const defiEvents = (state.history || []).filter(h => h.type === 'defi');
+  const eventsByDay = {};
+  defiEvents.forEach(h => {
+    const d = new Date(h.ts);
+    if(d.getFullYear() === year && d.getMonth() === month){
+      const day = d.getDate();
+      if(!eventsByDay[day]) eventsByDay[day] = [];
+      eventsByDay[day].push(h);
+    }
+  });
+
+  grid.innerHTML = '';
+  DOW_FR.forEach(l => {
+    const el = document.createElement('div');
+    el.className = 'cal-dow';
+    el.textContent = l;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(year, month, 1);
+  let startOffset = firstDay.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+
+  for(let i = 0; i < startOffset; i++){
+    const el = document.createElement('div');
+    el.className = 'cal-day empty-cell';
+    grid.appendChild(el);
+  }
+  for(let day = 1; day <= daysInMonth; day++){
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    if(today.getFullYear() === year && today.getMonth() === month && today.getDate() === day){
+      el.classList.add('today');
+    }
+    const num = document.createElement('div');
+    num.textContent = day;
+    el.appendChild(num);
+    const evts = eventsByDay[day];
+    if(evts && evts.length){
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      evts.slice(0,4).forEach(h => {
+        const dot = document.createElement('div');
+        dot.className = 'dot ' + (h.status === 'expired' ? 'expired' : 'done');
+        dots.appendChild(dot);
+      });
+      el.appendChild(dots);
+    }
+    grid.appendChild(el);
+  }
+
+  list.innerHTML = '';
+  const monthEvents = defiEvents
+    .filter(h => { const d = new Date(h.ts); return d.getFullYear() === year && d.getMonth() === month; })
+    .sort((a,b) => b.ts - a.ts);
+  if(monthEvents.length === 0){
+    list.innerHTML = '<div class="empty">Aucun défi ce mois-ci.</div>';
+    return;
+  }
+  monthEvents.forEach(h => {
+    const d = new Date(h.ts);
+    const row = document.createElement('div');
+    row.className = 'cal-list-item';
+    const statusHtml = h.status === 'expired'
+      ? `<div class="status-expired">Non relevé par ${escapeHtml(state.names[h.missedBy] || '')} — transféré</div>`
+      : `<div class="status-done">Relevé ✓</div>`;
+    row.innerHTML = `
+      <div class="cdate">${d.getDate()}</div>
+      <div class="cinfo">
+        <div><span class="who">${escapeHtml(state.names[h.who])}</span> — ${escapeHtml(h.label)}</div>
+        ${statusHtml}
+      </div>
+      <div class="pts">+${h.pts}</div>
+    `;
+    list.appendChild(row);
+  });
+}
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
