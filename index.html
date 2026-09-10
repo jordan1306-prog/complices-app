@@ -273,6 +273,10 @@
     border-radius: 16px; padding: 9px 13px; font-size:14px; line-height:1.4;
     word-break: break-word;
   }
+  .msg .bubble img{ max-width: 220px; max-height:280px; border-radius:12px; display:block; }
+  .msg .bubble img + div{ margin-top:6px; }
+  #chat-file-input{ display:none; }
+  .upload-preview{ font-size:11px; color: var(--muted); text-align:center; padding: 4px 0; }
   .msg.me .bubble{ background: var(--rose); color:#3a141f; border-bottom-right-radius:4px; }
   .msg.them .bubble{ background: var(--card-2); color: var(--cream); border-bottom-left-radius:4px; }
   .msg .when{ font-size:10px; color: var(--muted); margin-top:3px; }
@@ -402,7 +406,10 @@
 
   <section id="tab-messages" class="active">
     <div class="chat-box" id="chat-box"></div>
+    <div class="upload-preview" id="upload-preview" style="display:none;">Envoi de la photo...</div>
     <div class="chat-input-row">
+      <button class="icon-btn" id="chat-photo-btn" title="Envoyer une photo">📷</button>
+      <input type="file" id="chat-file-input" accept="image/*">
       <input type="text" id="chat-text-input" placeholder="Écris un message...">
       <button class="icon-btn send" id="chat-send-btn" title="Envoyer">➤</button>
     </div>
@@ -1030,14 +1037,25 @@ function startMessageListener(){
       row.className = 'msg ' + (isMe ? 'me' : 'them');
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
-      bubble.textContent = m.text || '';
+      if(m.type === 'image' && m.imageData){
+        const img = document.createElement('img');
+        img.src = m.imageData;
+        bubble.appendChild(img);
+        if(m.text){
+          const cap = document.createElement('div');
+          cap.textContent = m.text;
+          bubble.appendChild(cap);
+        }
+      } else {
+        bubble.textContent = m.text || '';
+      }
       row.appendChild(bubble);
       const when = document.createElement('div');
       when.className = 'when';
       when.textContent = m.ts && m.ts.toDate ? fmtDate(m.ts.toDate().getTime()) : '';
       row.appendChild(when);
       chatBox.appendChild(row);
-      if(!isMe) newestOther = { id: docSnap.id, text: m.text };
+      if(!isMe) newestOther = { id: docSnap.id, text: m.type === 'image' ? '📷 Photo reçue' : m.text };
     });
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -1093,6 +1111,69 @@ async function sendTextMessage(){
 document.getElementById('chat-send-btn').addEventListener('click', sendTextMessage);
 document.getElementById('chat-text-input').addEventListener('keydown', e => {
   if(e.key === 'Enter') sendTextMessage();
+});
+
+function compressImageToDataUrl(file, maxSize = 900){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('read failed'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('image load failed'));
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > height){
+          if(width > maxSize){ height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if(height > maxSize){ width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        let quality = 0.7;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while(dataUrl.length > 700000 && quality > 0.2){
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function sendImageMessage(file){
+  const preview = document.getElementById('upload-preview');
+  preview.style.display = 'block';
+  try{
+    const dataUrl = await compressImageToDataUrl(file);
+    if(dataUrl.length > 950000){
+      showToast('Photo trop lourde même compressée, essaie une autre photo');
+      return;
+    }
+    await addDoc(collection(db, 'messages'), {
+      type: 'image',
+      imageData: dataUrl,
+      senderEmail: auth.currentUser.email,
+      ts: serverTimestamp()
+    });
+  }catch(e){
+    console.error(e);
+    showToast('Photo non envoyée');
+  } finally {
+    preview.style.display = 'none';
+  }
+}
+
+document.getElementById('chat-photo-btn').addEventListener('click', () => {
+  document.getElementById('chat-file-input').click();
+});
+document.getElementById('chat-file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(file) sendImageMessage(file);
+  e.target.value = '';
 });
 
 function sanitizeKey(email){
