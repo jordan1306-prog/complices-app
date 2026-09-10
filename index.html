@@ -203,6 +203,7 @@
   .cal-day .dot{ width:5px; height:5px; border-radius:50%; }
   .cal-day .dot.done{ background: var(--gold); }
   .cal-day .dot.expired{ background: var(--danger); }
+  .cal-day .dot.note{ background: var(--rose); }
   .cal-list-item{
     display:flex; align-items:center; gap:10px; padding:10px 0;
     border-bottom:0.5px solid var(--line); font-size:13px;
@@ -215,6 +216,8 @@
   .cal-list-item .cinfo .who{ color: var(--rose-deep); font-weight:600; }
   .cal-list-item .status-done{ color: var(--gold); font-size:11px; }
   .cal-list-item .status-expired{ color: var(--danger); font-size:11px; }
+  .cal-list-item.note-item .cinfo{ font-style:italic; color: var(--muted); }
+  .cal-list-item.note-item .cdate{ color: var(--rose); }
 
   .hist-item{
     display:flex; justify-content:space-between; align-items:center; gap:8px; padding: 10px 0;
@@ -331,7 +334,7 @@
   <nav>
     <button class="tab-btn" data-tab="defis">Défis</button>
     <button class="tab-btn" data-tab="boutique">Boutique</button>
-    <button class="tab-btn" data-tab="secret">Secret</button>
+    <button class="tab-btn" data-tab="secret">Fantasmes</button>
     <button class="tab-btn active" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
     <button class="tab-btn" data-tab="historique">Historique</button>
@@ -383,15 +386,17 @@
 
   <section id="tab-secret">
     <div class="secret-box">
-      <h3>Ton envie secrète 🔒</h3>
-      <div class="sub">Écris-la ici — elle reste invisible pour ton ou ta complice. Iel saura seulement qu'une envie t'attend... à lui de venir la découvrir.</div>
+      <h3>Mes fantasmes 🔒</h3>
+      <div class="sub">Écris-les ici — ils restent invisibles pour ton ou ta complice, pour toujours. Iel saura seulement qu'un fantasme t'attend... à lui/elle de venir le découvrir.</div>
       <textarea id="secret-text" placeholder="Ce que tu gardes pour toi, pour l'instant..." maxlength="500"></textarea>
-      <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en secret</button>
+      <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en privé</button>
       <div class="secret-status" id="secret-status"></div>
+      <button class="btn btn-rose" id="secret-to-defi-btn" style="width:100%; margin-top:10px;">✨ Transformer en défi pour mon/ma partenaire</button>
+      <div class="sub" style="margin:8px 0 0;">Ce bouton ne partage rien automatiquement : il ouvre le formulaire de défi pré-rempli avec ton texte, et c'est toi qui choisis ce que tu envoies réellement.</div>
     </div>
     <div class="secret-teaser" id="secret-teaser" style="display:none;">
       <div class="icon">💌</div>
-      <div class="txt"><b>Ton ou ta complice</b> a laissé une envie secrète... elle ne se dévoile qu'en personne.</div>
+      <div class="txt"><b>Ton ou ta complice</b> a un fantasme noté... il ne se dévoile qu'en personne, ou via un défi qu'iel choisira de t'envoyer 😉</div>
     </div>
   </section>
 
@@ -410,6 +415,16 @@
       <button id="cal-next">›</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
+
+    <button class="btn btn-ghost" id="toggle-note-form" style="width:100%; margin-bottom:12px;">+ Ajouter une note</button>
+    <div class="add-form" id="note-form-wrap" style="display:none;">
+      <div class="row">
+        <input type="date" id="new-note-date" style="flex:0 0 130px;">
+        <input type="text" id="new-note-text" placeholder="Une petite note pour ce jour...">
+      </div>
+      <button class="btn btn-gold" id="add-note-btn" style="width:100%;">Ajouter la note</button>
+    </div>
+
     <div id="cal-list"></div>
   </section>
 
@@ -533,6 +548,7 @@ const defaultState = () => ({
   mysteryAssign: 'a',
   dailyTurn: 'a',
   dailyChallenge: { date: '' },
+  calendarNotes: [],
   history: [],
   newDefiAssign: 'a',
 });
@@ -563,6 +579,7 @@ function normalizeState(s){
   if(!s.mysteryAssign) s.mysteryAssign = 'a';
   if(!s.dailyTurn) s.dailyTurn = 'a';
   if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
+  if(!s.calendarNotes) s.calendarNotes = [];
   return s;
 }
 
@@ -803,6 +820,16 @@ function addMysteryItem(text){
 function removeMysteryItem(id){
   state.mysteryBox = state.mysteryBox.filter(x => x.id !== id);
   persist(); render();
+}
+
+function addCalendarNote(date, text){
+  state.calendarNotes.push({ id: cryptoId(), date, text, ts: Date.now() });
+  persist(); renderCalendar();
+}
+
+function removeCalendarNote(id){
+  state.calendarNotes = state.calendarNotes.filter(n => n.id !== id);
+  persist(); renderCalendar();
 }
 
 function renderRewards(){
@@ -1096,11 +1123,28 @@ document.getElementById('secret-save-btn').addEventListener('click', async () =>
     await setDoc(doc(db, 'secrets', key), { text, updatedAt: serverTimestamp() });
     await setDoc(doc(db, 'secretFlags', key), { hasSecret: text.length > 0, updatedAt: serverTimestamp() });
     document.getElementById('secret-status').textContent = 'Enregistré à l\'instant, rien qu\'à toi 🔒';
-    showToast(text.length > 0 ? 'Ton envie secrète est en sécurité' : 'Envie secrète effacée');
+    showToast(text.length > 0 ? 'Ton fantasme est en sécurité' : 'Fantasme effacé');
   }catch(e){
     console.error(e);
     showToast("Impossible d'enregistrer");
   }
+});
+
+document.getElementById('secret-to-defi-btn').addEventListener('click', () => {
+  const text = document.getElementById('secret-text').value.trim();
+  if(!text){
+    showToast('Écris ton fantasme avant de le transformer en défi');
+    return;
+  }
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="defis"]').classList.add('active');
+  document.getElementById('tab-defis').classList.add('active');
+  document.getElementById('defi-form-wrap').style.display = 'block';
+  document.getElementById('toggle-defi-form').textContent = '– Masquer le formulaire';
+  document.getElementById('new-defi-name').value = text;
+  document.getElementById('new-defi-name').focus();
+  showToast('Choisis pour qui et ajuste avant d\'envoyer ✨');
 });
 
 function startSecretFlagListener(){
@@ -1164,13 +1208,22 @@ function renderCalendar(){
   label.textContent = MOIS_FR[month] + ' ' + year;
 
   const defiEvents = (state.history || []).filter(h => h.type === 'defi');
+  const notes = state.calendarNotes || [];
   const eventsByDay = {};
   defiEvents.forEach(h => {
     const d = new Date(h.ts);
     if(d.getFullYear() === year && d.getMonth() === month){
       const day = d.getDate();
-      if(!eventsByDay[day]) eventsByDay[day] = [];
-      eventsByDay[day].push(h);
+      if(!eventsByDay[day]) eventsByDay[day] = { defis: [], notes: [] };
+      eventsByDay[day].defis.push(h);
+    }
+  });
+  notes.forEach(n => {
+    const d = new Date(n.date + 'T12:00:00');
+    if(d.getFullYear() === year && d.getMonth() === month){
+      const day = d.getDate();
+      if(!eventsByDay[day]) eventsByDay[day] = { defis: [], notes: [] };
+      eventsByDay[day].notes.push(n);
     }
   });
 
@@ -1202,52 +1255,99 @@ function renderCalendar(){
     const num = document.createElement('div');
     num.textContent = day;
     el.appendChild(num);
-    const evts = eventsByDay[day];
-    if(evts && evts.length){
+    const dayData = eventsByDay[day];
+    if(dayData && (dayData.defis.length || dayData.notes.length)){
       const dots = document.createElement('div');
       dots.className = 'dots';
-      evts.slice(0,4).forEach(h => {
+      dayData.defis.slice(0,3).forEach(h => {
         const dot = document.createElement('div');
         dot.className = 'dot ' + (h.status === 'expired' ? 'expired' : 'done');
         dots.appendChild(dot);
       });
+      if(dayData.notes.length){
+        const dot = document.createElement('div');
+        dot.className = 'dot note';
+        dots.appendChild(dot);
+      }
       el.appendChild(dots);
     }
     grid.appendChild(el);
   }
 
   list.innerHTML = '';
-  const monthEvents = defiEvents
+  const monthDefis = defiEvents
     .filter(h => { const d = new Date(h.ts); return d.getFullYear() === year && d.getMonth() === month; })
-    .sort((a,b) => b.ts - a.ts);
-  if(monthEvents.length === 0){
-    list.innerHTML = '<div class="empty">Aucun défi ce mois-ci.</div>';
+    .map(h => ({ kind:'defi', ts: h.ts, data: h }));
+  const monthNotes = notes
+    .filter(n => { const d = new Date(n.date + 'T12:00:00'); return d.getFullYear() === year && d.getMonth() === month; })
+    .map(n => ({ kind:'note', ts: n.ts || new Date(n.date + 'T12:00:00').getTime(), data: n }));
+  const combined = monthDefis.concat(monthNotes).sort((a,b) => b.ts - a.ts);
+
+  if(combined.length === 0){
+    list.innerHTML = '<div class="empty">Rien ce mois-ci. Ajoutez une note ou relevez un défi.</div>';
     return;
   }
-  monthEvents.forEach(h => {
-    const d = new Date(h.ts);
+
+  combined.forEach(item => {
     const row = document.createElement('div');
-    row.className = 'cal-list-item';
-    const statusHtml = h.status === 'expired'
-      ? `<div class="status-expired">Non relevé par ${escapeHtml(state.names[h.missedBy] || '')} — transféré</div>`
-      : `<div class="status-done">Relevé ✓</div>`;
-    row.innerHTML = `
-      <div class="cdate">${d.getDate()}</div>
-      <div class="cinfo">
-        <div><span class="who">${escapeHtml(state.names[h.who])}</span> — ${escapeHtml(h.label)}</div>
-        ${statusHtml}
-      </div>
-      <div class="pts">+${h.pts}</div>
-    `;
-    const undoBtn = document.createElement('button');
-    undoBtn.className = 'btn btn-danger';
-    undoBtn.textContent = '✕';
-    undoBtn.title = 'Corriger / annuler';
-    undoBtn.onclick = () => undoHistoryEntry(h.id);
-    row.appendChild(undoBtn);
+    if(item.kind === 'note'){
+      const n = item.data;
+      const d = new Date(n.date + 'T12:00:00');
+      row.className = 'cal-list-item note-item';
+      row.innerHTML = `
+        <div class="cdate">${d.getDate()}</div>
+        <div class="cinfo">📝 ${escapeHtml(n.text)}</div>
+      `;
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Supprimer la note';
+      delBtn.onclick = () => removeCalendarNote(n.id);
+      row.appendChild(delBtn);
+    } else {
+      const h = item.data;
+      const d = new Date(h.ts);
+      row.className = 'cal-list-item';
+      const statusHtml = h.status === 'expired'
+        ? `<div class="status-expired">Non relevé par ${escapeHtml(state.names[h.missedBy] || '')} — transféré</div>`
+        : `<div class="status-done">Relevé ✓</div>`;
+      row.innerHTML = `
+        <div class="cdate">${d.getDate()}</div>
+        <div class="cinfo">
+          <div><span class="who">${escapeHtml(state.names[h.who])}</span> — ${escapeHtml(h.label)}</div>
+          ${statusHtml}
+        </div>
+        <div class="pts">+${h.pts}</div>
+      `;
+      const undoBtn = document.createElement('button');
+      undoBtn.className = 'btn btn-danger';
+      undoBtn.textContent = '✕';
+      undoBtn.title = 'Corriger / annuler';
+      undoBtn.onclick = () => undoHistoryEntry(h.id);
+      row.appendChild(undoBtn);
+    }
     list.appendChild(row);
   });
 }
+
+document.getElementById('toggle-note-form').addEventListener('click', () => {
+  const wrap = document.getElementById('note-form-wrap');
+  const btn = document.getElementById('toggle-note-form');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '– Masquer' : '+ Ajouter une note';
+  if(show) document.getElementById('new-note-date').value = daysFromNow(0);
+});
+
+document.getElementById('add-note-btn').addEventListener('click', () => {
+  const dateInput = document.getElementById('new-note-date');
+  const textInput = document.getElementById('new-note-text');
+  const date = dateInput.value || daysFromNow(0);
+  const text = textInput.value.trim();
+  if(!text) return;
+  addCalendarNote(date, text);
+  textInput.value = '';
+});
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
