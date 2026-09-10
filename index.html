@@ -178,6 +178,10 @@
   }
   .defi-deadline{ font-size:11px; color: var(--rose); margin-top:3px; }
   .defi-deadline.soon{ color: var(--danger); font-weight:600; }
+  .mystery-item{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:8px 0; border-bottom:0.5px solid var(--line); font-size:13px;
+  }
   .empty{ text-align:center; color: var(--muted); font-size:13px; padding: 30px 10px; }
 
   .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -312,16 +316,17 @@
 
   <div class="players">
     <div class="player">
-      <input class="name" id="name-a" value="Elle" maxlength="16">
+      <input class="name" id="name-a" value="Elle" maxlength="16" title="Touche pour changer le prénom">
       <div class="score" id="score-a">0</div>
       <div class="score-label">points</div>
     </div>
     <div class="player">
-      <input class="name" id="name-b" value="Lui" maxlength="16">
+      <input class="name" id="name-b" value="Lui" maxlength="16" title="Touche pour changer le prénom">
       <div class="score" id="score-b">0</div>
       <div class="score-label">points</div>
     </div>
   </div>
+  <div style="text-align:center; font-size:10.5px; color:var(--muted); margin:-12px 0 14px;">✎ touchez un prénom pour le modifier</div>
 
   <nav>
     <button class="tab-btn" data-tab="defis">Défis</button>
@@ -347,6 +352,21 @@
       <button class="btn btn-gold" id="add-defi-btn" style="margin-top:10px; width:100%;">Ajouter le défi</button>
     </div>
     <div id="defis-list"></div>
+
+    <div class="secret-box" style="margin-top:22px;">
+      <h3>🎁 Boîte à défis mystère</h3>
+      <div class="sub">Pioche un défi surprise (50 pts, 48h pour le relever). Pour qui ?</div>
+      <div class="assign" id="mystery-assign"></div>
+      <button class="btn btn-rose" id="draw-mystery-btn" style="width:100%; margin:12px 0;">🎲 Piocher un défi mystère</button>
+      <button class="btn btn-ghost" id="toggle-mystery-form" style="width:100%;">Gérer le contenu de la boîte</button>
+      <div id="mystery-form-wrap" style="display:none; margin-top:12px;">
+        <div class="row">
+          <input type="text" id="new-mystery-text" placeholder="Ajouter une idée à la boîte...">
+        </div>
+        <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin-bottom:10px;">Ajouter à la boîte</button>
+        <div id="mystery-list"></div>
+      </div>
+    </div>
   </section>
 
   <section id="tab-boutique">
@@ -499,25 +519,64 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Strip-tease privé", pts: 55 },
     { id: cryptoId(), text: "Soirée à thème au choix", pts: 100 },
   ],
+  mysteryBox: [
+    { id: cryptoId(), text: "Restaurant pour elle" },
+    { id: cryptoId(), text: "Restaurant pour lui" },
+    { id: cryptoId(), text: "Préliminaires pour lui" },
+    { id: cryptoId(), text: "Préliminaires pour elle" },
+    { id: cryptoId(), text: "Plaisir à deux" },
+    { id: cryptoId(), text: "Journée du oui pour lui" },
+    { id: cryptoId(), text: "Journée du oui pour elle" },
+    { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
+    { id: cryptoId(), text: "Utiliser un sex toy sur elle" },
+  ],
+  mysteryAssign: 'a',
+  dailyTurn: 'a',
+  dailyChallenge: { date: '' },
   history: [],
   newDefiAssign: 'a',
 });
+
+const DAILY_POOL = [
+  { text: "Envoie un message coquin dans la journée", pts: 10 },
+  { text: "Complimente ton/ta partenaire devant quelqu'un", pts: 10 },
+  { text: "Prépare le petit-déjeuner au lit", pts: 15 },
+  { text: "Offre un bisou surprise dans la journée", pts: 8 },
+  { text: "Câlin de 5 minutes, sans téléphone", pts: 10 },
+  { text: "Prépare un bain avec bougies pour l'autre", pts: 20 },
+  { text: "Masse les épaules pendant 10 minutes", pts: 15 },
+  { text: "Danse sensuelle surprise", pts: 22 },
+  { text: "Écris un petit mot doux caché quelque part", pts: 8 },
+  { text: "Chuchote quelque chose de coquin à l'oreille", pts: 25 },
+  { text: "Improvise un moment romantique ce soir", pts: 28 },
+  { text: "Prépare une soirée cocooning rien que pour deux", pts: 18 },
+];
 
 function cryptoId(){ return Math.random().toString(36).slice(2,10); }
 
 let state = null;
 let saveTimer = null;
 
+function normalizeState(s){
+  const def = defaultState();
+  if(!s.mysteryBox) s.mysteryBox = def.mysteryBox;
+  if(!s.mysteryAssign) s.mysteryAssign = 'a';
+  if(!s.dailyTurn) s.dailyTurn = 'a';
+  if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
+  return s;
+}
+
 async function loadState(){
   try{
     const snap = await getDoc(stateDocRef);
-    state = snap.exists() ? snap.data() : defaultState();
+    state = snap.exists() ? normalizeState(snap.data()) : defaultState();
   }catch(e){
     console.error(e);
     state = defaultState();
     showToast("Connexion à Firebase impossible, mode local");
   }
   checkExpiredDefis();
+  ensureDailyChallenge();
   document.getElementById('new-defi-deadline').value = daysFromNow(3);
   render();
 }
@@ -568,6 +627,8 @@ function render(){
   document.getElementById('score-b').textContent = state.scores.b;
 
   renderAssignPicker();
+  renderMysteryAssign();
+  renderMysteryList();
   renderDefis();
   renderRewards();
   renderHistory();
@@ -583,6 +644,42 @@ function renderAssignPicker(){
     b.className = state.newDefiAssign === k ? 'picked' : '';
     b.onclick = () => { state.newDefiAssign = k; renderAssignPicker(); };
     wrap.appendChild(b);
+  });
+}
+
+function renderMysteryAssign(){
+  const wrap = document.getElementById('mystery-assign');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  ['a','b'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = 'Pour ' + state.names[k];
+    b.className = state.mysteryAssign === k ? 'picked' : '';
+    b.onclick = () => { state.mysteryAssign = k; persist(); renderMysteryAssign(); };
+    wrap.appendChild(b);
+  });
+}
+
+function renderMysteryList(){
+  const list = document.getElementById('mystery-list');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!state.mysteryBox || state.mysteryBox.length === 0){
+    list.innerHTML = '<div class="empty">La boîte est vide.</div>';
+    return;
+  }
+  state.mysteryBox.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'mystery-item';
+    const txt = document.createElement('div');
+    txt.textContent = item.text;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => removeMysteryItem(item.id);
+    row.appendChild(txt);
+    row.appendChild(delBtn);
+    list.appendChild(row);
   });
 }
 
@@ -603,9 +700,10 @@ function renderDefis(){
       const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
       deadlineHtml = `<div class="defi-deadline${soonClass}">À relever avant le ${deadlineTxt}</div>`;
     }
+    const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Défi mystère — ' : '');
     card.innerHTML = `
       <div class="info">
-        <div class="t">${escapeHtml(d.text)}</div>
+        <div class="t">${badge}${escapeHtml(d.text)}</div>
         <div class="m">Défi pour ${escapeHtml(state.names[d.for])}</div>
         ${deadlineHtml}
       </div>
@@ -665,6 +763,46 @@ function checkExpiredDefis(){
     persist();
     showToast('Un défi non relevé a transféré ses points 🕰️');
   }
+}
+
+function ensureDailyChallenge(){
+  const today = daysFromNow(0);
+  if(state.dailyChallenge && state.dailyChallenge.date === today) return;
+  const pick = DAILY_POOL[Math.floor(Math.random() * DAILY_POOL.length)];
+  const assignee = state.dailyTurn === 'b' ? 'b' : 'a';
+  state.defis.push({
+    id: cryptoId(), text: pick.text, pts: pick.pts, for: assignee,
+    deadline: daysFromNow(1), daily: true
+  });
+  state.dailyTurn = assignee === 'a' ? 'b' : 'a';
+  state.dailyChallenge = { date: today };
+  persist();
+  showToast('✨ Nouveau défi du jour pour ' + state.names[assignee]);
+}
+
+function drawMystery(){
+  if(!state.mysteryBox || state.mysteryBox.length === 0){
+    showToast('La boîte mystère est vide, ajoute des idées !');
+    return;
+  }
+  const item = state.mysteryBox[Math.floor(Math.random() * state.mysteryBox.length)];
+  const assignee = state.mysteryAssign === 'b' ? 'b' : 'a';
+  state.defis.push({
+    id: cryptoId(), text: item.text, pts: 50, for: assignee,
+    deadline: daysFromNow(2), mystery: true
+  });
+  persist(); render();
+  showToast('🎁 Défi mystère pioché pour ' + state.names[assignee]);
+}
+
+function addMysteryItem(text){
+  state.mysteryBox.push({ id: cryptoId(), text });
+  persist(); render();
+}
+
+function removeMysteryItem(id){
+  state.mysteryBox = state.mysteryBox.filter(x => x.id !== id);
+  persist(); render();
 }
 
 function renderRewards(){
@@ -800,6 +938,24 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
   ptsInput.value = '10';
   deadlineInput.value = daysFromNow(3);
   persist(); render();
+});
+
+document.getElementById('draw-mystery-btn').addEventListener('click', drawMystery);
+
+document.getElementById('toggle-mystery-form').addEventListener('click', () => {
+  const wrap = document.getElementById('mystery-form-wrap');
+  const btn = document.getElementById('toggle-mystery-form');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '– Masquer la gestion' : 'Gérer le contenu de la boîte';
+});
+
+document.getElementById('add-mystery-btn').addEventListener('click', () => {
+  const input = document.getElementById('new-mystery-text');
+  const text = input.value.trim();
+  if(!text) return;
+  addMysteryItem(text);
+  input.value = '';
 });
 
 document.getElementById('add-reward-btn').addEventListener('click', () => {
