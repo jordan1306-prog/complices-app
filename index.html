@@ -17,23 +17,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #1c1116;
-    --bg-2: #241620;
-    --card: #2c1a26;
-    --card-2: #33202b;
+    --bg: #2b1216;
+    --bg-2: #38151b;
+    --card: #421a22;
+    --card-2: #4c2029;
     --gold: #c9a24d;
     --gold-soft: #ddc088;
-    --rose: #d88c9a;
-    --rose-deep: #b8637a;
-    --cream: #f2e9e2;
-    --muted: #b8a29f;
-    --line: rgba(242,233,226,0.12);
-    --danger: #d9756a;
+    --rose: #e0697c;
+    --rose-deep: #c94356;
+    --red: #b8323f;
+    --cream: #f5ece7;
+    --muted: #c9a3a3;
+    --line: rgba(245,236,231,0.14);
+    --danger: #e0554a;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background: radial-gradient(ellipse at top, #2a1720 0%, var(--bg) 55%);
+    background: radial-gradient(ellipse at top, #4a1c22 0%, var(--bg) 60%);
     color: var(--cream);
     font-family: 'Manrope', sans-serif;
     min-height:100vh;
@@ -42,27 +43,19 @@
   h1,h2,h3,.serif{ font-family: 'Cormorant Garamond', serif; }
   .wrap{ max-width: 760px; margin: 0 auto; padding: 32px 20px 20px; }
 
-  header{ text-align:center; margin-bottom: 22px; position:relative; }
+  header{ text-align:center; margin-bottom: 20px; position:relative; }
   header h1{
-    font-size: 46px; font-weight:600; margin:0 0 8px;
+    font-size: 40px; font-weight:600; margin:0 0 6px;
     letter-spacing: 0.5px; color: var(--gold-soft);
-    text-shadow: 0 0 28px rgba(216,140,154,0.45), 0 0 60px rgba(201,162,77,0.18);
+    text-shadow: 0 0 18px rgba(224,105,124,0.3);
   }
-  header .flourish{
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    margin-bottom: 10px; color: var(--rose-deep); font-size:13px; letter-spacing:2px;
-  }
-  header .flourish::before, header .flourish::after{
-    content:''; height:1px; width:34px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-  header p{ margin:0; color: var(--muted); font-size:14.5px; letter-spacing: 0.3px; font-style:italic; }
+  header p{ margin:0; color: var(--muted); font-size:13.5px; letter-spacing: 0.3px; }
 
   .invite-btn{
-    display:block; margin: 14px auto 0; width:fit-content;
-    background: rgba(216,140,154,0.12); border:1px solid rgba(216,140,154,0.4);
-    color: var(--rose); font-family:'Manrope',sans-serif; font-weight:600; font-size:12.5px;
-    padding: 9px 18px; border-radius: 20px; cursor:pointer; letter-spacing:0.3px;
+    display:inline-flex; align-items:center; gap:6px; margin: 12px auto 0;
+    background: none; border:none;
+    color: var(--rose); font-family:'Manrope',sans-serif; font-weight:600; font-size:12px;
+    padding: 4px 6px; cursor:pointer; letter-spacing:0.2px; opacity:0.85;
   }
 
   .secret-box{
@@ -80,8 +73,8 @@
   }
   .secret-status{ font-size:11px; color: var(--muted); margin-top:8px; text-align:right; }
   .secret-teaser{
-    background: linear-gradient(160deg, rgba(216,140,154,0.14), rgba(201,162,77,0.08));
-    border: 0.5px solid rgba(216,140,154,0.35);
+    background: linear-gradient(160deg, rgba(224,105,124,0.14), rgba(201,162,77,0.08));
+    border: 0.5px solid rgba(224,105,124,0.35);
     border-radius: 16px; padding: 16px 18px; display:flex; align-items:center; gap:12px;
   }
   .secret-teaser .icon{ font-size:26px; }
@@ -89,13 +82,13 @@
   .secret-teaser .txt b{ color: var(--rose); }
 
   .players{
-    display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom: 26px;
+    display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 18px;
   }
   .player{
-    background: linear-gradient(160deg, var(--card), var(--card-2));
+    background: var(--card);
     border: 0.5px solid var(--line);
-    border-radius: 16px;
-    padding: 18px 16px;
+    border-radius: 14px;
+    padding: 14px 12px;
     text-align:center;
     position:relative;
   }
@@ -108,8 +101,8 @@
   }
   .player .name:focus{ border-bottom: 1px solid var(--gold); }
   .player .score{
-    font-size: 34px; font-weight:700; color: var(--gold);
-    margin: 8px 0 2px; font-family:'Cormorant Garamond',serif;
+    font-size: 28px; font-weight:700; color: var(--gold);
+    margin: 6px 0 1px; font-family:'Cormorant Garamond',serif;
   }
   .player .score-label{ font-size:11px; color:var(--muted); letter-spacing:0.5px; }
 
@@ -251,7 +244,7 @@
     width:40px; height:40px; display:flex; align-items:center; justify-content:center;
     cursor:pointer; color: var(--gold-soft); font-size:18px; flex-shrink:0;
   }
-  .icon-btn.send{ background: var(--gold); color:#2c1a10; }
+  .icon-btn.send{ background: linear-gradient(135deg, var(--red), var(--rose-deep)); color:#fdf3ef; }
 </style>
 </head>
 <body>
@@ -272,10 +265,9 @@
 <div id="app-view" style="display:none;">
 <div class="wrap">
   <header>
-    <div class="flourish">à deux, en secret</div>
     <h1>Complices</h1>
-    <p>Un jeu de désir, de patience et de petites promesses tenues.</p>
-    <button class="invite-btn" id="invite-btn">💌 Viens me rejoindre</button>
+    <p>Défis, envies et petites promesses — à deux.</p>
+    <button class="invite-btn" id="invite-btn">💌 Inviter</button>
   </header>
 
   <div class="players">
