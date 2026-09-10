@@ -213,7 +213,7 @@
   .cal-list-item .status-expired{ color: var(--danger); font-size:11px; }
 
   .hist-item{
-    display:flex; justify-content:space-between; padding: 10px 0;
+    display:flex; justify-content:space-between; align-items:center; gap:8px; padding: 10px 0;
     border-bottom: 0.5px solid var(--line); font-size:13px;
   }
   .hist-item .who{ color: var(--rose-deep); font-weight:600; }
@@ -333,7 +333,8 @@
   </nav>
 
   <section id="tab-defis">
-    <div class="add-form">
+    <button class="btn btn-ghost" id="toggle-defi-form" style="width:100%; margin-bottom:14px;">+ Proposer un défi</button>
+    <div class="add-form" id="defi-form-wrap" style="display:none;">
       <div class="row">
         <input type="text" id="new-defi-name" placeholder="Nom du défi (ex : massage surprise)">
         <input type="number" id="new-defi-pts" placeholder="pts" value="10" min="1">
@@ -435,6 +436,7 @@ onAuthStateChanged(auth, user => {
     startMessageListener();
     startSecretFlagListener();
     loadOwnSecret();
+    requestNotifPermission();
   } else {
     loginView.style.display = 'flex';
     appView.style.display = 'none';
@@ -545,8 +547,18 @@ function fmtDate(ts){
 }
 
 function addHistory(entry){
-  state.history.unshift({ ...entry, ts: Date.now() });
+  state.history.unshift({ ...entry, ts: Date.now(), id: cryptoId() });
   if(state.history.length > 100) state.history.pop();
+}
+
+function undoHistoryEntry(id){
+  const entry = state.history.find(h => h.id === id);
+  if(!entry) return;
+  if(!confirm('Annuler cette entrée et corriger les points ?')) return;
+  state.scores[entry.who] -= entry.pts;
+  state.history = state.history.filter(h => h.id !== id);
+  persist(); render();
+  showToast('Correction effectuée');
 }
 
 function render(){
@@ -728,6 +740,12 @@ function renderHistory(){
       </div>
       <div class="hist-pts ${h.pts > 0 ? 'plus' : 'minus'}">${h.pts > 0 ? '+' : ''}${h.pts}</div>
     `;
+    const undoBtn = document.createElement('button');
+    undoBtn.className = 'btn btn-danger';
+    undoBtn.textContent = '✕';
+    undoBtn.title = 'Corriger / annuler';
+    undoBtn.onclick = () => undoHistoryEntry(h.id);
+    row.appendChild(undoBtn);
     list.appendChild(row);
   });
 }
@@ -754,6 +772,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
   });
+});
+
+document.getElementById('toggle-defi-form').addEventListener('click', () => {
+  const wrap = document.getElementById('defi-form-wrap');
+  const btn = document.getElementById('toggle-defi-form');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '– Masquer le formulaire' : '+ Proposer un défi';
 });
 
 document.getElementById('add-defi-btn').addEventListener('click', () => {
@@ -804,11 +830,16 @@ document.getElementById('add-reward-btn').addEventListener('click', () => {
   });
 });
 
+let messagesFirstLoad = true;
+let lastSeenMsgId = null;
+
 function startMessageListener(){
   const chatBox = document.getElementById('chat-box');
   const q = query(collection(db, 'messages'), orderBy('ts', 'asc'));
+  messagesFirstLoad = true;
   unsubMessages = onSnapshot(q, snap => {
     chatBox.innerHTML = '';
+    let newestOther = null;
     snap.forEach(docSnap => {
       const m = docSnap.data();
       const isMe = m.senderEmail === auth.currentUser.email;
@@ -823,11 +854,40 @@ function startMessageListener(){
       when.textContent = m.ts && m.ts.toDate ? fmtDate(m.ts.toDate().getTime()) : '';
       row.appendChild(when);
       chatBox.appendChild(row);
+      if(!isMe) newestOther = { id: docSnap.id, text: m.text };
     });
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    if(!messagesFirstLoad && newestOther && newestOther.id !== lastSeenMsgId){
+      notifyNewMessage(newestOther.text);
+    }
+    if(newestOther) lastSeenMsgId = newestOther.id;
+    messagesFirstLoad = false;
   }, err => {
     showToast("Impossible de charger les messages");
   });
+}
+
+function requestNotifPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default' && !localStorage.getItem('complices-notif-asked')){
+    localStorage.setItem('complices-notif-asked', '1');
+    Notification.requestPermission();
+  }
+}
+
+function notifyNewMessage(text){
+  showToast('💬 Nouveau message reçu');
+  if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification('Complices 💌', {
+        body: text ? text.slice(0, 100) : 'Nouveau message reçu',
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        tag: 'complices-message'
+      });
+    }).catch(()=>{});
+  }
 }
 
 async function sendTextMessage(){
@@ -1023,6 +1083,12 @@ function renderCalendar(){
       </div>
       <div class="pts">+${h.pts}</div>
     `;
+    const undoBtn = document.createElement('button');
+    undoBtn.className = 'btn btn-danger';
+    undoBtn.textContent = '✕';
+    undoBtn.title = 'Corriger / annuler';
+    undoBtn.onclick = () => undoHistoryEntry(h.id);
+    row.appendChild(undoBtn);
     list.appendChild(row);
   });
 }
