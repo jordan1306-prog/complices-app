@@ -387,6 +387,14 @@
     </div>
     <div id="rewards-list"></div>
     <a href="https://fr.wikipedia.org/wiki/Kama-sutra" target="_blank" rel="noopener" class="btn btn-ghost" style="display:block; text-align:center; text-decoration:none; margin-top:16px;">📖 Guide des positions (lien externe)</a>
+
+    <button class="btn btn-ghost" id="toggle-positions-list" style="width:100%; margin-top:8px;">💡 Idées de noms à chercher ensemble</button>
+    <div class="secret-box" id="positions-list-wrap" style="display:none; margin-top:10px;">
+      <div class="sub" style="margin-bottom:10px;">Cherchez ces noms sur un site de votre choix pour voir à quoi ça correspond :</div>
+      <div style="font-size:13.5px; line-height:2; color:var(--cream);">
+        Le missionnaire · L'andromaque · La levrette · Le lotus · La cuillère · Le 69 · La brouette · Le doggy style · La levrette debout · Le cowgirl · Le reverse cowgirl · Le missionnaire surélevé · L'étau · Le papillon · La chaise · Le face à face assis
+      </div>
+    </div>
   </section>
 
   <section id="tab-secret">
@@ -710,6 +718,14 @@ function renderMysteryList(){
   });
 }
 
+function formatCountdown(ms){
+  if(ms <= 0) return 'Temps écoulé';
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h + 'h ' + String(m).padStart(2,'0') + 'min restantes';
+}
+
 function renderDefis(){
   const list = document.getElementById('defis-list');
   list.innerHTML = '';
@@ -721,11 +737,15 @@ function renderDefis(){
     const card = document.createElement('div');
     card.className = 'card';
     let deadlineHtml = '';
-    if(d.deadline){
+    if(d.status === 'accepted' && d.acceptDeadline){
+      const remaining = d.acceptDeadline - Date.now();
+      const soonClass = remaining < 3 * 3600000 ? ' soon' : '';
+      deadlineHtml = `<div class="defi-deadline${soonClass}">⏳ ${formatCountdown(remaining)}</div>`;
+    } else if(d.deadline){
       const daysLeft = Math.ceil((new Date(d.deadline + 'T23:59:59') - new Date()) / 86400000);
       const soonClass = daysLeft <= 1 ? ' soon' : '';
       const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
-      deadlineHtml = `<div class="defi-deadline${soonClass}">À relever avant le ${deadlineTxt}</div>`;
+      deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
     }
     const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Défi mystère — ' : '');
     card.innerHTML = `
@@ -741,10 +761,25 @@ function renderDefis(){
     btnWrap.style.flexDirection = 'column';
     btnWrap.style.gap = '4px';
 
-    const doneBtn = document.createElement('button');
-    doneBtn.className = 'btn btn-gold';
-    doneBtn.textContent = 'Réalisé';
-    doneBtn.onclick = () => completeDefi(d.id);
+    if(d.status === 'accepted'){
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'btn btn-gold';
+      doneBtn.textContent = '✅ Terminé';
+      doneBtn.onclick = () => completeDefi(d.id);
+      btnWrap.appendChild(doneBtn);
+    } else {
+      const acceptBtn = document.createElement('button');
+      acceptBtn.className = 'btn btn-gold';
+      acceptBtn.textContent = '✅ Accepté';
+      acceptBtn.onclick = () => acceptDefi(d.id);
+      btnWrap.appendChild(acceptBtn);
+
+      const refuseBtn = document.createElement('button');
+      refuseBtn.className = 'btn btn-rose';
+      refuseBtn.textContent = '❌ Refusé';
+      refuseBtn.onclick = () => refuseDefi(d.id);
+      btnWrap.appendChild(refuseBtn);
+    }
 
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
@@ -753,12 +788,32 @@ function renderDefis(){
       state.defis = state.defis.filter(x => x.id !== d.id);
       persist(); render();
     };
-
-    btnWrap.appendChild(doneBtn);
     btnWrap.appendChild(delBtn);
+
     card.appendChild(btnWrap);
     list.appendChild(card);
   });
+}
+
+function acceptDefi(id){
+  const d = state.defis.find(x => x.id === id);
+  if(!d) return;
+  d.status = 'accepted';
+  d.acceptDeadline = Date.now() + 24 * 3600000;
+  persist(); render();
+  showToast('Défi accepté — 24h pour le relever ⏳');
+}
+
+function refuseDefi(id){
+  const d = state.defis.find(x => x.id === id);
+  if(!d) return;
+  if(!confirm('Refuser ce défi ? Les points seront crédités à ton/ta partenaire.')) return;
+  const other = d.for === 'a' ? 'b' : 'a';
+  state.scores[other] += d.pts;
+  addHistory({ type:'defi', who: other, label: d.text + ' (refusé)', pts: d.pts, status:'expired', missedBy: d.for });
+  state.defis = state.defis.filter(x => x.id !== id);
+  persist(); render();
+  showToast('Défi refusé — points transférés à ' + state.names[other]);
 }
 
 function completeDefi(id){
@@ -773,13 +828,23 @@ function completeDefi(id){
 
 function checkExpiredDefis(){
   const now = new Date();
+  const nowMs = Date.now();
   const stillGoing = [];
   let anyExpired = false;
   state.defis.forEach(d => {
-    if(d.deadline && new Date(d.deadline + 'T23:59:59') < now){
+    if(d.status === 'accepted'){
+      if(d.acceptDeadline && d.acceptDeadline < nowMs){
+        const other = d.for === 'a' ? 'b' : 'a';
+        state.scores[other] += d.pts;
+        addHistory({ type:'defi', who: other, label: d.text + ' (non terminé dans les 24h)', pts: d.pts, status:'expired', missedBy: d.for });
+        anyExpired = true;
+      } else {
+        stillGoing.push(d);
+      }
+    } else if(d.deadline && new Date(d.deadline + 'T23:59:59') < now){
       const other = d.for === 'a' ? 'b' : 'a';
       state.scores[other] += d.pts;
-      addHistory({ type:'defi', who: other, label: d.text + ' (non relevé à temps)', pts: d.pts, status:'expired', missedBy: d.for });
+      addHistory({ type:'defi', who: other, label: d.text + ' (non accepté à temps)', pts: d.pts, status:'expired', missedBy: d.for });
       anyExpired = true;
     } else {
       stillGoing.push(d);
@@ -985,6 +1050,12 @@ document.getElementById('toggle-mystery-form').addEventListener('click', () => {
   const show = wrap.style.display === 'none';
   wrap.style.display = show ? 'block' : 'none';
   btn.textContent = show ? '– Masquer la gestion' : 'Gérer le contenu de la boîte';
+});
+
+document.getElementById('toggle-positions-list').addEventListener('click', () => {
+  const wrap = document.getElementById('positions-list-wrap');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
 });
 
 document.getElementById('add-mystery-btn').addEventListener('click', () => {
@@ -1441,6 +1512,13 @@ document.getElementById('add-note-btn').addEventListener('click', () => {
   addCalendarNote(date, text);
   textInput.value = '';
 });
+
+setInterval(() => {
+  if(state && auth.currentUser){
+    checkExpiredDefis();
+    renderDefis();
+  }
+}, 30000);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
