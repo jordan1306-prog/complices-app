@@ -464,7 +464,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, where, onSnapshot, getDocs, deleteDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -498,6 +498,7 @@ onAuthStateChanged(auth, user => {
     startSecretFlagListener();
     loadOwnSecret();
     requestNotifPermission();
+    cleanupOldMessages();
   } else {
     loginView.style.display = 'flex';
     appView.style.display = 'none';
@@ -1149,6 +1150,21 @@ document.getElementById('add-reward-btn').addEventListener('click', () => {
 let messagesFirstLoad = true;
 let lastSeenMsgId = null;
 
+async function cleanupOldMessages(){
+  try{
+    const cutoff = Timestamp.fromMillis(Date.now() - 72 * 3600000);
+    const q = query(collection(db, 'messages'), where('ts', '<', cutoff));
+    const snap = await getDocs(q);
+    const deletions = [];
+    snap.forEach(docSnap => deletions.push(deleteDoc(docSnap.ref)));
+    if(deletions.length){
+      await Promise.all(deletions);
+    }
+  }catch(e){
+    console.error('Nettoyage messages:', e);
+  }
+}
+
 function startMessageListener(){
   const chatBox = document.getElementById('chat-box');
   const q = query(collection(db, 'messages'), orderBy('ts', 'asc'));
@@ -1571,6 +1587,12 @@ setInterval(() => {
     renderDefis();
   }
 }, 30000);
+
+setInterval(() => {
+  if(auth.currentUser){
+    cleanupOldMessages();
+  }
+}, 15 * 60000);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
