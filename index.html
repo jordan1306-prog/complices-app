@@ -21,8 +21,8 @@
     --bg-2: #38151b;
     --card: #421a22;
     --card-2: #4c2029;
-    --gold: #c9a24d;
-    --gold-soft: #ddc088;
+    --gold: #c9333f;
+    --gold-soft: #ea8890;
     --rose: #e0697c;
     --rose-deep: #c94356;
     --red: #b8323f;
@@ -142,7 +142,7 @@
     font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
     cursor:pointer; white-space:nowrap;
   }
-  .btn-gold{ background: var(--gold); color: #2c1a10; }
+  .btn-gold{ background: var(--gold); color: #fdf1f0; }
   .btn-gold:disabled{ background:#5a5148; color:#8a8178; cursor:not-allowed; }
   .btn-rose{ background: var(--rose); color: #3a141f; }
   .btn-ghost{ background:none; border:1px solid var(--line); color: var(--muted); }
@@ -232,7 +232,7 @@
   .err{ color: var(--danger); font-size:12px; margin-top:4px; display:none; }
   .toast{
     position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
-    background: var(--gold); color:#2c1a10; padding:10px 20px; border-radius:20px;
+    background: var(--gold); color:#fdf1f0; padding:10px 20px; border-radius:20px;
     font-weight:600; font-size:13px; opacity:0; transition: all 0.25s; pointer-events:none;
     z-index:10;
   }
@@ -345,6 +345,14 @@
   </nav>
 
   <section id="tab-defis">
+    <div class="secret-box" id="role-picker" style="display:none;">
+      <h3>Qui es-tu ? 👤</h3>
+      <div class="sub">Pour que les défis restent une surprise, dis-nous qui tu es sur cet appareil — tu ne verras alors que les défis qui te sont destinés.</div>
+      <div class="assign" id="role-picker-buttons"></div>
+    </div>
+    <div id="role-current" style="display:none; text-align:center; font-size:11px; color:var(--muted); margin-bottom:12px;">
+      Tu es connecté·e en tant que <b id="role-current-name"></b> — <span id="change-role-btn" style="color:var(--rose); text-decoration:underline; cursor:pointer;">changer</span>
+    </div>
     <button class="btn btn-ghost" id="toggle-defi-form" style="width:100%; margin-bottom:14px;">+ Proposer un défi</button>
     <div class="add-form" id="defi-form-wrap" style="display:none;">
       <div class="row">
@@ -590,6 +598,42 @@ function cryptoId(){ return Math.random().toString(36).slice(2,10); }
 
 let state = null;
 let saveTimer = null;
+let myRole = localStorage.getItem('complices-role') || null;
+
+function setMyRole(role){
+  myRole = role;
+  localStorage.setItem('complices-role', role);
+  render();
+}
+
+function renderRolePicker(){
+  const picker = document.getElementById('role-picker');
+  const pickerBtns = document.getElementById('role-picker-buttons');
+  const current = document.getElementById('role-current');
+  const currentName = document.getElementById('role-current-name');
+  if(!picker || !state) return;
+  if(myRole === 'a' || myRole === 'b'){
+    picker.style.display = 'none';
+    current.style.display = 'block';
+    currentName.textContent = state.names[myRole];
+  } else {
+    picker.style.display = 'block';
+    current.style.display = 'none';
+    pickerBtns.innerHTML = '';
+    ['a','b'].forEach(k => {
+      const b = document.createElement('button');
+      b.textContent = state.names[k];
+      b.onclick = () => setMyRole(k);
+      pickerBtns.appendChild(b);
+    });
+  }
+}
+
+document.getElementById('change-role-btn').addEventListener('click', () => {
+  myRole = null;
+  localStorage.removeItem('complices-role');
+  render();
+});
 
 function normalizeState(s){
   const def = defaultState();
@@ -661,6 +705,7 @@ function render(){
   document.getElementById('score-a').textContent = state.scores.a;
   document.getElementById('score-b').textContent = state.scores.b;
 
+  renderRolePicker();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -729,11 +774,18 @@ function formatCountdown(ms){
 function renderDefis(){
   const list = document.getElementById('defis-list');
   list.innerHTML = '';
-  if(state.defis.length === 0){
-    list.innerHTML = '<div class="empty">Aucun défi pour le moment. Ajoutez-en un ci-dessus.</div>';
+  const visibleDefis = (myRole === 'a' || myRole === 'b')
+    ? state.defis.filter(d => d.for === myRole)
+    : state.defis;
+  if(!(myRole === 'a' || myRole === 'b')){
+    list.innerHTML = '<div class="empty">Choisis d\'abord qui tu es ci-dessus pour voir tes défis.</div>';
     return;
   }
-  state.defis.forEach(d => {
+  if(visibleDefis.length === 0){
+    list.innerHTML = '<div class="empty">Aucun défi en attente pour toi pour le moment.</div>';
+    return;
+  }
+  visibleDefis.forEach(d => {
     const card = document.createElement('div');
     card.className = 'card';
     let deadlineHtml = '';
