@@ -241,6 +241,10 @@
   #login-view{
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
   }
+  #settings-panel{
+    position:fixed; inset:0; background:rgba(10,5,7,0.85); z-index:20;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
   .login-card{
     background: var(--card); border:0.5px solid var(--line); border-radius:16px;
     padding:32px 24px; width:100%; max-width:340px; text-align:center;
@@ -312,6 +316,19 @@
 </div>
 
 <button class="signout" id="signout-btn" style="display:none;">Déconnexion</button>
+<button class="signout" id="settings-btn" style="display:none; top:16px; left:16px; right:auto;">⚙️</button>
+
+<div id="settings-panel" style="display:none;">
+  <div class="login-card" style="max-width:360px;">
+    <h1 style="font-size:24px;">Paramètres</h1>
+    <p style="margin-bottom:16px;">Personnalise l'app</p>
+    <div class="sub" style="text-align:left; margin-bottom:8px;">Fond d'écran personnalisé (ta propre photo)</div>
+    <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
+    <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
+    <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
+    <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
+  </div>
+</div>
 
 <div id="app-view" style="display:none;">
 <div class="wrap">
@@ -493,6 +510,7 @@ onAuthStateChanged(auth, user => {
     loginView.style.display = 'none';
     appView.style.display = 'block';
     signoutBtn.style.display = 'block';
+    document.getElementById('settings-btn').style.display = 'block';
     loadState();
     startMessageListener();
     startSecretFlagListener();
@@ -503,6 +521,7 @@ onAuthStateChanged(auth, user => {
     loginView.style.display = 'flex';
     appView.style.display = 'none';
     signoutBtn.style.display = 'none';
+    document.getElementById('settings-btn').style.display = 'none';
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubSecretFlags){ unsubSecretFlags(); unsubSecretFlags = null; }
   }
@@ -1285,6 +1304,50 @@ function compressImageToDataUrl(file, maxSize = 900){
     reader.readAsDataURL(file);
   });
 }
+
+function applyStoredBackground(){
+  const bg = localStorage.getItem('complices-bg');
+  if(bg){
+    document.body.style.backgroundImage = `linear-gradient(rgba(28,17,22,0.72), rgba(28,17,22,0.85)), url(${bg})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+  } else {
+    document.body.style.backgroundImage = '';
+  }
+}
+applyStoredBackground();
+
+document.getElementById('settings-btn').addEventListener('click', () => {
+  document.getElementById('settings-panel').style.display = 'flex';
+});
+document.getElementById('close-settings-btn').addEventListener('click', () => {
+  document.getElementById('settings-panel').style.display = 'none';
+});
+document.getElementById('apply-bg-btn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('bg-file-input');
+  const file = fileInput.files[0];
+  if(!file){
+    showToast('Choisis une photo d\'abord');
+    return;
+  }
+  showToast('Traitement de la photo...');
+  try{
+    const dataUrl = await compressImageToDataUrl(file, 1400);
+    localStorage.setItem('complices-bg', dataUrl);
+    applyStoredBackground();
+    showToast('Fond d\'écran appliqué 🖼️');
+    document.getElementById('settings-panel').style.display = 'none';
+  }catch(e){
+    console.error(e);
+    showToast('Impossible d\'appliquer cette photo');
+  }
+});
+document.getElementById('reset-bg-btn').addEventListener('click', () => {
+  localStorage.removeItem('complices-bg');
+  applyStoredBackground();
+  showToast('Fond réinitialisé');
+});
 
 async function sendImageMessage(file){
   const preview = document.getElementById('upload-preview');
