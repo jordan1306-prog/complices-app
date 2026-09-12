@@ -182,6 +182,14 @@
   }
   .defi-deadline{ font-size:11px; color: var(--rose); margin-top:3px; }
   .defi-deadline.soon{ color: var(--danger); font-weight:600; }
+  .defi-tag{
+    display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:0.3px;
+    padding:3px 9px; border-radius:12px; margin-bottom:6px;
+  }
+  .defi-tag-new{ background: rgba(201,51,63,0.85); color:#fdf1f0; }
+  .defi-tag-progress{ background: rgba(201,162,77,0.25); color: var(--gold-soft); border:0.5px solid rgba(201,162,77,0.5); }
+  .card.defi-pending{ border-color: rgba(201,51,63,0.6); box-shadow: 0 0 0 1px rgba(201,51,63,0.3); }
+  .card.defi-inprogress{ opacity:0.85; }
   .mystery-item{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
     padding:8px 0; border-bottom:0.5px solid var(--line); font-size:13px;
@@ -255,6 +263,15 @@
     position:fixed; inset:0; background:rgba(10,5,7,0.85); z-index:20;
     display:flex; align-items:center; justify-content:center; padding:20px;
   }
+  #notif-panel{
+    position:fixed; inset:0; background:rgba(10,5,7,0.85); z-index:20;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .notif-item{
+    background: var(--bg-2); border-radius:10px; padding:10px 12px; margin-bottom:8px;
+    font-size:13px; line-height:1.4; cursor:pointer;
+  }
+  .notif-item:active{ opacity:0.8; }
   .login-card{
     background: var(--card); border:0.5px solid var(--line); border-radius:16px;
     padding:32px 24px; width:100%; max-width:340px; text-align:center;
@@ -328,6 +345,9 @@
 
 <button class="signout" id="signout-btn" style="display:none;">Déconnexion</button>
 <button class="signout" id="settings-btn" style="display:none; top:16px; left:16px; right:auto;">⚙️</button>
+<button class="signout" id="notif-btn" style="display:none; top:16px; left:64px; right:auto; position:fixed;">
+  🔔<span id="notif-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--red); color:#fff; font-size:10px; font-weight:700; border-radius:10px; min-width:16px; height:16px; line-height:16px; text-align:center; padding:0 3px;">0</span>
+</button>
 
 <div id="settings-panel" style="display:none;">
   <div class="login-card" style="max-width:360px;">
@@ -338,6 +358,15 @@
     <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
+  </div>
+</div>
+
+<div id="notif-panel" style="display:none;">
+  <div class="login-card" style="max-width:380px; max-height:80vh; overflow-y:auto;">
+    <h1 style="font-size:24px;">🔔 Notifications</h1>
+    <p style="margin-bottom:16px;">Tout ce qui attend une action de ta part</p>
+    <div id="notif-list" style="text-align:left;"></div>
+    <button class="btn btn-ghost" id="close-notif-btn" style="width:100%; margin-top:14px;">Fermer</button>
   </div>
 </div>
 
@@ -559,6 +588,7 @@ onAuthStateChanged(auth, user => {
     appView.style.display = 'block';
     signoutBtn.style.display = 'block';
     document.getElementById('settings-btn').style.display = 'block';
+    document.getElementById('notif-btn').style.display = 'block';
     loadState();
     startMessageListener();
     startSecretFlagListener();
@@ -570,6 +600,7 @@ onAuthStateChanged(auth, user => {
     appView.style.display = 'none';
     signoutBtn.style.display = 'none';
     document.getElementById('settings-btn').style.display = 'none';
+    document.getElementById('notif-btn').style.display = 'none';
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubSecretFlags){ unsubSecretFlags(); unsubSecretFlags = null; }
   }
@@ -805,6 +836,7 @@ function render(){
   renderRolePicker();
   renderNegotiations();
   renderPurchases();
+  renderNotifications();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -939,9 +971,14 @@ function renderDefis(){
     list.innerHTML = '<div class="empty">Aucun défi en attente pour toi pour le moment.</div>';
     return;
   }
-  visibleDefis.forEach(d => {
+  const sorted = [...visibleDefis].sort((a, b) => {
+    const aPending = a.status !== 'accepted' ? 0 : 1;
+    const bPending = b.status !== 'accepted' ? 0 : 1;
+    return aPending - bPending;
+  });
+  sorted.forEach(d => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card ' + (d.status === 'accepted' ? 'defi-inprogress' : 'defi-pending');
     let deadlineHtml = '';
     if(d.status === 'accepted' && d.acceptDeadline){
       const remaining = d.acceptDeadline - Date.now();
@@ -954,11 +991,15 @@ function renderDefis(){
       deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
     }
     const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Défi mystère — ' : '');
+    const statusTag = d.status === 'accepted'
+      ? '<div class="defi-tag defi-tag-progress">⏳ En cours</div>'
+      : '<div class="defi-tag defi-tag-new">🆕 En attente de ta réponse</div>';
     const negoHtml = d.negotiation
       ? `<div class="defi-deadline" style="color:var(--gold-soft);">🤝 Ta contre-offre de ${d.negotiation.pts} pts est en attente de réponse</div>`
       : '';
     card.innerHTML = `
       <div class="info">
+        ${statusTag}
         <div class="t">${badge}${escapeHtml(d.text)}</div>
         <div class="m">Défi pour ${escapeHtml(state.names[d.for])}</div>
         ${deadlineHtml}
@@ -1746,6 +1787,81 @@ document.getElementById('settings-btn').addEventListener('click', () => {
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
 });
+
+document.getElementById('notif-btn').addEventListener('click', () => {
+  renderNotifications();
+  document.getElementById('notif-panel').style.display = 'flex';
+});
+document.getElementById('close-notif-btn').addEventListener('click', () => {
+  document.getElementById('notif-panel').style.display = 'none';
+});
+
+function goToTab(tabName){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+  if(btn) btn.classList.add('active');
+  const sec = document.getElementById('tab-' + tabName);
+  if(sec) sec.classList.add('active');
+}
+
+function getNotificationItems(){
+  if(!state || !myRole) return [];
+  const items = [];
+  state.defis.forEach(d => {
+    if(d.for === myRole && d.status !== 'accepted'){
+      items.push({ text: '🆕 Défi en attente de ta réponse : ' + d.text, tab: 'defis' });
+    }
+    if(d.for === myRole && d.status === 'accepted' && d.acceptDeadline){
+      const remaining = d.acceptDeadline - Date.now();
+      if(remaining > 0 && remaining < 2 * 3600000){
+        items.push({ text: '⏰ Plus que ' + formatCountdown(remaining) + ' pour : ' + d.text, tab: 'defis' });
+      }
+    }
+    if(d.negotiation && d.negotiation.by !== myRole){
+      items.push({ text: '🤝 ' + state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts pour un défi', tab: 'defis' });
+    }
+  });
+  state.purchases.forEach(p => {
+    if(p.owedBy === myRole && p.status === 'pending'){
+      items.push({ text: '🛍️ À faire pour ' + state.names[p.boughtBy] + ' : ' + p.text, tab: 'achats' });
+    }
+    if(p.boughtBy === myRole && p.status === 'done'){
+      items.push({ text: '✅ À valider : ' + p.text, tab: 'achats' });
+    }
+  });
+  return items;
+}
+
+function renderNotifications(){
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notif-list');
+  const items = getNotificationItems();
+  if(items.length > 0){
+    badge.style.display = 'block';
+    badge.textContent = items.length > 9 ? '9+' : items.length;
+  } else {
+    badge.style.display = 'none';
+  }
+  if(list){
+    list.innerHTML = '';
+    if(items.length === 0){
+      list.innerHTML = '<div class="empty">Rien qui t\'attend pour l\'instant 🎉</div>';
+    } else {
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'notif-item';
+        row.textContent = item.text;
+        row.onclick = () => {
+          document.getElementById('notif-panel').style.display = 'none';
+          goToTab(item.tab);
+        };
+        list.appendChild(row);
+      });
+    }
+  }
+}
+
 document.getElementById('apply-bg-btn').addEventListener('click', async () => {
   const fileInput = document.getElementById('bg-file-input');
   const file = fileInput.files[0];
