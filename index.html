@@ -444,15 +444,25 @@
     <div class="secret-box">
       <h3>Mes fantasmes 🔒</h3>
       <div class="sub">Écris-les ici — ils restent invisibles pour ton ou ta complice, pour toujours. Iel saura seulement qu'un fantasme t'attend... à lui/elle de venir le découvrir.</div>
-      <textarea id="secret-text" placeholder="Ce que tu gardes pour toi, pour l'instant..." maxlength="500"></textarea>
-      <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en privé</button>
-      <div class="secret-status" id="secret-status"></div>
+
+      <div id="secret-locked-view" style="display:none; text-align:center; padding:18px 10px; background:var(--bg-2); border-radius:12px; margin-bottom:14px;">
+        <div style="font-size:28px; margin-bottom:6px;">🔒</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Ton fantasme est enregistré et caché, même à l'écran.</div>
+        <button class="btn btn-ghost" id="reveal-secret-btn" style="width:100%;">👁️ Afficher / Modifier</button>
+      </div>
+
+      <div id="secret-edit-view">
+        <textarea id="secret-text" placeholder="Ce que tu gardes pour toi, pour l'instant..." maxlength="500"></textarea>
+        <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en privé</button>
+        <div class="secret-status" id="secret-status"></div>
+      </div>
+
       <button class="btn btn-rose" id="secret-to-defi-btn" style="width:100%; margin-top:10px;">✨ Transformer en défi pour mon/ma partenaire</button>
       <div class="sub" style="margin:8px 0 0;">Ce bouton ne partage rien automatiquement : il ouvre le formulaire de défi pré-rempli avec ton texte, et c'est toi qui choisis ce que tu envoies réellement.</div>
     </div>
     <div class="secret-teaser" id="secret-teaser" style="display:none;">
       <div class="icon">💌</div>
-      <div class="txt"><b>Ton ou ta complice</b> a un fantasme noté... il ne se dévoile qu'en personne, ou via un défi qu'iel choisira de t'envoyer 😉</div>
+      <div class="txt" id="secret-teaser-text"><b>Ton ou ta complice</b> a un fantasme noté... il ne se dévoile qu'en personne, ou via un défi qu'iel choisira de t'envoyer 😉</div>
     </div>
   </section>
 
@@ -501,7 +511,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, where, onSnapshot, getDocs, deleteDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, where, onSnapshot, getDocs, deleteDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1370,6 +1380,15 @@ function startMessageListener(){
       when.className = 'when';
       when.textContent = m.ts && m.ts.toDate ? fmtDate(m.ts.toDate().getTime()) : '';
       row.appendChild(when);
+      if(isMe){
+        const status = document.createElement('div');
+        status.className = 'when';
+        status.textContent = m.read ? 'Vu ✓✓' : 'Envoyé ✓';
+        row.appendChild(status);
+      }
+      if(!isMe && !m.read){
+        updateDoc(docSnap.ref, { read: true, readAt: serverTimestamp() }).catch(()=>{});
+      }
       chatBox.appendChild(row);
       if(!isMe) newestOther = { id: docSnap.id, text: m.type === 'image' ? '📷 Photo reçue' : m.text };
     });
@@ -1549,21 +1568,40 @@ function sanitizeKey(email){
   return email.replace(/[.#$/\[\]]/g, '_');
 }
 
+function showSecretLocked(){
+  document.getElementById('secret-locked-view').style.display = 'block';
+  document.getElementById('secret-edit-view').style.display = 'none';
+}
+function showSecretEditor(){
+  document.getElementById('secret-locked-view').style.display = 'none';
+  document.getElementById('secret-edit-view').style.display = 'block';
+}
+
 async function loadOwnSecret(){
   try{
     const key = sanitizeKey(auth.currentUser.email);
     const snap = await getDoc(doc(db, 'secrets', key));
     if(snap.exists()){
-      document.getElementById('secret-text').value = snap.data().text || '';
+      const text = snap.data().text || '';
+      document.getElementById('secret-text').value = text;
       const ts = snap.data().updatedAt;
       if(ts && ts.toDate){
         document.getElementById('secret-status').textContent = 'Enregistré le ' + fmtDate(ts.toDate().getTime());
       }
+      if(text.length > 0){
+        showSecretLocked();
+      } else {
+        showSecretEditor();
+      }
+    } else {
+      showSecretEditor();
     }
   }catch(e){
     console.error(e);
   }
 }
+
+document.getElementById('reveal-secret-btn').addEventListener('click', showSecretEditor);
 
 document.getElementById('secret-save-btn').addEventListener('click', async () => {
   const textarea = document.getElementById('secret-text');
@@ -1574,6 +1612,9 @@ document.getElementById('secret-save-btn').addEventListener('click', async () =>
     await setDoc(doc(db, 'secretFlags', key), { hasSecret: text.length > 0, updatedAt: serverTimestamp() });
     document.getElementById('secret-status').textContent = 'Enregistré à l\'instant, rien qu\'à toi 🔒';
     showToast(text.length > 0 ? 'Ton fantasme est en sécurité' : 'Fantasme effacé');
+    if(text.length > 0){
+      showSecretLocked();
+    }
   }catch(e){
     console.error(e);
     showToast("Impossible d'enregistrer");
