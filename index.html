@@ -455,6 +455,32 @@
         <div id="mystery-list"></div>
       </div>
     </div>
+
+    <div class="secret-box" style="margin-top:22px;">
+      <h3>🎲 Dés à deux</h3>
+      <div class="sub">Deux dés à 6 faces, remplis avec ce que vous voulez. Lancez-les à deux, en direct.</div>
+      <button class="btn btn-rose" id="roll-dice-btn" style="width:100%; margin:12px 0;">🎲 Lancer les dés</button>
+      <div id="dice-result" style="display:none; text-align:center; padding:16px; background:var(--bg-2); border-radius:12px; margin-bottom:12px; font-family:'Cormorant Garamond',serif; font-size:19px; color:var(--gold-soft);"></div>
+      <button class="btn btn-ghost" id="dice-to-defi-btn" style="width:100%; display:none; margin-bottom:10px;">✨ Transformer en défi</button>
+      <button class="btn btn-ghost" id="toggle-dice-form" style="width:100%;">Modifier les faces des dés</button>
+      <div id="dice-form-wrap" style="display:none; margin-top:12px;">
+        <div style="font-size:12px; color:var(--gold-soft); margin-bottom:6px;">Dé 1</div>
+        <input type="text" class="dice-face-input" data-die="1" data-idx="0" placeholder="Face 1" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="1" data-idx="1" placeholder="Face 2" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="1" data-idx="2" placeholder="Face 3" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="1" data-idx="3" placeholder="Face 4" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="1" data-idx="4" placeholder="Face 5" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="1" data-idx="5" placeholder="Face 6" style="width:100%; margin-bottom:14px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <div style="font-size:12px; color:var(--gold-soft); margin-bottom:6px;">Dé 2</div>
+        <input type="text" class="dice-face-input" data-die="2" data-idx="0" placeholder="Face 1" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="2" data-idx="1" placeholder="Face 2" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="2" data-idx="2" placeholder="Face 3" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="2" data-idx="3" placeholder="Face 4" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="2" data-idx="4" placeholder="Face 5" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <input type="text" class="dice-face-input" data-die="2" data-idx="5" placeholder="Face 6" style="width:100%; margin-bottom:10px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <button class="btn btn-gold" id="save-dice-btn" style="width:100%;">Enregistrer les dés</button>
+      </div>
+    </div>
   </section>
 
   <section id="tab-boutique">
@@ -677,6 +703,7 @@ const defaultState = () => ({
   calendarNotes: [],
   goal: { target: 500 },
   purchases: [],
+  dice: { d1: ['','','','','',''], d2: ['','','','','',''] },
   history: [],
   newDefiAssign: 'a',
 });
@@ -746,6 +773,7 @@ function normalizeState(s){
   if(!s.calendarNotes) s.calendarNotes = [];
   if(!s.goal) s.goal = { target: 500 };
   if(!s.purchases) s.purchases = [];
+  if(!s.dice) s.dice = { d1: ['','','','','',''], d2: ['','','','','',''] };
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -1240,6 +1268,65 @@ function addMysteryItem(text){
   state.mysteryBox.push({ id: cryptoId(), text });
   persist(); render();
 }
+
+let lastDiceResult = '';
+
+function renderDiceFaces(){
+  if(!state.dice) return;
+  document.querySelectorAll('.dice-face-input').forEach(input => {
+    const die = input.dataset.die === '1' ? state.dice.d1 : state.dice.d2;
+    const idx = parseInt(input.dataset.idx, 10);
+    input.value = die[idx] || '';
+  });
+}
+
+document.getElementById('roll-dice-btn').addEventListener('click', () => {
+  const d1 = state.dice.d1.filter(f => f && f.trim());
+  const d2 = state.dice.d2.filter(f => f && f.trim());
+  if(d1.length === 0 || d2.length === 0){
+    showToast('Remplis au moins une face sur chaque dé d\'abord');
+    return;
+  }
+  const f1 = d1[Math.floor(Math.random() * d1.length)];
+  const f2 = d2[Math.floor(Math.random() * d2.length)];
+  lastDiceResult = `${f1} — ${f2}`;
+  const resultEl = document.getElementById('dice-result');
+  resultEl.textContent = '🎲 ' + lastDiceResult;
+  resultEl.style.display = 'block';
+  document.getElementById('dice-to-defi-btn').style.display = 'block';
+});
+
+document.getElementById('dice-to-defi-btn').addEventListener('click', () => {
+  if(!lastDiceResult) return;
+  goToTab('defis');
+  document.getElementById('defi-form-wrap').style.display = 'block';
+  document.getElementById('toggle-defi-form').textContent = '– Masquer le formulaire';
+  document.getElementById('new-defi-name').value = lastDiceResult;
+  document.getElementById('new-defi-name').focus();
+  showToast('Choisis pour qui et ajuste avant d\'envoyer ✨');
+});
+
+document.getElementById('toggle-dice-form').addEventListener('click', () => {
+  const wrap = document.getElementById('dice-form-wrap');
+  const btn = document.getElementById('toggle-dice-form');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '– Masquer' : 'Modifier les faces des dés';
+  if(show) renderDiceFaces();
+});
+
+document.getElementById('save-dice-btn').addEventListener('click', () => {
+  const d1 = [null,null,null,null,null,null];
+  const d2 = [null,null,null,null,null,null];
+  document.querySelectorAll('.dice-face-input').forEach(input => {
+    const idx = parseInt(input.dataset.idx, 10);
+    const val = input.value.trim();
+    if(input.dataset.die === '1') d1[idx] = val; else d2[idx] = val;
+  });
+  state.dice = { d1, d2 };
+  persist(); render();
+  showToast('Dés enregistrés 🎲');
+});
 
 function removeMysteryItem(id){
   state.mysteryBox = state.mysteryBox.filter(x => x.id !== id);
