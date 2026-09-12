@@ -186,6 +186,12 @@
     display:flex; align-items:center; justify-content:space-between; gap:8px;
     padding:8px 0; border-bottom:0.5px solid var(--line); font-size:13px;
   }
+  .secret-item{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+    padding:10px 0; border-bottom:0.5px solid var(--line); font-size:13.5px;
+  }
+  .secret-item .stxt{ flex:1; line-height:1.4; }
+  .secret-item .sbtns{ display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
   .empty{ text-align:center; color: var(--muted); font-size:13px; padding: 30px 10px; }
 
   .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -373,6 +379,7 @@
   <nav>
     <button class="tab-btn" data-tab="defis">Défis</button>
     <button class="tab-btn" data-tab="boutique">Boutique</button>
+    <button class="tab-btn" data-tab="achats">Achats</button>
     <button class="tab-btn" data-tab="secret">Fantasmes</button>
     <button class="tab-btn active" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
@@ -388,6 +395,7 @@
     <div id="role-current" style="display:none; text-align:center; font-size:11px; color:var(--muted); margin-bottom:12px;">
       Tu es connecté·e en tant que <b id="role-current-name"></b> — <span id="change-role-btn" style="color:var(--rose); text-decoration:underline; cursor:pointer;">changer</span>
     </div>
+    <div id="negotiation-list"></div>
     <button class="btn btn-ghost" id="toggle-defi-form" style="width:100%; margin-bottom:14px;">+ Proposer un défi</button>
     <div class="add-form" id="defi-form-wrap" style="display:none;">
       <div class="row">
@@ -440,25 +448,35 @@
     </div>
   </section>
 
+  <section id="tab-achats">
+    <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">À faire pour ton/ta complice</h3>
+    <div class="sub" style="margin-bottom:12px;">Acheté avec ses points — impossible de refuser, sous peine de perdre 50 pts si l'échéance passe.</div>
+    <div id="purchases-owed-list"></div>
+
+    <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:20px 0 4px;">Tes achats en cours</h3>
+    <div class="sub" style="margin-bottom:12px;">Valide une fois que c'est bien fait.</div>
+    <div id="purchases-bought-list"></div>
+  </section>
+
   <section id="tab-secret">
     <div class="secret-box">
       <h3>Mes fantasmes 🔒</h3>
-      <div class="sub">Écris-les ici — ils restent invisibles pour ton ou ta complice, pour toujours. Iel saura seulement qu'un fantasme t'attend... à lui/elle de venir le découvrir.</div>
+      <div class="sub">Écris-les ici, un par un — ils restent invisibles pour ton ou ta complice, pour toujours. Iel saura seulement qu'au moins un fantasme t'attend... à lui/elle de venir le découvrir.</div>
 
       <div id="secret-locked-view" style="display:none; text-align:center; padding:18px 10px; background:var(--bg-2); border-radius:12px; margin-bottom:14px;">
         <div style="font-size:28px; margin-bottom:6px;">🔒</div>
-        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Ton fantasme est enregistré et caché, même à l'écran.</div>
-        <button class="btn btn-ghost" id="reveal-secret-btn" style="width:100%;">👁️ Afficher / Modifier</button>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;" id="secret-locked-count">Tes fantasmes sont enregistrés et cachés, même à l'écran.</div>
+        <button class="btn btn-ghost" id="reveal-secret-btn" style="width:100%;">👁️ Afficher / Gérer</button>
       </div>
 
       <div id="secret-edit-view">
-        <textarea id="secret-text" placeholder="Ce que tu gardes pour toi, pour l'instant..." maxlength="500"></textarea>
-        <button class="btn btn-gold" id="secret-save-btn" style="width:100%;">Enregistrer en privé</button>
-        <div class="secret-status" id="secret-status"></div>
+        <div id="secret-items-list"></div>
+        <div class="row">
+          <input type="text" id="new-secret-text" placeholder="Écris un nouveau fantasme..." maxlength="300">
+        </div>
+        <button class="btn btn-gold" id="add-secret-btn" style="width:100%; margin-bottom:8px;">+ Ajouter en privé</button>
+        <button class="btn btn-ghost" id="hide-secret-btn" style="width:100%;">🔒 Masquer à nouveau</button>
       </div>
-
-      <button class="btn btn-rose" id="secret-to-defi-btn" style="width:100%; margin-top:10px;">✨ Transformer en défi pour mon/ma partenaire</button>
-      <div class="sub" style="margin:8px 0 0;">Ce bouton ne partage rien automatiquement : il ouvre le formulaire de défi pré-rempli avec ton texte, et c'est toi qui choisis ce que tu envoies réellement.</div>
     </div>
     <div class="secret-teaser" id="secret-teaser" style="display:none;">
       <div class="icon">💌</div>
@@ -626,6 +644,7 @@ const defaultState = () => ({
   dailyChallenge: { date: '' },
   calendarNotes: [],
   goal: { target: 500 },
+  purchases: [],
   history: [],
   newDefiAssign: 'a',
 });
@@ -694,6 +713,7 @@ function normalizeState(s){
   if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
   if(!s.calendarNotes) s.calendarNotes = [];
   if(!s.goal) s.goal = { target: 500 };
+  if(!s.purchases) s.purchases = [];
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -708,6 +728,7 @@ async function loadState(){
     showToast("Connexion à Firebase impossible, mode local");
   }
   checkExpiredDefis();
+  checkExpiredPurchases();
   ensureDailyChallenge();
   document.getElementById('new-defi-deadline').value = daysFromNow(3);
   render();
@@ -782,6 +803,8 @@ function render(){
   document.getElementById('score-b').textContent = state.scores.b;
 
   renderRolePicker();
+  renderNegotiations();
+  renderPurchases();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -931,11 +954,15 @@ function renderDefis(){
       deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
     }
     const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Défi mystère — ' : '');
+    const negoHtml = d.negotiation
+      ? `<div class="defi-deadline" style="color:var(--gold-soft);">🤝 Ta contre-offre de ${d.negotiation.pts} pts est en attente de réponse</div>`
+      : '';
     card.innerHTML = `
       <div class="info">
         <div class="t">${badge}${escapeHtml(d.text)}</div>
         <div class="m">Défi pour ${escapeHtml(state.names[d.for])}</div>
         ${deadlineHtml}
+        ${negoHtml}
       </div>
       <div class="pts">+${d.pts}</div>
     `;
@@ -962,6 +989,14 @@ function renderDefis(){
       refuseBtn.textContent = '❌ Refusé';
       refuseBtn.onclick = () => refuseDefi(d.id);
       btnWrap.appendChild(refuseBtn);
+
+      if(!d.negotiation){
+        const negoBtn = document.createElement('button');
+        negoBtn.className = 'btn btn-ghost';
+        negoBtn.textContent = '🤝 Négocier';
+        negoBtn.onclick = () => proposeNegotiation(d.id);
+        btnWrap.appendChild(negoBtn);
+      }
     }
 
     if(d.status !== 'accepted'){
@@ -1025,6 +1060,67 @@ function refuseDefi(id){
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
   showToast('Défi refusé — points transférés à ' + state.names[other]);
+}
+
+function proposeNegotiation(id){
+  const d = state.defis.find(x => x.id === id);
+  if(!d) return;
+  const input = prompt('Proposer un autre nombre de points pour ce défi (actuellement ' + d.pts + ') :', d.pts);
+  if(input === null) return;
+  const val = parseInt(input, 10);
+  if(!val || val <= 0){
+    showToast('Entre un nombre valide');
+    return;
+  }
+  d.negotiation = { pts: val, by: myRole };
+  persist(); render();
+  showToast('Contre-offre envoyée, en attente de réponse 🤝');
+}
+
+function renderNegotiations(){
+  const wrap = document.getElementById('negotiation-list');
+  if(!wrap || !myRole) { if(wrap) wrap.innerHTML = ''; return; }
+  const pending = state.defis.filter(d => d.negotiation && d.negotiation.by !== myRole);
+  wrap.innerHTML = '';
+  pending.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="info">
+        <div class="t">🤝 Contre-offre reçue</div>
+        <div class="m">${escapeHtml(state.names[d.negotiation.by])} propose ${d.negotiation.pts} pts au lieu de ${d.pts} pts pour un défi</div>
+      </div>
+    `;
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.flexDirection = 'column';
+    btnWrap.style.gap = '4px';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-gold';
+    okBtn.textContent = 'Accepter';
+    okBtn.onclick = () => resolveNegotiation(d.id, true);
+    const noBtn = document.createElement('button');
+    noBtn.className = 'btn btn-rose';
+    noBtn.textContent = 'Refuser';
+    noBtn.onclick = () => resolveNegotiation(d.id, false);
+    btnWrap.appendChild(okBtn);
+    btnWrap.appendChild(noBtn);
+    card.appendChild(btnWrap);
+    wrap.appendChild(card);
+  });
+}
+
+function resolveNegotiation(id, accept){
+  const d = state.defis.find(x => x.id === id);
+  if(!d || !d.negotiation) return;
+  if(accept){
+    d.pts = d.negotiation.pts;
+    showToast('Contre-offre acceptée : ' + d.pts + ' pts');
+  } else {
+    showToast('Contre-offre refusée, points inchangés');
+  }
+  d.negotiation = null;
+  persist(); render();
 }
 
 function completeDefi(id){
@@ -1194,10 +1290,132 @@ function redeemReward(id, who){
     showToast('Pas assez de points pour ' + state.names[who]);
     return;
   }
+  const owedBy = who === 'a' ? 'b' : 'a';
+  const hoursInput = prompt('Dans combien d\'heures ' + state.names[owedBy] + ' doit le faire ? (ex : 24)', '24');
+  if(hoursInput === null) return;
+  const hours = parseFloat(hoursInput);
+  if(!hours || hours <= 0){
+    showToast('Entre un nombre d\'heures valide');
+    return;
+  }
   state.scores[who] -= r.pts;
   addHistory({ type:'reward', who, label: r.text, pts: -r.pts });
+  const purchase = {
+    id: cryptoId(),
+    text: r.text,
+    boughtBy: who,
+    owedBy,
+    deadline: Date.now() + hours * 3600000,
+    status: 'pending'
+  };
+  state.purchases.push(purchase);
   persist(); render();
   showToast(state.names[who] + ' échange ' + r.pts + ' points');
+}
+
+function renderPurchases(){
+  const owedList = document.getElementById('purchases-owed-list');
+  const boughtList = document.getElementById('purchases-bought-list');
+  if(!owedList || !boughtList || !myRole) return;
+
+  const owed = state.purchases.filter(p => p.owedBy === myRole);
+  owedList.innerHTML = '';
+  if(owed.length === 0){
+    owedList.innerHTML = '<div class="empty">Rien à faire pour l\'instant.</div>';
+  } else {
+    owed.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const remaining = p.deadline - Date.now();
+      const soonClass = remaining < 3 * 3600000 ? ' soon' : '';
+      const statusTxt = p.status === 'done'
+        ? '<div class="defi-deadline" style="color:var(--gold-soft);">En attente de validation par ' + escapeHtml(state.names[p.boughtBy]) + '</div>'
+        : `<div class="defi-deadline${soonClass}">⏳ ${formatCountdown(remaining)}</div>`;
+      card.innerHTML = `
+        <div class="info">
+          <div class="t">${escapeHtml(p.text)}</div>
+          <div class="m">Acheté par ${escapeHtml(state.names[p.boughtBy])}</div>
+          ${statusTxt}
+        </div>
+      `;
+      if(p.status === 'pending'){
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'btn btn-gold';
+        doneBtn.textContent = '✅ Fait';
+        doneBtn.onclick = () => markPurchaseDone(p.id);
+        card.appendChild(doneBtn);
+      }
+      owedList.appendChild(card);
+    });
+  }
+
+  const bought = state.purchases.filter(p => p.boughtBy === myRole);
+  boughtList.innerHTML = '';
+  if(bought.length === 0){
+    boughtList.innerHTML = '<div class="empty">Aucun achat en cours.</div>';
+  } else {
+    bought.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const remaining = p.deadline - Date.now();
+      const statusTxt = p.status === 'done'
+        ? '<div class="defi-deadline" style="color:var(--gold-soft);">Marqué comme fait — à toi de valider</div>'
+        : `<div class="defi-deadline">⏳ ${formatCountdown(remaining)} pour ${escapeHtml(state.names[p.owedBy])}</div>`;
+      card.innerHTML = `
+        <div class="info">
+          <div class="t">${escapeHtml(p.text)}</div>
+          <div class="m">Dû par ${escapeHtml(state.names[p.owedBy])}</div>
+          ${statusTxt}
+        </div>
+      `;
+      if(p.status === 'done'){
+        const validateBtn = document.createElement('button');
+        validateBtn.className = 'btn btn-gold';
+        validateBtn.textContent = '✅ Valider';
+        validateBtn.onclick = () => validatePurchase(p.id);
+        card.appendChild(validateBtn);
+      }
+      boughtList.appendChild(card);
+    });
+  }
+}
+
+function markPurchaseDone(id){
+  const p = state.purchases.find(x => x.id === id);
+  if(!p) return;
+  p.status = 'done';
+  persist(); render();
+  showToast('Marqué comme fait — en attente de validation');
+}
+
+function validatePurchase(id){
+  const p = state.purchases.find(x => x.id === id);
+  if(!p) return;
+  addHistory({ type:'purchase', who: p.owedBy, label: p.text + ' (validé)', pts: 0, status:'completed' });
+  state.purchases = state.purchases.filter(x => x.id !== id);
+  persist(); render();
+  showToast('Achat validé ✅');
+}
+
+function checkExpiredPurchases(){
+  const now = Date.now();
+  let changed = false;
+  const remaining = [];
+  state.purchases.forEach(p => {
+    if(p.status === 'pending' && p.deadline < now){
+      state.scores[p.owedBy] -= 50;
+      state.scores[p.boughtBy] += 50;
+      addHistory({ type:'purchase', who: p.boughtBy, label: p.text + ' (non fait à temps, pénalité)', pts: 50, status:'expired', missedBy: p.owedBy });
+      changed = true;
+    } else {
+      remaining.push(p);
+    }
+  });
+  if(changed){
+    state.purchases = remaining;
+    persist();
+    showToast('Un achat non honoré a coûté 50 pts ⏱️');
+  }
 }
 
 function renderHistory(){
@@ -1577,22 +1795,71 @@ function showSecretEditor(){
   document.getElementById('secret-edit-view').style.display = 'block';
 }
 
+let mySecretItems = [];
+
+function renderSecretItems(){
+  const list = document.getElementById('secret-items-list');
+  list.innerHTML = '';
+  if(mySecretItems.length === 0){
+    list.innerHTML = '<div class="empty">Aucun fantasme noté pour l\'instant.</div>';
+    return;
+  }
+  mySecretItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'secret-item';
+    const txt = document.createElement('div');
+    txt.className = 'stxt';
+    txt.textContent = item.text;
+    const btns = document.createElement('div');
+    btns.className = 'sbtns';
+    const toDefiBtn = document.createElement('button');
+    toDefiBtn.className = 'btn btn-rose';
+    toDefiBtn.textContent = '✨ Défi';
+    toDefiBtn.onclick = () => sendSecretToDefiForm(item.text);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => removeSecretItem(item.id);
+    btns.appendChild(toDefiBtn);
+    btns.appendChild(delBtn);
+    row.appendChild(txt);
+    row.appendChild(btns);
+    list.appendChild(row);
+  });
+}
+
+async function saveSecretItems(){
+  const key = sanitizeKey(auth.currentUser.email);
+  try{
+    await setDoc(doc(db, 'secrets', key), { items: mySecretItems, updatedAt: serverTimestamp() });
+    await setDoc(doc(db, 'secretFlags', key), { hasSecret: mySecretItems.length > 0, updatedAt: serverTimestamp() });
+  }catch(e){
+    console.error(e);
+    showToast("Impossible d'enregistrer");
+  }
+}
+
+function updateSecretLockedCount(){
+  const el = document.getElementById('secret-locked-count');
+  const n = mySecretItems.length;
+  el.textContent = n > 0
+    ? `${n} fantasme${n > 1 ? 's' : ''} enregistré${n > 1 ? 's' : ''} et caché${n > 1 ? 's' : ''}, même à l'écran.`
+    : 'Tes fantasmes sont enregistrés et cachés, même à l\'écran.';
+}
+
 async function loadOwnSecret(){
   try{
     const key = sanitizeKey(auth.currentUser.email);
     const snap = await getDoc(doc(db, 'secrets', key));
-    if(snap.exists()){
-      const text = snap.data().text || '';
-      document.getElementById('secret-text').value = text;
-      const ts = snap.data().updatedAt;
-      if(ts && ts.toDate){
-        document.getElementById('secret-status').textContent = 'Enregistré le ' + fmtDate(ts.toDate().getTime());
-      }
-      if(text.length > 0){
-        showSecretLocked();
-      } else {
-        showSecretEditor();
-      }
+    if(snap.exists() && Array.isArray(snap.data().items)){
+      mySecretItems = snap.data().items;
+    } else {
+      mySecretItems = [];
+    }
+    renderSecretItems();
+    updateSecretLockedCount();
+    if(mySecretItems.length > 0){
+      showSecretLocked();
     } else {
       showSecretEditor();
     }
@@ -1602,31 +1869,32 @@ async function loadOwnSecret(){
 }
 
 document.getElementById('reveal-secret-btn').addEventListener('click', showSecretEditor);
-
-document.getElementById('secret-save-btn').addEventListener('click', async () => {
-  const textarea = document.getElementById('secret-text');
-  const text = textarea.value.trim();
-  const key = sanitizeKey(auth.currentUser.email);
-  try{
-    await setDoc(doc(db, 'secrets', key), { text, updatedAt: serverTimestamp() });
-    await setDoc(doc(db, 'secretFlags', key), { hasSecret: text.length > 0, updatedAt: serverTimestamp() });
-    document.getElementById('secret-status').textContent = 'Enregistré à l\'instant, rien qu\'à toi 🔒';
-    showToast(text.length > 0 ? 'Ton fantasme est en sécurité' : 'Fantasme effacé');
-    if(text.length > 0){
-      showSecretLocked();
-    }
-  }catch(e){
-    console.error(e);
-    showToast("Impossible d'enregistrer");
-  }
+document.getElementById('hide-secret-btn').addEventListener('click', () => {
+  if(mySecretItems.length > 0) showSecretLocked();
 });
 
-document.getElementById('secret-to-defi-btn').addEventListener('click', () => {
-  const text = document.getElementById('secret-text').value.trim();
-  if(!text){
-    showToast('Écris ton fantasme avant de le transformer en défi');
-    return;
-  }
+document.getElementById('add-secret-btn').addEventListener('click', async () => {
+  const input = document.getElementById('new-secret-text');
+  const text = input.value.trim();
+  if(!text) return;
+  mySecretItems.push({ id: cryptoId(), text, ts: Date.now() });
+  input.value = '';
+  renderSecretItems();
+  updateSecretLockedCount();
+  await saveSecretItems();
+  showToast('Fantasme ajouté en privé 🔒');
+});
+
+async function removeSecretItem(id){
+  if(!confirm('Supprimer ce fantasme ?')) return;
+  mySecretItems = mySecretItems.filter(i => i.id !== id);
+  renderSecretItems();
+  updateSecretLockedCount();
+  await saveSecretItems();
+  showToast('Fantasme supprimé');
+}
+
+function sendSecretToDefiForm(text){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.querySelector('.tab-btn[data-tab="defis"]').classList.add('active');
@@ -1636,7 +1904,7 @@ document.getElementById('secret-to-defi-btn').addEventListener('click', () => {
   document.getElementById('new-defi-name').value = text;
   document.getElementById('new-defi-name').focus();
   showToast('Choisis pour qui et ajuste avant d\'envoyer ✨');
-});
+}
 
 function startSecretFlagListener(){
   const teaser = document.getElementById('secret-teaser');
@@ -1883,8 +2151,13 @@ async function pollForNewDefis(){
     const fresh = normalizeState(snap.data());
     const previousIds = new Set((state.defis || []).map(d => d.id));
     const newForMe = fresh.defis.filter(d => d.for === myRole && !previousIds.has(d.id));
+    const previousPurchaseIds = new Set((state.purchases || []).map(p => p.id));
+    const previousDonePurchaseIds = new Set((state.purchases || []).filter(p => p.status === 'done').map(p => p.id));
+    const newPurchasesForMe = fresh.purchases.filter(p => p.owedBy === myRole && !previousPurchaseIds.has(p.id));
+    const newlyDoneForMe = fresh.purchases.filter(p => p.boughtBy === myRole && p.status === 'done' && !previousDonePurchaseIds.has(p.id));
     state = fresh;
     checkExpiredDefis();
+    checkExpiredPurchases();
     ensureDailyChallenge();
     newForMe.forEach(d => {
       showToast('✨ Nouveau défi pour toi : ' + d.text);
@@ -1892,6 +2165,26 @@ async function pollForNewDefis(){
         navigator.serviceWorker.ready.then(reg => {
           reg.showNotification('Complices ✨', {
             body: d.text, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-defi-' + d.id
+          });
+        }).catch(()=>{});
+      }
+    });
+    newPurchasesForMe.forEach(p => {
+      showToast('🛍️ ' + state.names[p.boughtBy] + ' a acheté : ' + p.text);
+      if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('Complices 🛍️', {
+            body: state.names[p.boughtBy] + ' attend : ' + p.text, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-purchase-' + p.id
+          });
+        }).catch(()=>{});
+      }
+    });
+    newlyDoneForMe.forEach(p => {
+      showToast('✅ ' + state.names[p.owedBy] + ' dit avoir fait : ' + p.text + ' — à valider');
+      if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('Complices ✅', {
+            body: 'À valider : ' + p.text, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-validate-' + p.id
           });
         }).catch(()=>{});
       }
@@ -1905,9 +2198,11 @@ async function pollForNewDefis(){
 setInterval(() => {
   if(state && auth.currentUser){
     checkExpiredDefis();
+    checkExpiredPurchases();
     checkReminders();
     pollForNewDefis();
     renderDefis();
+    renderPurchases();
   }
 }, 30000);
 
