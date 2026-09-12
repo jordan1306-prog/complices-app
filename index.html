@@ -1072,7 +1072,7 @@ function proposeNegotiation(id){
     showToast('Entre un nombre valide');
     return;
   }
-  d.negotiation = { pts: val, by: myRole };
+  d.negotiation = { pts: val, by: myRole, ts: Date.now() };
   persist(); render();
   showToast('Contre-offre envoyée, en attente de réponse 🤝');
 }
@@ -1291,11 +1291,23 @@ function redeemReward(id, who){
     return;
   }
   const owedBy = who === 'a' ? 'b' : 'a';
-  const hoursInput = prompt('Dans combien d\'heures ' + state.names[owedBy] + ' doit le faire ? (ex : 24)', '24');
+  const hoursInput = prompt('Dans combien d\'HEURES ' + state.names[owedBy] + ' doit le faire ? (ex : 1, ou 0 si juste des minutes)', '1');
   if(hoursInput === null) return;
   const hours = parseFloat(hoursInput);
-  if(!hours || hours <= 0){
+  if(isNaN(hours) || hours < 0){
     showToast('Entre un nombre d\'heures valide');
+    return;
+  }
+  const minutesInput = prompt('Et combien de MINUTES en plus ? (ex : 30, ou 0)', '0');
+  if(minutesInput === null) return;
+  const minutes = parseFloat(minutesInput);
+  if(isNaN(minutes) || minutes < 0){
+    showToast('Entre un nombre de minutes valide');
+    return;
+  }
+  const totalMs = hours * 3600000 + minutes * 60000;
+  if(totalMs <= 0){
+    showToast('La durée doit être supérieure à 0');
     return;
   }
   state.scores[who] -= r.pts;
@@ -1305,7 +1317,7 @@ function redeemReward(id, who){
     text: r.text,
     boughtBy: who,
     owedBy,
-    deadline: Date.now() + hours * 3600000,
+    deadline: Date.now() + totalMs,
     status: 'pending'
   };
   state.purchases.push(purchase);
@@ -1374,10 +1386,28 @@ function renderPurchases(){
         validateBtn.textContent = '✅ Valider';
         validateBtn.onclick = () => validatePurchase(p.id);
         card.appendChild(validateBtn);
+      } else {
+        const refuseBtn = document.createElement('button');
+        refuseBtn.className = 'btn btn-danger';
+        refuseBtn.textContent = '❌ Signaler un refus';
+        refuseBtn.onclick = () => reportPurchaseRefusal(p.id);
+        card.appendChild(refuseBtn);
       }
       boughtList.appendChild(card);
     });
   }
+}
+
+function reportPurchaseRefusal(id){
+  const p = state.purchases.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(state.names[p.owedBy] + ' refuse vraiment de le faire ? 50 points seront transférés vers toi.')) return;
+  state.scores[p.owedBy] -= 50;
+  state.scores[p.boughtBy] += 50;
+  addHistory({ type:'purchase', who: p.boughtBy, label: p.text + ' (refus signalé)', pts: 50, status:'expired', missedBy: p.owedBy });
+  state.purchases = state.purchases.filter(x => x.id !== p.id);
+  persist(); render();
+  showToast('Refus signalé — 50 pts transférés vers toi');
 }
 
 function markPurchaseDone(id){
@@ -2155,6 +2185,8 @@ async function pollForNewDefis(){
     const previousDonePurchaseIds = new Set((state.purchases || []).filter(p => p.status === 'done').map(p => p.id));
     const newPurchasesForMe = fresh.purchases.filter(p => p.owedBy === myRole && !previousPurchaseIds.has(p.id));
     const newlyDoneForMe = fresh.purchases.filter(p => p.boughtBy === myRole && p.status === 'done' && !previousDonePurchaseIds.has(p.id));
+    const previousNegoKeys = new Set((state.defis || []).filter(d => d.negotiation).map(d => d.id + '_' + d.negotiation.ts));
+    const newNegoForMe = fresh.defis.filter(d => d.negotiation && d.negotiation.by !== myRole && !previousNegoKeys.has(d.id + '_' + d.negotiation.ts));
     state = fresh;
     checkExpiredDefis();
     checkExpiredPurchases();
@@ -2185,6 +2217,16 @@ async function pollForNewDefis(){
         navigator.serviceWorker.ready.then(reg => {
           reg.showNotification('Complices ✅', {
             body: 'À valider : ' + p.text, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-validate-' + p.id
+          });
+        }).catch(()=>{});
+      }
+    });
+    newNegoForMe.forEach(d => {
+      showToast('🤝 ' + state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts pour un défi');
+      if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('Complices 🤝', {
+            body: state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts au lieu de ' + d.pts, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-nego-' + d.id
           });
         }).catch(()=>{});
       }
