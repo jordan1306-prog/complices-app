@@ -364,9 +364,10 @@
 <div id="notif-panel" style="display:none;">
   <div class="login-card" style="max-width:380px; max-height:80vh; overflow-y:auto;">
     <h1 style="font-size:24px;">🔔 Notifications</h1>
-    <p style="margin-bottom:16px;">Tout ce qui attend une action de ta part</p>
+    <p style="margin-bottom:16px;">Tout ce qui a un délai en cours</p>
     <div id="notif-list" style="text-align:left;"></div>
-    <button class="btn btn-ghost" id="close-notif-btn" style="width:100%; margin-top:14px;">Fermer</button>
+    <button class="btn btn-gold" id="notif-send-defi-btn" style="width:100%; margin-top:14px;">✉️ Envoyer un défi</button>
+    <button class="btn btn-ghost" id="close-notif-btn" style="width:100%; margin-top:8px;">Fermer</button>
   </div>
 </div>
 
@@ -1795,6 +1796,13 @@ document.getElementById('notif-btn').addEventListener('click', () => {
 document.getElementById('close-notif-btn').addEventListener('click', () => {
   document.getElementById('notif-panel').style.display = 'none';
 });
+document.getElementById('notif-send-defi-btn').addEventListener('click', () => {
+  document.getElementById('notif-panel').style.display = 'none';
+  goToTab('defis');
+  document.getElementById('defi-form-wrap').style.display = 'block';
+  document.getElementById('toggle-defi-form').textContent = '– Masquer le formulaire';
+  document.getElementById('new-defi-name').focus();
+});
 
 function goToTab(tabName){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1808,26 +1816,27 @@ function goToTab(tabName){
 function getNotificationItems(){
   if(!state || !myRole) return [];
   const items = [];
+  const now = Date.now();
   state.defis.forEach(d => {
-    if(d.for === myRole && d.status !== 'accepted'){
-      items.push({ text: '🆕 Défi en attente de ta réponse : ' + d.text, tab: 'defis' });
+    if(d.for === myRole && d.status !== 'accepted' && d.deadline){
+      const remaining = new Date(d.deadline + 'T23:59:59') - now;
+      if(remaining > 0){
+        items.push({ text: '🆕 À accepter avant le ' + new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ' : ' + d.text, tab: 'defis' });
+      }
     }
     if(d.for === myRole && d.status === 'accepted' && d.acceptDeadline){
-      const remaining = d.acceptDeadline - Date.now();
-      if(remaining > 0 && remaining < 2 * 3600000){
+      const remaining = d.acceptDeadline - now;
+      if(remaining > 0){
         items.push({ text: '⏰ Plus que ' + formatCountdown(remaining) + ' pour : ' + d.text, tab: 'defis' });
       }
     }
-    if(d.negotiation && d.negotiation.by !== myRole){
-      items.push({ text: '🤝 ' + state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts pour un défi', tab: 'defis' });
-    }
   });
   state.purchases.forEach(p => {
-    if(p.owedBy === myRole && p.status === 'pending'){
-      items.push({ text: '🛍️ À faire pour ' + state.names[p.boughtBy] + ' : ' + p.text, tab: 'achats' });
-    }
-    if(p.boughtBy === myRole && p.status === 'done'){
-      items.push({ text: '✅ À valider : ' + p.text, tab: 'achats' });
+    if(p.owedBy === myRole && p.status === 'pending' && p.deadline){
+      const remaining = p.deadline - now;
+      if(remaining > 0){
+        items.push({ text: '🛍️ Plus que ' + formatCountdown(remaining) + ' pour : ' + p.text + ' (achat de ' + state.names[p.boughtBy] + ')', tab: 'achats' });
+      }
     }
   });
   return items;
