@@ -18,9 +18,9 @@
 <style>
   :root{
     --bg: #2b1216;
-    --bg-2: rgba(56,21,27,0.55);
-    --card: rgba(66,26,34,0.62);
-    --card-2: rgba(76,32,41,0.62);
+    --bg-2: rgba(56,21,27,0.4);
+    --card: rgba(66,26,34,0.42);
+    --card-2: rgba(76,32,41,0.42);
     --gold: #c9333f;
     --gold-soft: #ea8890;
     --rose: #e0697c;
@@ -316,7 +316,7 @@
     <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
     <div class="err" id="login-err">Identifiants invalides.</div>
     <button class="btn btn-gold" id="login-btn">Se connecter</button>
-    <button class="btn btn-ghost" id="signup-btn">Créer un compte</button>
+    <button class="btn btn-ghost" id="signup-btn" style="display:none;">Créer un compte</button>
   </div>
 </div>
 
@@ -356,6 +356,19 @@
     </div>
   </div>
   <div style="text-align:center; font-size:10.5px; color:var(--muted); margin:-12px 0 14px;">✎ touchez un prénom pour le modifier</div>
+
+  <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin-bottom:12px;"></div>
+
+  <div class="secret-box" style="padding:14px 16px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); margin-bottom:6px;">
+      <span>🎯 Objectif commun — <span id="goal-target-display">500</span> pts</span>
+      <span id="change-goal-btn" style="color:var(--rose); text-decoration:underline; cursor:pointer;">changer</span>
+    </div>
+    <div style="background:var(--bg-2); border-radius:20px; height:14px; overflow:hidden;">
+      <div id="goal-bar" style="height:100%; background:linear-gradient(90deg, var(--gold), var(--rose)); width:0%; transition:width 0.4s;"></div>
+    </div>
+    <div style="text-align:center; font-size:11px; color:var(--muted); margin-top:4px;" id="goal-text"></div>
+  </div>
 
   <nav>
     <button class="tab-btn" data-tab="defis">Défis</button>
@@ -463,6 +476,7 @@
       <button id="cal-next">›</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
+    <div id="cal-recap" style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:16px;"></div>
 
     <button class="btn btn-ghost" id="toggle-note-form" style="width:100%; margin-bottom:12px;">+ Ajouter une note</button>
     <div class="add-form" id="note-form-wrap" style="display:none;">
@@ -477,6 +491,7 @@
   </section>
 
   <section id="tab-historique">
+    <button class="btn btn-ghost" id="export-history-btn" style="width:100%; margin-bottom:14px;">⬇️ Exporter l'historique</button>
     <div id="history-list"></div>
   </section>
 </div>
@@ -600,6 +615,7 @@ const defaultState = () => ({
   dailyTurn: 'a',
   dailyChallenge: { date: '' },
   calendarNotes: [],
+  goal: { target: 500 },
   history: [],
   newDefiAssign: 'a',
 });
@@ -667,6 +683,8 @@ function normalizeState(s){
   if(!s.dailyTurn) s.dailyTurn = 'a';
   if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
   if(!s.calendarNotes) s.calendarNotes = [];
+  if(!s.goal) s.goal = { target: 500 };
+  s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
 
@@ -724,6 +742,29 @@ function undoHistoryEntry(id){
   showToast('Correction effectuée');
 }
 
+document.getElementById('export-history-btn').addEventListener('click', () => {
+  if(!state || !state.history || state.history.length === 0){
+    showToast('Rien à exporter pour le moment');
+    return;
+  }
+  const lines = ['Historique Complices', '====================', ''];
+  [...state.history].sort((a,b) => a.ts - b.ts).forEach(h => {
+    const d = new Date(h.ts).toLocaleString('fr-FR');
+    const nom = state.names[h.who] || h.who;
+    lines.push(`${d} — ${nom} — ${h.label} — ${h.pts > 0 ? '+' : ''}${h.pts} pts`);
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'complices-historique.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Export téléchargé');
+});
+
 function render(){
   document.getElementById('name-a').value = state.names.a;
   document.getElementById('name-b').value = state.names.b;
@@ -738,7 +779,62 @@ function render(){
   renderRewards();
   renderHistory();
   renderCalendar();
+  renderStreak();
+  renderGoal();
 }
+
+function computeStreak(){
+  const completedDays = new Set();
+  (state.history || []).forEach(h => {
+    if(h.type === 'defi' && h.status === 'completed'){
+      const d = new Date(h.ts);
+      completedDays.add(d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate());
+    }
+  });
+  let streak = 0;
+  let cursor = new Date();
+  if(!completedDays.has(cursor.getFullYear() + '-' + cursor.getMonth() + '-' + cursor.getDate())){
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while(completedDays.has(cursor.getFullYear() + '-' + cursor.getMonth() + '-' + cursor.getDate())){
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderStreak(){
+  const el = document.getElementById('streak-display');
+  if(!el) return;
+  const streak = computeStreak();
+  el.textContent = streak > 0 ? `🔥 ${streak} jour${streak > 1 ? 's' : ''} de suite` : '';
+}
+
+function renderGoal(){
+  const bar = document.getElementById('goal-bar');
+  const text = document.getElementById('goal-text');
+  const targetDisplay = document.getElementById('goal-target-display');
+  if(!bar || !text) return;
+  const target = (state.goal && state.goal.target) || 500;
+  const total = (state.scores.a || 0) + (state.scores.b || 0);
+  const pct = Math.min(100, Math.round((total / target) * 100));
+  bar.style.width = pct + '%';
+  text.textContent = total + ' / ' + target + ' points cumulés (' + pct + '%)';
+  targetDisplay.textContent = target;
+}
+
+document.getElementById('change-goal-btn').addEventListener('click', () => {
+  const current = (state.goal && state.goal.target) || 500;
+  const input = prompt('Nouvel objectif de points cumulés :', current);
+  if(input === null) return;
+  const val = parseInt(input, 10);
+  if(!val || val <= 0){
+    showToast('Entre un nombre valide');
+    return;
+  }
+  state.goal = { target: val };
+  persist(); renderGoal();
+});
 
 function renderAssignPicker(){
   const wrap = document.getElementById('new-defi-assign');
@@ -858,10 +954,20 @@ function renderDefis(){
       btnWrap.appendChild(refuseBtn);
     }
 
+    if(d.status !== 'accepted'){
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-ghost';
+      editBtn.textContent = '✎';
+      editBtn.title = 'Modifier';
+      editBtn.onclick = () => editDefi(d.id);
+      btnWrap.appendChild(editBtn);
+    }
+
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
     delBtn.textContent = '✕';
     delBtn.onclick = () => {
+      if(!confirm('Supprimer ce défi ?')) return;
       state.defis = state.defis.filter(x => x.id !== d.id);
       persist(); render();
     };
@@ -870,6 +976,24 @@ function renderDefis(){
     card.appendChild(btnWrap);
     list.appendChild(card);
   });
+}
+
+function editDefi(id){
+  const d = state.defis.find(x => x.id === id);
+  if(!d) return;
+  const newText = prompt('Modifier le texte du défi :', d.text);
+  if(newText === null) return;
+  const newPtsRaw = prompt('Modifier les points :', d.pts);
+  if(newPtsRaw === null) return;
+  const newPts = parseInt(newPtsRaw, 10);
+  if(!newText.trim() || !newPts || newPts <= 0){
+    showToast('Valeurs invalides, rien de changé');
+    return;
+  }
+  d.text = newText.trim();
+  d.pts = newPts;
+  persist(); render();
+  showToast('Défi modifié');
 }
 
 function acceptDefi(id){
@@ -1013,10 +1137,18 @@ function renderRewards(){
       buyBtn.onclick = () => redeemReward(r.id, k);
       btnWrap.appendChild(buyBtn);
     });
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-ghost';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Modifier';
+    editBtn.onclick = () => editReward(r.id);
+    btnWrap.appendChild(editBtn);
+
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
     delBtn.textContent = '✕';
     delBtn.onclick = () => {
+      if(!confirm('Supprimer cette récompense ?')) return;
       state.rewards = state.rewards.filter(x => x.id !== r.id);
       persist(); render();
     };
@@ -1025,6 +1157,24 @@ function renderRewards(){
     card.appendChild(btnWrap);
     list.appendChild(card);
   });
+}
+
+function editReward(id){
+  const r = state.rewards.find(x => x.id === id);
+  if(!r) return;
+  const newText = prompt('Modifier le nom de la récompense :', r.text);
+  if(newText === null) return;
+  const newPtsRaw = prompt('Modifier le coût en points :', r.pts);
+  if(newPtsRaw === null) return;
+  const newPts = parseInt(newPtsRaw, 10);
+  if(!newText.trim() || !newPts || newPts <= 0){
+    showToast('Valeurs invalides, rien de changé');
+    return;
+  }
+  r.text = newText.trim();
+  r.pts = newPts;
+  persist(); render();
+  showToast('Récompense modifiée');
 }
 
 function redeemReward(id, who){
@@ -1574,6 +1724,16 @@ function renderCalendar(){
     grid.appendChild(el);
   }
 
+  const recap = document.getElementById('cal-recap');
+  if(recap){
+    const monthDefiEvents = defiEvents.filter(h => { const d = new Date(h.ts); return d.getFullYear() === year && d.getMonth() === month; });
+    const completedCount = monthDefiEvents.filter(h => h.status === 'completed').length;
+    const expiredCount = monthDefiEvents.filter(h => h.status === 'expired').length;
+    const ptsByPerson = { a: 0, b: 0 };
+    monthDefiEvents.forEach(h => { if(h.status === 'completed') ptsByPerson[h.who] = (ptsByPerson[h.who] || 0) + h.pts; });
+    recap.innerHTML = `📊 Ce mois : ${completedCount} défi${completedCount !== 1 ? 's' : ''} relevé${completedCount !== 1 ? 's' : ''}, ${expiredCount} manqué${expiredCount !== 1 ? 's' : ''} — ${escapeHtml(state.names.a)} +${ptsByPerson.a || 0} pts, ${escapeHtml(state.names.b)} +${ptsByPerson.b || 0} pts`;
+  }
+
   list.innerHTML = '';
   const monthDefis = defiEvents
     .filter(h => { const d = new Date(h.ts); return d.getFullYear() === year && d.getMonth() === month; })
@@ -1649,9 +1809,63 @@ document.getElementById('add-note-btn').addEventListener('click', () => {
   textInput.value = '';
 });
 
+function checkReminders(){
+  let changed = false;
+  state.defis.forEach(d => {
+    if(d.status === 'accepted' && d.acceptDeadline && !d.reminded){
+      const remaining = d.acceptDeadline - Date.now();
+      if(remaining > 0 && remaining < 2 * 3600000){
+        d.reminded = true;
+        changed = true;
+        if(myRole === d.for){
+          showToast('⏰ Il te reste moins de 2h pour ce défi !');
+          if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification('Complices ⏰', {
+                body: 'Plus que 2h pour relever : ' + d.text,
+                icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-reminder-' + d.id
+              });
+            }).catch(()=>{});
+          }
+        }
+      }
+    }
+  });
+  if(changed) persist();
+}
+
+async function pollForNewDefis(){
+  if(!myRole) return;
+  try{
+    const snap = await getDoc(stateDocRef);
+    if(!snap.exists()) return;
+    const fresh = normalizeState(snap.data());
+    const previousIds = new Set((state.defis || []).map(d => d.id));
+    const newForMe = fresh.defis.filter(d => d.for === myRole && !previousIds.has(d.id));
+    state = fresh;
+    checkExpiredDefis();
+    ensureDailyChallenge();
+    newForMe.forEach(d => {
+      showToast('✨ Nouveau défi pour toi : ' + d.text);
+      if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('Complices ✨', {
+            body: d.text, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-defi-' + d.id
+          });
+        }).catch(()=>{});
+      }
+    });
+    render();
+  }catch(e){
+    console.error('poll défis:', e);
+  }
+}
+
 setInterval(() => {
   if(state && auth.currentUser){
     checkExpiredDefis();
+    checkReminders();
+    pollForNewDefis();
     renderDefis();
   }
 }, 30000);
