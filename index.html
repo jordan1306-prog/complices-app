@@ -34,7 +34,11 @@
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background: radial-gradient(ellipse at top, #4a1c22 0%, var(--bg) 60%);
+    background: linear-gradient(rgba(28,17,22,0.25), rgba(28,17,22,0.4)), url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: var(--bg);
     color: var(--cream);
     font-family: 'Manrope', sans-serif;
     min-height:100vh;
@@ -357,6 +361,8 @@
     <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
     <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
+    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
+    <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
   </div>
 </div>
@@ -704,6 +710,7 @@ const defaultState = () => ({
   goal: { target: 500 },
   purchases: [],
   dice: { d1: ['','','','','',''], d2: ['','','','','',''] },
+  scoresResetUsed: false,
   history: [],
   newDefiAssign: 'a',
 });
@@ -774,6 +781,7 @@ function normalizeState(s){
   if(!s.goal) s.goal = { target: 500 };
   if(!s.purchases) s.purchases = [];
   if(!s.dice) s.dice = { d1: ['','','','','',''], d2: ['','','','','',''] };
+  if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -1871,6 +1879,16 @@ applyStoredBackground();
 
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'flex';
+  const resetBtn = document.getElementById('reset-scores-btn');
+  if(state && state.scoresResetUsed){
+    resetBtn.disabled = true;
+    resetBtn.textContent = 'Déjà utilisé — indisponible';
+    resetBtn.style.opacity = '0.5';
+  } else {
+    resetBtn.disabled = false;
+    resetBtn.textContent = '⚠️ Remettre les points à 0';
+    resetBtn.style.opacity = '1';
+  }
 });
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
@@ -1981,6 +1999,21 @@ document.getElementById('reset-bg-btn').addEventListener('click', () => {
   localStorage.removeItem('complices-bg');
   applyStoredBackground();
   showToast('Fond réinitialisé');
+});
+
+document.getElementById('reset-scores-btn').addEventListener('click', () => {
+  if(state.scoresResetUsed){
+    showToast('Ce bouton a déjà été utilisé une fois, il n\'est plus disponible');
+    return;
+  }
+  if(!confirm('Remettre les points de ' + state.names.a + ' et ' + state.names.b + ' à 0 ? Cette action est irréversible et ne pourra être faite qu\'une seule fois.')) return;
+  if(!confirm('Vraiment sûr·e ? Les points actuels (' + state.scores.a + ' et ' + state.scores.b + ') seront définitivement perdus.')) return;
+  state.scores.a = 0;
+  state.scores.b = 0;
+  state.scoresResetUsed = true;
+  persist(); render();
+  showToast('Points remis à 0 ✅ (option maintenant désactivée)');
+  document.getElementById('settings-panel').style.display = 'none';
 });
 
 async function sendImageMessage(file){
