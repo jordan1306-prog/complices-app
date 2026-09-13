@@ -499,7 +499,8 @@
       <button class="btn btn-gold" id="add-reward-btn" style="margin-top:2px; width:100%;">Ajouter à la boutique</button>
     </div>
     <div id="rewards-list"></div>
-    <a href="https://fr.wikipedia.org/wiki/Kama-sutra" target="_blank" rel="noopener" class="btn btn-ghost" style="display:block; text-align:center; text-decoration:none; margin-top:16px;">📖 Guide des positions (lien externe)</a>
+    <a href="https://fr.wikipedia.org/wiki/Kama-sutra" target="_blank" rel="noopener" id="guide-link-btn" class="btn btn-ghost" style="display:block; text-align:center; text-decoration:none; margin-top:16px;">📖 Guide des positions (lien externe)</a>
+    <button class="btn btn-ghost" id="edit-guide-link-btn" style="width:100%; margin-top:8px; font-size:11px;">✎ Changer ce lien</button>
 
     <button class="btn btn-ghost" id="toggle-positions-list" style="width:100%; margin-top:8px;">💡 Idées de noms à chercher ensemble</button>
     <div class="secret-box" id="positions-list-wrap" style="display:none; margin-top:10px;">
@@ -711,6 +712,7 @@ const defaultState = () => ({
   purchases: [],
   dice: { d1: ['','','','','',''], d2: ['','','','','',''] },
   scoresResetUsed: false,
+  guideLink: 'https://fr.wikipedia.org/wiki/Kama-sutra',
   history: [],
   newDefiAssign: 'a',
 });
@@ -782,6 +784,7 @@ function normalizeState(s){
   if(!s.purchases) s.purchases = [];
   if(!s.dice) s.dice = { d1: ['','','','','',''], d2: ['','','','','',''] };
   if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
+  if(!s.guideLink) s.guideLink = 'https://fr.wikipedia.org/wiki/Kama-sutra';
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -874,6 +877,7 @@ function render(){
   renderNegotiations();
   renderPurchases();
   renderNotifications();
+  renderGuideLink();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -1350,6 +1354,25 @@ function removeCalendarNote(id){
   state.calendarNotes = state.calendarNotes.filter(n => n.id !== id);
   persist(); renderCalendar();
 }
+
+function renderGuideLink(){
+  const link = document.getElementById('guide-link-btn');
+  if(link && state.guideLink) link.href = state.guideLink;
+}
+
+document.getElementById('edit-guide-link-btn').addEventListener('click', () => {
+  const current = state.guideLink || '';
+  const input = prompt('Colle la nouvelle adresse (URL) du guide :', current);
+  if(input === null) return;
+  const url = input.trim();
+  if(!url.startsWith('http://') && !url.startsWith('https://')){
+    showToast('L\'adresse doit commencer par http:// ou https://');
+    return;
+  }
+  state.guideLink = url;
+  persist(); renderGuideLink();
+  showToast('Lien mis à jour ✅');
+});
 
 function renderRewards(){
   const list = document.getElementById('rewards-list');
