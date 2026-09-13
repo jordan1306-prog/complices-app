@@ -1,5 +1,5 @@
-const CACHE_NAME = 'complices-v30';
-const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE_NAME = 'complices-v32';
+const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './background.jpg'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
