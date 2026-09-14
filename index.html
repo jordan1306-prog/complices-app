@@ -79,6 +79,28 @@
     margin-bottom:10px;
   }
   .secret-status{ font-size:11px; color: var(--muted); margin-top:8px; text-align:right; }
+  .story-card{
+    display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:12px;
+    background:var(--card); border:0.5px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .story-card .emoji{ font-size:28px; flex-shrink:0; }
+  .story-cat{
+    display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+    background:rgba(201,51,63,0.25); color:var(--gold-soft); margin-bottom:4px;
+  }
+  .story-msg{
+    background:var(--card); border:0.5px solid var(--line); border-radius:16px;
+    padding:18px; margin-bottom:16px; font-size:15px; line-height:1.6; color:var(--cream);
+    box-shadow:var(--shadow); text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  }
+  .story-choice{
+    display:block; width:100%; text-align:left; margin-bottom:8px;
+    background:var(--bg-2); border:0.5px solid var(--line); border-radius:12px;
+    padding:11px 14px; color:var(--cream); font-family:'Manrope',sans-serif; font-size:13.5px;
+    cursor:pointer;
+  }
+  .story-choice:active{ transform:scale(0.98); }
   .secret-teaser{
     background: linear-gradient(160deg, rgba(224,105,124,0.14), rgba(201,162,77,0.08));
     border: 0.5px solid rgba(224,105,124,0.35);
@@ -435,6 +457,7 @@
     <button class="tab-btn" data-tab="defis">Défis</button>
     <button class="tab-btn" data-tab="boutique">Boutique</button>
     <button class="tab-btn" data-tab="achats">Achats</button>
+    <button class="tab-btn" data-tab="histoires">Histoires</button>
     <button class="tab-btn" data-tab="secret">Fantasmes</button>
     <button class="tab-btn active" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
@@ -538,6 +561,22 @@
     <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:20px 0 4px;">Tes achats en cours</h3>
     <div class="sub" style="margin-bottom:12px;">Valide une fois que c'est bien fait.</div>
     <div id="purchases-bought-list"></div>
+  </section>
+
+  <section id="tab-histoires">
+    <div id="story-library-view">
+      <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">📖 Bibliothèque d'histoires</h3>
+      <div class="sub" style="margin-bottom:14px;">Lancez une histoire à embranchements, à vivre à deux, message par message.</div>
+      <div id="story-list"></div>
+      <button class="btn btn-ghost" id="toggle-story-create" style="width:100%; margin-top:8px;">+ Créer votre propre histoire</button>
+      <div id="story-create-wrap" class="add-form" style="display:none; margin-top:12px;">
+        <input type="text" id="new-story-title" placeholder="Titre de l'histoire" style="width:100%; margin-bottom:8px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:9px 10px; color:var(--cream); font-size:13px;">
+        <div class="sub" style="margin-bottom:8px;">Étapes (une par ligne, elles alterneront automatiquement entre vous deux) :</div>
+        <textarea id="new-story-steps" placeholder="Étape 1...&#10;Étape 2...&#10;Étape 3..." style="min-height:110px;"></textarea>
+        <button class="btn btn-gold" id="save-story-btn" style="width:100%; margin-top:8px;">Enregistrer l'histoire</button>
+      </div>
+    </div>
+    <div id="story-play-view" style="display:none;"></div>
   </section>
 
   <section id="tab-secret">
@@ -733,6 +772,8 @@ const defaultState = () => ({
   scoresResetUsed: false,
   guideLink: 'https://fr.wikipedia.org/wiki/Kama-sutra',
   coupleStartDate: '',
+  story: null,
+  customScenarios: [],
   history: [],
   newDefiAssign: 'a',
 });
@@ -806,6 +847,8 @@ function normalizeState(s){
   if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
   if(!s.guideLink) s.guideLink = 'https://fr.wikipedia.org/wiki/Kama-sutra';
   if(s.coupleStartDate === undefined) s.coupleStartDate = '';
+  if(s.story === undefined) s.story = null;
+  if(!s.customScenarios) s.customScenarios = [];
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -901,6 +944,7 @@ function render(){
   renderGuideLink();
   renderDaysTogether();
   renderTodayDefiBox();
+  renderHistoires();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -1441,6 +1485,236 @@ function renderTodayDefiBox(){
 document.getElementById('play-now-btn').addEventListener('click', () => goToTab('defis'));
 document.getElementById('quick-messages-btn').addEventListener('click', () => goToTab('messages'));
 document.getElementById('quick-boutique-btn').addEventListener('click', () => goToTab('boutique'));
+
+const STORY_LIBRARY = [
+  {
+    id: 'message-mysterieux',
+    title: 'Le message mystérieux',
+    category: 'Romantique',
+    emoji: '🌙',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'both', text: "Un message mystérieux arrive : « Ce soir, ne prévois rien, je m'occupe de tout... » Comment réponds-tu ?", choices: [
+        { label: "Envoie un smiley curieux", next: 'n2' },
+        { label: "Réponds « Tu m'intrigues... »", next: 'n2' },
+        { label: "Demande un indice", next: 'n2b' },
+      ]},
+      n2: { for: 'b', text: "Tu reçois la réponse et souris en préparant ta surprise. Tu choisis :", choices: [
+        { label: "Un dîner aux chandelles à la maison", next: 'n3a' },
+        { label: "Une sortie improvisée dehors", next: 'n3b' },
+      ]},
+      n2b: { for: 'b', text: "Iel te demande un indice. Tu réponds :", choices: [
+        { label: "« Porte quelque chose de rouge ce soir »", next: 'n3a' },
+        { label: "« Sois prêt·e à 20h, rien d'autre »", next: 'n3b' },
+      ]},
+      n3a: { for: 'a', text: "Le soir venu, la table est dressée aux chandelles. Comment réagis-tu ?", choices: [
+        { label: "Tu es ému·e, tu prends sa main", next: 'end1', pts: 10, who: 'b' },
+        { label: "Tu proposes de cuisiner ensemble", next: 'end2', pts: 10, who: 'b' },
+      ]},
+      n3b: { for: 'a', text: "Vous voilà dehors, sous les étoiles, sans savoir où vous allez. Comment réagis-tu ?", choices: [
+        { label: "Tu te laisses porter par la surprise", next: 'end3', pts: 10, who: 'b' },
+        { label: "Tu proposes un jeu pour deviner la destination", next: 'end4', pts: 10, who: 'b' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Vous terminez la soirée blottis l'un contre l'autre, sans un mot de trop nécessaire. 💞" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Vous finissez à cuisiner ensemble, rires et sauce tomate sur le plan de travail. 🍝" },
+      end3: { for: 'both', isEnding: true, text: "Fin — La surprise se termine allongés dans l'herbe à regarder les étoiles. ✨" },
+      end4: { for: 'both', isEnding: true, text: "Fin — Le jeu des devinettes se transforme en fou rire général. 😂" },
+    }
+  },
+  {
+    id: 'chaleur-montante',
+    title: 'Chaleur montante',
+    category: 'Sensuel',
+    emoji: '🔥',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'both', text: "Un message arrive : « J'ai très envie de toi ce soir... » Comment réponds-tu ?", choices: [
+        { label: "Réponds avec envie", next: 'n2' },
+        { label: "Propose d'y aller doucement", next: 'n2soft' },
+        { label: "Pas ce soir, une autre fois", next: 'endSkip' },
+      ]},
+      n2: { for: 'b', text: "Le cœur battant, tu proposes :", choices: [
+        { label: "Un massage lent pour commencer", next: 'endA', pts: 15, who: 'a' },
+        { label: "Une danse rien que pour l'autre", next: 'endB', pts: 15, who: 'a' },
+        { label: "Un jeu de questions coquines", next: 'endC', pts: 15, who: 'a' },
+      ]},
+      n2soft: { for: 'b', text: "Tu accueilles cette envie de douceur avec un sourire. Tu proposes :", choices: [
+        { label: "Un bain à deux, sans pression", next: 'endSoft1', pts: 10, who: 'a' },
+        { label: "Juste un câlin qui dure", next: 'endSoft2', pts: 10, who: 'a' },
+      ]},
+      endSkip: { for: 'both', isEnding: true, text: "Fin — Vous remettez ça à un soir où vous serez tous les deux plus disponibles. Le désir attendra, il n'en sera que meilleur 😉" },
+      endA: { for: 'both', isEnding: true, text: "Fin — Le massage se termine en fou rire complice, peau contre peau. 🔥" },
+      endB: { for: 'both', isEnding: true, text: "Fin — La danse se termine front contre front, essoufflés. 💃" },
+      endC: { for: 'both', isEnding: true, text: "Fin — Les questions coquines révèlent une envie commune que vous n'aviez jamais osé dire tout haut. 😏" },
+      endSoft1: { for: 'both', isEnding: true, text: "Fin — Le bain se termine par un long silence complice, sans besoin de mots. 🛁" },
+      endSoft2: { for: 'both', isEnding: true, text: "Fin — Le câlin dure bien plus longtemps que prévu, et c'est très bien ainsi. 🤍" },
+    }
+  },
+];
+
+function getScenarioById(id){
+  return STORY_LIBRARY.find(s => s.id === id) || (state.customScenarios || []).find(s => s.id === id);
+}
+
+function startScenario(id){
+  const scenario = getScenarioById(id);
+  if(!scenario) return;
+  state.story = { scenarioId: id, currentNodeId: scenario.start, history: [], startedAt: Date.now() };
+  persist(); render();
+  showToast('Histoire commencée 📖');
+}
+
+function restartStory(){
+  if(!state.story) return;
+  const scenario = getScenarioById(state.story.scenarioId);
+  if(!scenario) return;
+  state.story = { scenarioId: state.story.scenarioId, currentNodeId: scenario.start, history: [], startedAt: Date.now() };
+  persist(); render();
+}
+
+function quitStory(){
+  if(!confirm('Quitter cette histoire ? La progression sera perdue.')) return;
+  state.story = null;
+  persist(); render();
+}
+
+function chooseStoryOption(nextId, effectPts, effectWho){
+  if(!state.story) return;
+  state.story.history.push(state.story.currentNodeId);
+  state.story.currentNodeId = nextId;
+  if(effectPts && effectWho){
+    state.scores[effectWho] = (state.scores[effectWho] || 0) + effectPts;
+  }
+  persist(); render();
+}
+
+function renderHistoires(){
+  const libView = document.getElementById('story-library-view');
+  const playView = document.getElementById('story-play-view');
+  if(!libView || !playView || !state) return;
+  if(state.story){
+    libView.style.display = 'none';
+    playView.style.display = 'block';
+    renderStoryPlay();
+  } else {
+    libView.style.display = 'block';
+    playView.style.display = 'none';
+    renderStoryLibrary();
+  }
+}
+
+function renderStoryLibrary(){
+  const list = document.getElementById('story-list');
+  if(!list) return;
+  list.innerHTML = '';
+  const all = [...STORY_LIBRARY, ...(state.customScenarios || []).map(s => ({ ...s, custom: true }))];
+  all.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'story-card';
+    card.innerHTML = `
+      <div class="emoji">${s.emoji || '📖'}</div>
+      <div style="flex:1; min-width:0;">
+        <div class="story-cat">${escapeHtml(s.category || 'Histoire')}</div>
+        <div style="font-weight:600; color:var(--cream);">${escapeHtml(s.title)}</div>
+      </div>
+    `;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-gold';
+    btn.textContent = '▶';
+    btn.onclick = () => startScenario(s.id);
+    card.appendChild(btn);
+    if(s.custom){
+      const del = document.createElement('button');
+      del.className = 'btn btn-danger';
+      del.textContent = '✕';
+      del.onclick = () => {
+        if(!confirm('Supprimer cette histoire ?')) return;
+        state.customScenarios = state.customScenarios.filter(x => x.id !== s.id);
+        persist(); render();
+      };
+      card.appendChild(del);
+    }
+    list.appendChild(card);
+  });
+}
+
+function renderStoryPlay(){
+  const playView = document.getElementById('story-play-view');
+  const scenario = getScenarioById(state.story.scenarioId);
+  if(!scenario){ state.story = null; persist(); render(); return; }
+  const node = scenario.nodes[state.story.currentNodeId];
+  if(!node){ playView.innerHTML = '<div class="empty">Histoire introuvable.</div>'; return; }
+
+  let html = `<div class="story-cat" style="margin-bottom:8px;">${escapeHtml(scenario.emoji || '📖')} ${escapeHtml(scenario.title)}</div>`;
+  html += `<div class="story-msg">${escapeHtml(node.text)}</div>`;
+
+  const canAct = node.for === 'both' || node.for === myRole || !node.for;
+
+  if(node.isEnding){
+    html += `<button class="btn btn-gold" id="story-restart-btn" style="width:100%; margin-bottom:8px;">🔄 Recommencer</button>`;
+    html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Quitter et choisir une autre histoire</button>`;
+  } else if(canAct){
+    node.choices.forEach((choice, idx) => {
+      html += `<button class="story-choice" data-idx="${idx}">${escapeHtml(choice.label)}</button>`;
+    });
+    html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%; margin-top:6px;">Quitter l'histoire</button>`;
+  } else {
+    const waitingFor = node.for === 'a' ? state.names.a : state.names.b;
+    html += `<div class="empty">En attente du choix de ${escapeHtml(waitingFor)}...</div>`;
+    html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Quitter l'histoire</button>`;
+  }
+
+  playView.innerHTML = html;
+
+  if(node.isEnding){
+    document.getElementById('story-restart-btn').onclick = restartStory;
+  } else if(canAct){
+    playView.querySelectorAll('.story-choice').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const choice = node.choices[idx];
+        chooseStoryOption(choice.next, choice.pts, choice.who);
+      };
+    });
+  }
+  const quitBtn = document.getElementById('story-quit-btn');
+  if(quitBtn) quitBtn.onclick = quitStory;
+}
+
+document.getElementById('toggle-story-create').addEventListener('click', () => {
+  const wrap = document.getElementById('story-create-wrap');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+});
+
+document.getElementById('save-story-btn').addEventListener('click', () => {
+  const title = document.getElementById('new-story-title').value.trim();
+  const stepsRaw = document.getElementById('new-story-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if(!title || stepsRaw.length < 2){
+    showToast('Titre + au moins 2 étapes nécessaires');
+    return;
+  }
+  const nodes = {};
+  stepsRaw.forEach((step, i) => {
+    const nodeId = 'step' + i;
+    const isLast = i === stepsRaw.length - 1;
+    const forRole = i % 2 === 0 ? 'a' : 'b';
+    nodes[nodeId] = isLast
+      ? { for: 'both', text: step, isEnding: true }
+      : { for: forRole, text: step, choices: [{ label: 'Continuer →', next: 'step' + (i + 1) }] };
+  });
+  const scenario = {
+    id: 'custom-' + cryptoId(),
+    title, category: 'Personnalisée', emoji: '✍️',
+    start: 'step0', nodes
+  };
+  state.customScenarios.push(scenario);
+  persist(); render();
+  document.getElementById('new-story-title').value = '';
+  document.getElementById('new-story-steps').value = '';
+  document.getElementById('story-create-wrap').style.display = 'none';
+  showToast('Histoire créée ✍️');
+});
 
 function renderGuideLink(){
   const link = document.getElementById('guide-link-btn');
@@ -2543,6 +2817,16 @@ async function pollForNewDefis(){
     const newlyDoneForMe = fresh.purchases.filter(p => p.boughtBy === myRole && p.status === 'done' && !previousDonePurchaseIds.has(p.id));
     const previousNegoKeys = new Set((state.defis || []).filter(d => d.negotiation).map(d => d.id + '_' + d.negotiation.ts));
     const newNegoForMe = fresh.defis.filter(d => d.negotiation && d.negotiation.by !== myRole && !previousNegoKeys.has(d.id + '_' + d.negotiation.ts));
+    const previousStoryNode = state.story ? state.story.currentNodeId : null;
+    const freshStoryNode = fresh.story ? fresh.story.currentNodeId : null;
+    let storyTurnForMe = false;
+    if(fresh.story && freshStoryNode !== previousStoryNode){
+      const scenario = getScenarioById(fresh.story.scenarioId);
+      const node = scenario && scenario.nodes[freshStoryNode];
+      if(node && !node.isEnding && (node.for === myRole)){
+        storyTurnForMe = true;
+      }
+    }
     state = fresh;
     checkExpiredDefis();
     checkExpiredPurchases();
@@ -2587,6 +2871,16 @@ async function pollForNewDefis(){
         }).catch(()=>{});
       }
     });
+    if(storyTurnForMe){
+      showToast('📖 C\'est ton tour dans votre histoire en cours !');
+      if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('Complices 📖', {
+            body: 'C\'est ton tour dans votre histoire en cours', icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-story'
+          });
+        }).catch(()=>{});
+      }
+    }
     render();
   }catch(e){
     console.error('poll défis:', e);
