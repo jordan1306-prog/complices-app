@@ -49,19 +49,73 @@
   h1,h2,h3,.serif{ font-family: 'Cormorant Garamond', serif; }
   .wrap{ max-width: 760px; margin: 0 auto; padding: 32px 20px 20px; }
 
-  header{ text-align:center; margin-bottom: 20px; position:relative; }
+  header{ text-align:center; margin-bottom: 8px; position:relative; }
   header h1{
-    font-size: 40px; font-weight:600; margin:0 0 6px;
+    font-size: 40px; font-weight:600; margin:0 0 4px;
     letter-spacing: 0.5px; color: var(--gold-soft);
     text-shadow: 0 0 18px rgba(224,105,124,0.3);
   }
-  header p{ margin:0; color: var(--muted); font-size:13.5px; letter-spacing: 0.3px; }
+  header p{ margin:0; color: var(--muted); font-size:13.5px; letter-spacing: 0.3px; font-style:italic; }
+  header p#daily-message{ margin: 8px 0; padding: 0 10px; }
+
+  .header-divider{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin: 8px 0; color: var(--gold); font-size:12px;
+  }
+  .header-divider.small{ margin: 6px 0; }
+  .header-divider::before, .header-divider::after{
+    content:''; height:1px; width:38px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header-tagline{
+    font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
+    color: var(--rose-powder); font-weight:600;
+  }
 
   .invite-btn{
     display:inline-flex; align-items:center; gap:6px; margin: 12px auto 0;
     background: none; border:none;
     color: var(--rose); font-family:'Manrope',sans-serif; font-weight:600; font-size:12px;
     padding: 4px 6px; cursor:pointer; letter-spacing:0.2px; opacity:0.85;
+  }
+
+  .pill-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; background: rgba(28,17,22,0.55);
+    border: 1px solid var(--gold); border-radius: 30px;
+    color: var(--cream); font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
+    padding: 12px 18px; cursor:pointer; margin-bottom:8px;
+    box-shadow: var(--shadow); transition: transform 0.12s ease;
+  }
+  .pill-btn:active{ transform: scale(0.97); }
+  .pill-btn .pill-arrow{ margin-left:auto; color: var(--gold); font-size:16px; }
+  .pill-btn-cta{
+    background: linear-gradient(120deg, var(--gold), var(--rose-deep));
+    border: none; font-size:15px; padding:14px 18px;
+    font-family:'Cormorant Garamond',serif; font-weight:700; letter-spacing:0.5px;
+  }
+  .pill-btn-cta .pill-arrow{ color: #fdf1f0; }
+
+  .avatar-wrap{ position:relative; width:64px; height:64px; margin:0 auto 8px; cursor:pointer; }
+  .avatar{
+    width:64px; height:64px; border-radius:50%; overflow:hidden;
+    background: var(--bg-2); border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; font-size:26px; color: var(--muted);
+    background-size:cover; background-position:center;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .avatar-edit{
+    position:absolute; bottom:-2px; right:-2px; width:20px; height:20px; border-radius:50%;
+    background: var(--gold); color:#fdf1f0; font-size:10px;
+    display:flex; align-items:center; justify-content:center; border:2px solid var(--bg);
+  }
+  .player-divider{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin: 4px 0; color: var(--gold); font-size:9px;
+  }
+  .player-divider::before, .player-divider::after{
+    content:''; height:1px; width:20px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
 
   .secret-box{
@@ -171,6 +225,11 @@
   .bottom-nav-btn .bn-icon{ font-size:20px; line-height:1; }
   .bottom-nav-btn.active{ color: var(--gold-soft); }
   .bottom-nav-btn.active .bn-icon{ transform: translateY(-1px); }
+  .bn-badge{
+    position:absolute; top:0; right:18%; background:var(--red); color:#fff;
+    font-size:9px; font-weight:700; border-radius:8px; min-width:14px; height:14px;
+    line-height:14px; text-align:center; padding:0 3px;
+  }
   .bottom-nav-btn:active{ transform: scale(0.92); }
 
   section{ display:none; }
@@ -435,34 +494,58 @@
   <div id="dashboard-area">
   <header>
     <h1>Complices</h1>
+    <div class="header-divider"><span>♡</span></div>
+    <div class="header-tagline">Plus qu'un jeu, une histoire</div>
+    <div class="header-divider small"><span>♡</span></div>
     <p id="daily-message">Défis, envies et petites promesses — à deux.</p>
-    <div id="days-together" style="font-size:12px; color:var(--rose-powder); margin-top:4px;"></div>
+    <button class="pill-btn" id="days-together-btn" style="margin:12px auto 0;">
+      <span id="days-together-icon">📅</span>
+      <span id="days-together-label">Ajouter la date de votre rencontre</span>
+      <span class="pill-arrow">›</span>
+    </button>
     <button class="invite-btn" id="invite-btn">💌 Inviter</button>
   </header>
 
   <div class="players">
     <div class="player">
+      <div class="avatar-wrap" data-role="a">
+        <div class="avatar" id="avatar-a">👤</div>
+        <div class="avatar-edit">✎</div>
+      </div>
       <input class="name" id="name-a" value="Elle" maxlength="16" title="Touche pour changer le prénom">
+      <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-a">0</div>
       <div class="score-label">points</div>
     </div>
     <div class="player">
+      <div class="avatar-wrap" data-role="b">
+        <div class="avatar" id="avatar-b">👤</div>
+        <div class="avatar-edit">✎</div>
+      </div>
       <input class="name" id="name-b" value="Lui" maxlength="16" title="Touche pour changer le prénom">
+      <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-b">0</div>
       <div class="score-label">points</div>
     </div>
   </div>
-  <div style="text-align:center; font-size:10.5px; color:var(--muted); margin:-12px 0 14px;">✎ touchez un prénom pour le modifier</div>
+  <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
+  <div style="text-align:center; font-size:10.5px; color:var(--muted); margin:-12px 0 14px;">✎ touchez un prénom ou une photo pour la modifier</div>
 
   <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin-bottom:12px;"></div>
 
   <div id="today-defi-box" style="display:none;"></div>
 
-  <div style="display:flex; gap:8px; margin-bottom:16px;">
-    <button class="btn btn-gold" id="play-now-btn" style="flex:2;">▶ Jouer maintenant</button>
-    <button class="btn btn-ghost" id="quick-messages-btn" style="flex:1;">💬</button>
-    <button class="btn btn-ghost" id="quick-boutique-btn" style="flex:1;">🎁</button>
+  <button class="pill-btn pill-btn-cta" id="play-now-btn">
+    <span>▶</span><span>Jouer maintenant</span><span class="pill-arrow">›</span>
+  </button>
+  <div style="display:flex; gap:8px; margin-bottom:10px;">
+    <button class="pill-btn" id="quick-messages-btn" style="flex:1;"><span>💬</span><span>Messages</span><span class="pill-arrow">›</span></button>
+    <button class="pill-btn" id="quick-boutique-btn" style="flex:1;"><span>🎁</span><span>Récompenses</span><span class="pill-arrow">›</span></button>
   </div>
+
+  <div class="header-divider small"><span>♡</span></div>
+  <div class="header-tagline" style="font-size:10px; line-height:1.6;">Chaque jour est une<br>nouvelle occasion de se redécouvrir</div>
+  <div class="header-divider small" style="margin-bottom:18px;"><span>♡</span></div>
   </div>
 
   <nav id="sub-nav" style="display:none;">
@@ -660,7 +743,10 @@
 <div id="bottom-nav">
   <button class="bottom-nav-btn active" data-group="accueil"><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
   <button class="bottom-nav-btn" data-group="jouer"><span class="bn-icon">🎮</span><span class="bn-label">Jouer</span></button>
-  <button class="bottom-nav-btn" data-group="messages"><span class="bn-icon">💬</span><span class="bn-label">Messages</span></button>
+  <button class="bottom-nav-btn" data-group="messages" style="position:relative;">
+    <span class="bn-icon">💬</span><span class="bn-label">Messages</span>
+    <span id="messages-badge" class="bn-badge" style="display:none;">0</span>
+  </button>
   <button class="bottom-nav-btn" data-group="recompenses"><span class="bn-icon">🎁</span><span class="bn-label">Récompenses</span></button>
   <button class="bottom-nav-btn" data-group="profil"><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
 </div>
@@ -793,6 +879,7 @@ const defaultState = () => ({
   scoresResetUsed: false,
   guideLink: 'https://fr.wikipedia.org/wiki/Kama-sutra',
   coupleStartDate: '',
+  photos: { a: '', b: '' },
   story: null,
   customScenarios: [],
   history: [],
@@ -868,6 +955,7 @@ function normalizeState(s){
   if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
   if(!s.guideLink) s.guideLink = 'https://fr.wikipedia.org/wiki/Kama-sutra';
   if(s.coupleStartDate === undefined) s.coupleStartDate = '';
+  if(!s.photos) s.photos = { a: '', b: '' };
   if(s.story === undefined) s.story = null;
   if(!s.customScenarios) s.customScenarios = [];
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
@@ -974,6 +1062,7 @@ function render(){
   renderHistory();
   renderCalendar();
   renderStreak();
+  renderAvatars();
 }
 
 function computeStreak(){
@@ -1427,6 +1516,44 @@ const ROMANTIC_MESSAGES = [
   "La distance ne compte pas quand la complicité est là 💕",
 ];
 
+function renderAvatars(){
+  if(!state || !state.photos) return;
+  ['a','b'].forEach(role => {
+    const el = document.getElementById('avatar-' + role);
+    if(!el) return;
+    if(state.photos[role]){
+      el.style.backgroundImage = `url(${state.photos[role]})`;
+      el.textContent = '';
+    } else {
+      el.style.backgroundImage = '';
+      el.textContent = '👤';
+    }
+  });
+}
+
+let avatarEditingRole = null;
+document.querySelectorAll('.avatar-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    avatarEditingRole = wrap.dataset.role;
+    document.getElementById('avatar-file-input').click();
+  });
+});
+document.getElementById('avatar-file-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file || !avatarEditingRole) return;
+  showToast('Traitement de la photo...');
+  try{
+    const dataUrl = await compressImageToDataUrl(file, 300);
+    state.photos[avatarEditingRole] = dataUrl;
+    persist(); renderAvatars();
+    showToast('Photo de profil mise à jour 📸');
+  }catch(err){
+    console.error(err);
+    showToast('Impossible d\'appliquer cette photo');
+  }
+});
+
 function renderDailyMessage(){
   const el = document.getElementById('daily-message');
   if(!el) return;
@@ -1435,16 +1562,19 @@ function renderDailyMessage(){
 }
 
 function renderDaysTogether(){
-  const el = document.getElementById('days-together');
-  if(!el || !state) return;
+  const btn = document.getElementById('days-together-btn');
+  const icon = document.getElementById('days-together-icon');
+  const label = document.getElementById('days-together-label');
+  if(!btn || !state) return;
   if(state.coupleStartDate){
     const days = Math.floor((Date.now() - new Date(state.coupleStartDate + 'T00:00:00')) / 86400000);
-    el.innerHTML = `💞 ${days} jour${days > 1 ? 's' : ''} ensemble — <span id="edit-start-date" style="text-decoration:underline; cursor:pointer;">modifier</span>`;
+    icon.textContent = '💞';
+    label.textContent = days + ' jour' + (days > 1 ? 's' : '') + ' ensemble';
   } else {
-    el.innerHTML = `<span id="edit-start-date" style="text-decoration:underline; cursor:pointer;">+ Ajouter la date de votre rencontre</span>`;
+    icon.textContent = '📅';
+    label.textContent = 'Ajouter la date de votre rencontre';
   }
-  const link = document.getElementById('edit-start-date');
-  if(link) link.onclick = () => {
+  btn.onclick = () => {
     const input = prompt('Date de votre rencontre (JJ/MM/AAAA) :', '');
     if(!input) return;
     const parts = input.split('/');
@@ -1465,12 +1595,13 @@ function renderTodayDefiBox(){
   const d = todays[0];
   box.style.display = 'block';
   box.innerHTML = `
-    <div class="card" style="border:0.5px solid rgba(201,51,63,0.5);">
+    <div class="card" style="border:0.5px solid rgba(201,51,63,0.5); cursor:pointer;">
       <div class="info">
         <div class="defi-tag defi-tag-new">✨ Défi du jour</div>
         <div class="t">${escapeHtml(d.text)}</div>
         <div class="m">+${d.pts} pts</div>
       </div>
+      <div style="color:var(--gold); font-size:20px;">›</div>
     </div>
   `;
   box.querySelector('.card').onclick = () => goToTab('defis');
@@ -2119,6 +2250,7 @@ function startMessageListener(){
   unsubMessages = onSnapshot(q, snap => {
     chatBox.innerHTML = '';
     let newestOther = null;
+    let unreadCount = 0;
     snap.forEach(docSnap => {
       const m = docSnap.data();
       const isMe = m.senderEmail === auth.currentUser.email;
@@ -2149,12 +2281,25 @@ function startMessageListener(){
         status.textContent = m.read ? 'Vu ✓✓' : 'Envoyé ✓';
         row.appendChild(status);
       }
+      const messagesTabActive = document.getElementById('tab-messages') && document.getElementById('tab-messages').classList.contains('active');
       if(!isMe && !m.read){
-        updateDoc(docSnap.ref, { read: true, readAt: serverTimestamp() }).catch(()=>{});
+        unreadCount++;
+        if(messagesTabActive){
+          updateDoc(docSnap.ref, { read: true, readAt: serverTimestamp() }).catch(()=>{});
+        }
       }
       chatBox.appendChild(row);
       if(!isMe) newestOther = { id: docSnap.id, text: m.type === 'image' ? '📷 Photo reçue' : m.text };
     });
+    const badge = document.getElementById('messages-badge');
+    if(badge){
+      if(unreadCount > 0){
+        badge.style.display = 'block';
+        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
     chatBox.scrollTop = chatBox.scrollHeight;
 
     if(!messagesFirstLoad && newestOther && newestOther.id !== lastSeenMsgId){
@@ -2320,7 +2465,25 @@ function selectGroup(groupName, preferredTab){
   const targetTab = (preferredTab && tabs.includes(preferredTab)) ? preferredTab : tabs[0];
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === targetTab));
   document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + targetTab));
+  if(targetTab === 'messages') markMessagesAsRead();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function markMessagesAsRead(){
+  if(!auth.currentUser) return;
+  try{
+    const snap = await getDocs(collection(db, 'messages'));
+    const updates = [];
+    snap.forEach(docSnap => {
+      const m = docSnap.data();
+      if(m.senderEmail !== auth.currentUser.email && !m.read){
+        updates.push(updateDoc(docSnap.ref, { read: true, readAt: serverTimestamp() }));
+      }
+    });
+    if(updates.length) await Promise.all(updates);
+  }catch(e){
+    console.error('markMessagesAsRead:', e);
+  }
 }
 
 function goToTab(tabName){
