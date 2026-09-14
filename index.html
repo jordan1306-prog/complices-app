@@ -25,11 +25,13 @@
     --gold-soft: #ea8890;
     --rose: #e0697c;
     --rose-deep: #c94356;
+    --rose-powder: #e8b8bf;
     --red: #b8323f;
     --cream: #f5ece7;
     --muted: #c9a3a3;
     --line: rgba(245,236,231,0.14);
     --danger: #e0554a;
+    --shadow: 0 6px 18px rgba(10,4,6,0.35);
   }
   *{box-sizing:border-box;}
   body{
@@ -92,12 +94,15 @@
   .player{
     background: var(--card);
     border: 0.5px solid var(--line);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px 12px;
     text-align:center;
     position:relative;
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease;
   }
+  .player:active{ transform: scale(0.98); }
   .player .name{
     font-family:'Cormorant Garamond',serif;
     font-size:20px; font-weight:600; color:var(--cream);
@@ -131,27 +136,32 @@
   .card{
     background: var(--card);
     border: 0.5px solid var(--line);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px 16px;
     margin-bottom: 12px;
     display:flex; align-items:center; gap: 12px;
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease;
   }
+  .card:active{ transform: scale(0.985); }
   .card .info{ flex:1; min-width:0; }
   .card .info .t{ font-size:15px; font-weight:600; color: var(--cream); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-  .card .info .m{ font-size:12px; color: var(--muted); margin-top:2px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+  .card .info .m{ font-size:12px; color: var(--rose-powder); margin-top:2px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
   .pts{
     font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px;
     color: var(--gold); white-space:nowrap;
   }
   .btn{
-    border:none; border-radius:10px; padding:9px 14px;
+    border:none; border-radius:11px; padding:9px 14px;
     font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
     cursor:pointer; white-space:nowrap;
+    transition: transform 0.12s ease, opacity 0.12s ease;
   }
-  .btn-gold{ background: var(--gold); color: #fdf1f0; }
-  .btn-gold:disabled{ background:#5a5148; color:#8a8178; cursor:not-allowed; }
-  .btn-rose{ background: var(--rose); color: #3a141f; }
+  .btn:active{ transform: scale(0.96); opacity:0.9; }
+  .btn-gold{ background: var(--gold); color: #fdf1f0; box-shadow: 0 3px 10px rgba(201,51,63,0.35); }
+  .btn-gold:disabled{ background:#5a5148; color:#8a8178; cursor:not-allowed; box-shadow:none; }
+  .btn-rose{ background: var(--rose); color: #3a141f; box-shadow: 0 3px 10px rgba(224,105,124,0.3); }
   .btn-ghost{ background:none; border:1px solid var(--line); color: var(--muted); }
   .btn-danger{ background:none; color: var(--danger); font-size:18px; padding:4px 8px; }
 
@@ -381,7 +391,8 @@
 <div class="wrap">
   <header>
     <h1>Complices</h1>
-    <p>Défis, envies et petites promesses — à deux.</p>
+    <p id="daily-message">Défis, envies et petites promesses — à deux.</p>
+    <div id="days-together" style="font-size:12px; color:var(--rose-powder); margin-top:4px;"></div>
     <button class="invite-btn" id="invite-btn">💌 Inviter</button>
   </header>
 
@@ -410,6 +421,14 @@
       <div id="goal-bar" style="height:100%; background:linear-gradient(90deg, var(--gold), var(--rose)); width:0%; transition:width 0.4s;"></div>
     </div>
     <div style="text-align:center; font-size:11px; color:var(--muted); margin-top:4px;" id="goal-text"></div>
+  </div>
+
+  <div id="today-defi-box" style="display:none;"></div>
+
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <button class="btn btn-gold" id="play-now-btn" style="flex:2;">▶ Jouer maintenant</button>
+    <button class="btn btn-ghost" id="quick-messages-btn" style="flex:1;">💬</button>
+    <button class="btn btn-ghost" id="quick-boutique-btn" style="flex:1;">🎁</button>
   </div>
 
   <nav>
@@ -713,6 +732,7 @@ const defaultState = () => ({
   dice: { d1: ['','','','','',''], d2: ['','','','','',''] },
   scoresResetUsed: false,
   guideLink: 'https://fr.wikipedia.org/wiki/Kama-sutra',
+  coupleStartDate: '',
   history: [],
   newDefiAssign: 'a',
 });
@@ -785,6 +805,7 @@ function normalizeState(s){
   if(!s.dice) s.dice = { d1: ['','','','','',''], d2: ['','','','','',''] };
   if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
   if(!s.guideLink) s.guideLink = 'https://fr.wikipedia.org/wiki/Kama-sutra';
+  if(s.coupleStartDate === undefined) s.coupleStartDate = '';
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   return s;
 }
@@ -878,6 +899,8 @@ function render(){
   renderPurchases();
   renderNotifications();
   renderGuideLink();
+  renderDaysTogether();
+  renderTodayDefiBox();
   renderAssignPicker();
   renderMysteryAssign();
   renderMysteryList();
@@ -1354,6 +1377,70 @@ function removeCalendarNote(id){
   state.calendarNotes = state.calendarNotes.filter(n => n.id !== id);
   persist(); renderCalendar();
 }
+
+const ROMANTIC_MESSAGES = [
+  "Aujourd'hui, créez un nouveau souvenir à deux ❤️",
+  "Un petit geste aujourd'hui peut illuminer toute la journée de l'autre 🌹",
+  "La complicité se cultive chaque jour, un défi à la fois ✨",
+  "Et si aujourd'hui vous preniez juste 5 minutes rien que pour vous deux ?",
+  "Le meilleur moment, c'est souvent celui qu'on décide de créer 💫",
+  "Un sourire, un mot doux, un clin d'œil... tout compte 💌",
+  "Aujourd'hui est une bonne occasion de se redécouvrir 🔥",
+  "La distance ne compte pas quand la complicité est là 💕",
+];
+
+function renderDailyMessage(){
+  const el = document.getElementById('daily-message');
+  if(!el) return;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  el.textContent = ROMANTIC_MESSAGES[dayOfYear % ROMANTIC_MESSAGES.length];
+}
+
+function renderDaysTogether(){
+  const el = document.getElementById('days-together');
+  if(!el || !state) return;
+  if(state.coupleStartDate){
+    const days = Math.floor((Date.now() - new Date(state.coupleStartDate + 'T00:00:00')) / 86400000);
+    el.innerHTML = `💞 ${days} jour${days > 1 ? 's' : ''} ensemble — <span id="edit-start-date" style="text-decoration:underline; cursor:pointer;">modifier</span>`;
+  } else {
+    el.innerHTML = `<span id="edit-start-date" style="text-decoration:underline; cursor:pointer;">+ Ajouter la date de votre rencontre</span>`;
+  }
+  const link = document.getElementById('edit-start-date');
+  if(link) link.onclick = () => {
+    const input = prompt('Date de votre rencontre (JJ/MM/AAAA) :', '');
+    if(!input) return;
+    const parts = input.split('/');
+    if(parts.length !== 3){ showToast('Format attendu : JJ/MM/AAAA'); return; }
+    const iso = parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
+    if(isNaN(new Date(iso).getTime())){ showToast('Date invalide'); return; }
+    state.coupleStartDate = iso;
+    persist(); renderDaysTogether();
+    showToast('Date enregistrée 💞');
+  };
+}
+
+function renderTodayDefiBox(){
+  const box = document.getElementById('today-defi-box');
+  if(!box || !state || !myRole) { if(box) box.style.display = 'none'; return; }
+  const todays = state.defis.filter(d => d.daily && d.for === myRole && d.status !== 'accepted');
+  if(todays.length === 0){ box.style.display = 'none'; return; }
+  const d = todays[0];
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div class="card" style="border:0.5px solid rgba(201,51,63,0.5);">
+      <div class="info">
+        <div class="defi-tag defi-tag-new">✨ Défi du jour</div>
+        <div class="t">${escapeHtml(d.text)}</div>
+        <div class="m">+${d.pts} pts</div>
+      </div>
+    </div>
+  `;
+  box.querySelector('.card').onclick = () => goToTab('defis');
+}
+
+document.getElementById('play-now-btn').addEventListener('click', () => goToTab('defis'));
+document.getElementById('quick-messages-btn').addEventListener('click', () => goToTab('messages'));
+document.getElementById('quick-boutique-btn').addEventListener('click', () => goToTab('boutique'));
 
 function renderGuideLink(){
   const link = document.getElementById('guide-link-btn');
@@ -1899,6 +1986,7 @@ function applyStoredBackground(){
   }
 }
 applyStoredBackground();
+renderDailyMessage();
 
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'flex';
