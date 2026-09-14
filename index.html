@@ -44,7 +44,7 @@
     color: var(--cream);
     font-family: 'Manrope', sans-serif;
     min-height:100vh;
-    padding-bottom: 60px;
+    padding-bottom: 90px;
   }
   h1,h2,h3,.serif{ font-family: 'Cormorant Garamond', serif; }
   .wrap{ max-width: 760px; margin: 0 auto; padding: 32px 20px 20px; }
@@ -151,6 +151,27 @@
     transition: color 0.15s, border-color 0.15s; white-space:nowrap;
   }
   nav button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
+
+  #bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:15;
+    display:flex; justify-content:space-around; align-items:center;
+    background: rgba(20,9,12,0.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 0.5px solid var(--line);
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.35);
+  }
+  .bottom-nav-btn{
+    background:none; border:none; color: var(--muted);
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    font-family:'Manrope',sans-serif; font-size:10px; font-weight:600;
+    padding:4px 8px; cursor:pointer; flex:1; border-radius:10px;
+    transition: color 0.15s, transform 0.12s;
+  }
+  .bottom-nav-btn .bn-icon{ font-size:20px; line-height:1; }
+  .bottom-nav-btn.active{ color: var(--gold-soft); }
+  .bottom-nav-btn.active .bn-icon{ transform: translateY(-1px); }
+  .bottom-nav-btn:active{ transform: scale(0.92); }
 
   section{ display:none; }
   section.active{ display:block; }
@@ -411,6 +432,7 @@
 
 <div id="app-view" style="display:none;">
 <div class="wrap">
+  <div id="dashboard-area">
   <header>
     <h1>Complices</h1>
     <p id="daily-message">Défis, envies et petites promesses — à deux.</p>
@@ -452,14 +474,15 @@
     <button class="btn btn-ghost" id="quick-messages-btn" style="flex:1;">💬</button>
     <button class="btn btn-ghost" id="quick-boutique-btn" style="flex:1;">🎁</button>
   </div>
+  </div>
 
-  <nav>
+  <nav id="sub-nav" style="display:none;">
     <button class="tab-btn" data-tab="defis">Défis</button>
     <button class="tab-btn" data-tab="boutique">Boutique</button>
     <button class="tab-btn" data-tab="achats">Achats</button>
     <button class="tab-btn" data-tab="histoires">Histoires</button>
     <button class="tab-btn" data-tab="secret">Fantasmes</button>
-    <button class="tab-btn active" data-tab="messages">Messages</button>
+    <button class="tab-btn" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
     <button class="tab-btn" data-tab="historique">Historique</button>
   </nav>
@@ -605,7 +628,7 @@
     </div>
   </section>
 
-  <section id="tab-messages" class="active">
+  <section id="tab-messages">
     <div class="chat-box" id="chat-box"></div>
     <div class="upload-preview" id="upload-preview" style="display:none;">Envoi de la photo...</div>
     <div class="chat-input-row">
@@ -644,6 +667,14 @@
     <div id="history-list"></div>
   </section>
 </div>
+
+<div id="bottom-nav">
+  <button class="bottom-nav-btn active" data-group="accueil"><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
+  <button class="bottom-nav-btn" data-group="jouer"><span class="bn-icon">🎮</span><span class="bn-label">Jouer</span></button>
+  <button class="bottom-nav-btn" data-group="messages"><span class="bn-icon">💬</span><span class="bn-label">Messages</span></button>
+  <button class="bottom-nav-btn" data-group="recompenses"><span class="bn-icon">🎁</span><span class="bn-label">Récompenses</span></button>
+  <button class="bottom-nav-btn" data-group="profil"><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -681,6 +712,7 @@ onAuthStateChanged(auth, user => {
     signoutBtn.style.display = 'block';
     document.getElementById('settings-btn').style.display = 'block';
     document.getElementById('notif-btn').style.display = 'block';
+    selectGroup('accueil');
     loadState();
     startMessageListener();
     startSecretFlagListener();
@@ -2294,14 +2326,49 @@ document.getElementById('notif-send-defi-btn').addEventListener('click', () => {
   document.getElementById('new-defi-name').focus();
 });
 
-function goToTab(tabName){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-  const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
-  if(btn) btn.classList.add('active');
-  const sec = document.getElementById('tab-' + tabName);
-  if(sec) sec.classList.add('active');
+const TAB_GROUPS = {
+  defis: 'jouer', histoires: 'jouer',
+  boutique: 'recompenses', achats: 'recompenses',
+  messages: 'messages',
+  secret: 'profil', calendrier: 'profil', historique: 'profil',
+};
+const GROUP_TABS = {
+  jouer: ['defis', 'histoires'],
+  recompenses: ['boutique', 'achats'],
+  messages: ['messages'],
+  profil: ['secret', 'calendrier', 'historique'],
+};
+
+function selectGroup(groupName, preferredTab){
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.group === groupName));
+  const dashboard = document.getElementById('dashboard-area');
+  const subNav = document.getElementById('sub-nav');
+  if(groupName === 'accueil'){
+    if(dashboard) dashboard.style.display = 'block';
+    if(subNav) subNav.style.display = 'none';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  if(dashboard) dashboard.style.display = 'none';
+  const tabs = GROUP_TABS[groupName] || [];
+  if(subNav) subNav.style.display = tabs.length > 1 ? 'flex' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.style.display = tabs.includes(b.dataset.tab) ? '' : 'none');
+  const targetTab = (preferredTab && tabs.includes(preferredTab)) ? preferredTab : tabs[0];
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === targetTab));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + targetTab));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function goToTab(tabName){
+  const group = TAB_GROUPS[tabName] || 'accueil';
+  selectGroup(group, tabName);
+}
+
+document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => selectGroup(btn.dataset.group));
+});
 
 function getNotificationItems(){
   if(!state || !myRole) return [];
