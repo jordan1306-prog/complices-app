@@ -456,17 +456,6 @@
 
   <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin-bottom:12px;"></div>
 
-  <div class="secret-box" style="padding:14px 16px; margin-bottom:16px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); margin-bottom:6px;">
-      <span>🎯 Objectif commun — <span id="goal-target-display">500</span> pts</span>
-      <span id="change-goal-btn" style="color:var(--rose); text-decoration:underline; cursor:pointer;">changer</span>
-    </div>
-    <div style="background:var(--bg-2); border-radius:20px; height:14px; overflow:hidden;">
-      <div id="goal-bar" style="height:100%; background:linear-gradient(90deg, var(--gold), var(--rose)); width:0%; transition:width 0.4s;"></div>
-    </div>
-    <div style="text-align:center; font-size:11px; color:var(--muted); margin-top:4px;" id="goal-text"></div>
-  </div>
-
   <div id="today-defi-box" style="display:none;"></div>
 
   <div style="display:flex; gap:8px; margin-bottom:16px;">
@@ -985,7 +974,6 @@ function render(){
   renderHistory();
   renderCalendar();
   renderStreak();
-  renderGoal();
 }
 
 function computeStreak(){
@@ -1014,32 +1002,6 @@ function renderStreak(){
   const streak = computeStreak();
   el.textContent = streak > 0 ? `🔥 ${streak} jour${streak > 1 ? 's' : ''} de suite` : '';
 }
-
-function renderGoal(){
-  const bar = document.getElementById('goal-bar');
-  const text = document.getElementById('goal-text');
-  const targetDisplay = document.getElementById('goal-target-display');
-  if(!bar || !text) return;
-  const target = (state.goal && state.goal.target) || 500;
-  const total = (state.scores.a || 0) + (state.scores.b || 0);
-  const pct = Math.min(100, Math.round((total / target) * 100));
-  bar.style.width = pct + '%';
-  text.textContent = total + ' / ' + target + ' points cumulés (' + pct + '%)';
-  targetDisplay.textContent = target;
-}
-
-document.getElementById('change-goal-btn').addEventListener('click', () => {
-  const current = (state.goal && state.goal.target) || 500;
-  const input = prompt('Nouvel objectif de points cumulés :', current);
-  if(input === null) return;
-  const val = parseInt(input, 10);
-  if(!val || val <= 0){
-    showToast('Entre un nombre valide');
-    return;
-  }
-  state.goal = { target: val };
-  persist(); renderGoal();
-});
 
 function renderAssignPicker(){
   const wrap = document.getElementById('new-defi-assign');
