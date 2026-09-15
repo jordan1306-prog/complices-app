@@ -1,15 +1,24 @@
-const CACHE_NAME = 'complices-v46';
+const CACHE_NAME = 'complices-v48';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './background.jpg'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).catch(()=>{})
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'SKIP_WAITING'){
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', event => {

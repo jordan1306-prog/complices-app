@@ -156,6 +156,14 @@
   }
   .dice-face-group{ margin-bottom:14px; text-align:left; }
   .dice-face-label{ font-size:12px; color:var(--gold-soft); margin-bottom:6px; font-weight:600; }
+  .counter-chart{
+    display:flex; align-items:flex-end; gap:5px; height:44px;
+    background: var(--bg-2); border-radius:10px; padding:6px 8px;
+  }
+  .counter-bar{
+    flex:1; background: linear-gradient(180deg, var(--gold), var(--rose-deep));
+    border-radius:3px; min-height:4px; transition: height 0.3s ease;
+  }
   .dice-face-group input.dice-face-input{
     width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line);
     border-radius:8px; padding:9px 10px; color:var(--cream); font-size:13px;
@@ -254,6 +262,19 @@
     transition: color 0.15s, border-color 0.15s; white-space:nowrap;
   }
   nav button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
+
+  #update-banner{
+    position:fixed; top:0; left:0; right:0; z-index:30;
+    background: linear-gradient(90deg, var(--gold), var(--rose-deep));
+    color:#fdf1f0; font-family:'Manrope',sans-serif; font-weight:600; font-size:12.5px;
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top));
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+  #update-banner-btn{
+    background:#fdf1f0; color: var(--gold-deep, #7a1233); border:none; border-radius:14px;
+    padding:5px 14px; font-weight:700; font-size:12px; cursor:pointer;
+  }
 
   #bottom-nav{
     position:fixed; left:0; right:0; bottom:0; z-index:15;
@@ -717,6 +738,7 @@
     <div id="story-library-view">
       <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">📖 Bibliothèque d'histoires</h3>
       <div class="sub" style="margin-bottom:14px;">Lancez une histoire à embranchements, à vivre à deux, message par message.</div>
+      <div id="story-filters" class="assign" style="flex-wrap:wrap; margin-bottom:14px;"></div>
       <div id="story-list"></div>
       <button class="btn btn-ghost" id="toggle-story-create" style="width:100%; margin-top:8px;">+ Créer votre propre histoire</button>
       <div id="story-create-wrap" class="add-form" style="display:none; margin-top:12px;">
@@ -731,6 +753,19 @@
 
   <section id="tab-profil-accueil">
     <div id="profil-overview"></div>
+
+    <div class="secret-box" style="margin-top:18px;">
+      <h3>📊 Statistiques</h3>
+      <div class="sub">Créez vos propres compteurs, incrémentez-les au moment venu, suivez l'évolution.</div>
+      <div id="counters-list"></div>
+      <button class="btn btn-ghost" id="toggle-counter-form" style="width:100%; margin-top:8px;">+ Ajouter un compteur</button>
+      <div id="counter-form-wrap" style="display:none; margin-top:12px;">
+        <div class="row">
+          <input type="text" id="new-counter-name" placeholder="Nom du compteur (ex : Câlins)">
+        </div>
+        <button class="btn btn-gold" id="add-counter-btn" style="width:100%;">Créer le compteur</button>
+      </div>
+    </div>
   </section>
 
   <section id="tab-secret">
@@ -936,6 +971,7 @@ const defaultState = () => ({
   purchases: [],
   dice: { d1: ['','','','','',''], d2: ['','','','','',''] },
   scoresResetUsed: false,
+  counters: [],
   guideLink: 'https://fr.wikipedia.org/wiki/Kama-sutra',
   coupleStartDate: '',
   photos: { a: '', b: '' },
@@ -1012,6 +1048,7 @@ function normalizeState(s){
   if(!s.purchases) s.purchases = [];
   if(!s.dice) s.dice = { d1: ['','','','','',''], d2: ['','','','','',''] };
   if(s.scoresResetUsed === undefined) s.scoresResetUsed = false;
+  if(!s.counters) s.counters = [];
   if(!s.guideLink) s.guideLink = 'https://fr.wikipedia.org/wiki/Kama-sutra';
   if(s.coupleStartDate === undefined) s.coupleStartDate = '';
   if(!s.photos) s.photos = { a: '', b: '' };
@@ -1123,6 +1160,7 @@ function render(){
   renderStreak();
   renderAvatars();
   renderProfilOverview();
+  renderCounters();
 }
 
 function computeStreak(){
@@ -1593,6 +1631,107 @@ const ROMANTIC_MESSAGES = [
   "Aujourd'hui est une bonne occasion de se redécouvrir 🔥",
   "La distance ne compte pas quand la complicité est là 💕",
 ];
+
+function addCounter(name){
+  state.counters.push({ id: cryptoId(), name, log: [] });
+  persist(); renderCounters();
+}
+
+function removeCounter(id){
+  if(!confirm('Supprimer ce compteur et tout son historique ?')) return;
+  state.counters = state.counters.filter(c => c.id !== id);
+  persist(); renderCounters();
+}
+
+function incrementCounter(id){
+  const c = state.counters.find(x => x.id === id);
+  if(!c) return;
+  c.log.push({ ts: Date.now(), by: myRole || null });
+  persist(); renderCounters();
+  celebrate('💗');
+}
+
+function computeCounterStats(counter){
+  const now = Date.now();
+  const oneDay = 86400000;
+  const total = counter.log.length;
+  const thisWeek = counter.log.filter(e => now - e.ts < 7 * oneDay).length;
+  const thisMonth = counter.log.filter(e => now - e.ts < 30 * oneDay).length;
+  const byPerson = { a: 0, b: 0 };
+  counter.log.forEach(e => { if(e.by === 'a' || e.by === 'b') byPerson[e.by]++; });
+  const weeks = [];
+  for(let i = 5; i >= 0; i--){
+    const weekStart = now - (i + 1) * 7 * oneDay;
+    const weekEnd = now - i * 7 * oneDay;
+    weeks.push(counter.log.filter(e => e.ts >= weekStart && e.ts < weekEnd).length);
+  }
+  return { total, thisWeek, thisMonth, byPerson, weeks };
+}
+
+function renderCounters(){
+  const list = document.getElementById('counters-list');
+  if(!list || !state) return;
+  list.innerHTML = '';
+  if(!state.counters || state.counters.length === 0){
+    list.innerHTML = '<div class="empty">Aucun compteur pour l\'instant.</div>';
+    return;
+  }
+  state.counters.forEach(counter => {
+    const stats = computeCounterStats(counter);
+    const maxWeek = Math.max(1, ...stats.weeks);
+    const bars = stats.weeks.map(w => {
+      const h = Math.round((w / maxWeek) * 100);
+      return `<div class="counter-bar" style="height:${Math.max(h,6)}%;" title="${w}"></div>`;
+    }).join('');
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'stretch';
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <div class="info">
+          <div class="t">${escapeHtml(counter.name)}</div>
+          <div class="m">${stats.total} au total · ${stats.thisWeek} cette semaine · ${stats.thisMonth} ce mois-ci</div>
+        </div>
+        <div class="pts">${stats.total}</div>
+      </div>
+      <div class="counter-chart">${bars}</div>
+      <div class="m" style="text-align:center; margin:4px 0 10px;">${escapeHtml(state.names.a)} : ${stats.byPerson.a} · ${escapeHtml(state.names.b)} : ${stats.byPerson.b}</div>
+    `;
+    const btnRow = document.createElement('div');
+    btnRow.style.display = 'flex';
+    btnRow.style.gap = '8px';
+    const plusBtn = document.createElement('button');
+    plusBtn.className = 'btn btn-gold';
+    plusBtn.style.flex = '1';
+    plusBtn.textContent = '+1';
+    plusBtn.onclick = () => incrementCounter(counter.id);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => removeCounter(counter.id);
+    btnRow.appendChild(plusBtn);
+    btnRow.appendChild(delBtn);
+    card.appendChild(btnRow);
+    list.appendChild(card);
+  });
+}
+
+document.getElementById('toggle-counter-form').addEventListener('click', () => {
+  const wrap = document.getElementById('counter-form-wrap');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+});
+
+document.getElementById('add-counter-btn').addEventListener('click', () => {
+  const input = document.getElementById('new-counter-name');
+  const name = input.value.trim();
+  if(!name) return;
+  addCounter(name);
+  input.value = '';
+  document.getElementById('counter-form-wrap').style.display = 'none';
+  showToast('Compteur créé 📊');
+});
 
 function renderProfilOverview(){
   const wrap = document.getElementById('profil-overview');
@@ -2129,12 +2268,34 @@ function renderHistoires(){
   }
 }
 
+let storyFilter = 'Toutes';
+
+function renderStoryFilters(all){
+  const wrap = document.getElementById('story-filters');
+  if(!wrap) return;
+  const categories = ['Toutes', ...new Set(all.map(s => s.category || 'Histoire'))];
+  wrap.innerHTML = '';
+  categories.forEach(cat => {
+    const b = document.createElement('button');
+    b.textContent = cat;
+    b.className = storyFilter === cat ? 'picked' : '';
+    b.onclick = () => { storyFilter = cat; renderStoryLibrary(); };
+    wrap.appendChild(b);
+  });
+}
+
 function renderStoryLibrary(){
   const list = document.getElementById('story-list');
   if(!list) return;
   list.innerHTML = '';
   const all = [...STORY_LIBRARY, ...(state.customScenarios || []).map(s => ({ ...s, custom: true }))];
-  all.forEach(s => {
+  renderStoryFilters(all);
+  const filtered = storyFilter === 'Toutes' ? all : all.filter(s => (s.category || 'Histoire') === storyFilter);
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">Aucune histoire dans cette catégorie.</div>';
+    return;
+  }
+  filtered.forEach(s => {
     const card = document.createElement('div');
     card.className = 'story-card';
     card.innerHTML = `
@@ -3512,8 +3673,37 @@ setInterval(() => {
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if(!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            showUpdateBanner(newWorker);
+          }
+        });
+      });
+    }).catch(()=>{});
+
+    let reloadedOnce = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(reloadedOnce) return;
+      reloadedOnce = true;
+      window.location.reload();
+    });
   });
+}
+
+function showUpdateBanner(worker){
+  if(document.getElementById('update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.innerHTML = `<span>✨ Nouvelle version disponible</span><button id="update-banner-btn">Actualiser</button>`;
+  document.body.appendChild(banner);
+  document.getElementById('update-banner-btn').onclick = () => {
+    worker.postMessage({ type: 'SKIP_WAITING' });
+    banner.querySelector('span').textContent = 'Mise à jour...';
+  };
 }
 </script>
 </body>
