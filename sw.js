@@ -1,4 +1,4 @@
-const CACHE_NAME = 'complices-v42';
+const CACHE_NAME = 'complices-v45';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './background.jpg'];
 
 self.addEventListener('install', event => {
