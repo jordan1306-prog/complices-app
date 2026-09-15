@@ -145,6 +145,15 @@
     0%{ transform: scale(0.85) rotate(-4deg); opacity:0; }
     100%{ transform: scale(1) rotate(0); opacity:1; }
   }
+  .celebrate-particle{
+    position:fixed; top:45%; font-size:26px; z-index:50; pointer-events:none;
+    animation: celebrateFloat 1.2s ease-out forwards;
+  }
+  @keyframes celebrateFloat{
+    0%{ transform: translate(0,0) scale(0.6); opacity:0; }
+    15%{ opacity:1; transform: translate(0,0) scale(1.1); }
+    100%{ transform: translate(var(--dx), -160px) scale(0.9); opacity:0; }
+  }
   .dice-face-group{ margin-bottom:14px; text-align:left; }
   .dice-face-label{ font-size:12px; color:var(--gold-soft); margin-bottom:6px; font-weight:600; }
   .dice-face-group input.dice-face-input{
@@ -588,6 +597,7 @@
     <button class="tab-btn" data-tab="boutique">Boutique</button>
     <button class="tab-btn" data-tab="achats">Achats</button>
     <button class="tab-btn" data-tab="histoires">Histoires</button>
+    <button class="tab-btn" data-tab="profil-accueil">Profil</button>
     <button class="tab-btn" data-tab="secret">Fantasmes</button>
     <button class="tab-btn" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
@@ -717,6 +727,10 @@
       </div>
     </div>
     <div id="story-play-view" style="display:none;"></div>
+  </section>
+
+  <section id="tab-profil-accueil">
+    <div id="profil-overview"></div>
   </section>
 
   <section id="tab-secret">
@@ -1108,6 +1122,7 @@ function render(){
   renderCalendar();
   renderStreak();
   renderAvatars();
+  renderProfilOverview();
 }
 
 function computeStreak(){
@@ -1400,6 +1415,20 @@ function resolveNegotiation(id, accept){
   persist(); render();
 }
 
+function celebrate(emoji){
+  emoji = emoji || '✨';
+  for(let i = 0; i < 7; i++){
+    const p = document.createElement('div');
+    p.className = 'celebrate-particle';
+    p.textContent = emoji;
+    p.style.left = (45 + Math.random() * 10) + '%';
+    p.style.animationDelay = (Math.random() * 0.15) + 's';
+    p.style.setProperty('--dx', (Math.random() * 140 - 70) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1300);
+  }
+}
+
 function completeDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
@@ -1408,6 +1437,7 @@ function completeDefi(id){
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
   showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
+  celebrate('🎉');
 }
 
 function checkExpiredDefis(){
@@ -1469,6 +1499,7 @@ function drawMystery(){
   });
   persist(); render();
   showToast('🎁 Défi mystère pioché pour ' + state.names[assignee]);
+  celebrate('🎁');
 }
 
 function addMysteryItem(text){
@@ -1562,6 +1593,53 @@ const ROMANTIC_MESSAGES = [
   "Aujourd'hui est une bonne occasion de se redécouvrir 🔥",
   "La distance ne compte pas quand la complicité est là 💕",
 ];
+
+function renderProfilOverview(){
+  const wrap = document.getElementById('profil-overview');
+  if(!wrap || !state) return;
+  const role = (myRole === 'a' || myRole === 'b') ? myRole : null;
+  const otherRole = role === 'a' ? 'b' : 'a';
+
+  if(!role){
+    wrap.innerHTML = `<div class="empty">Choisis d'abord qui tu es dans l'onglet Défis pour voir ton profil.</div>`;
+    return;
+  }
+
+  const myName = state.names[role];
+  const otherName = state.names[otherRole];
+  const myPhoto = state.photos && state.photos[role];
+  const streak = computeStreak();
+  const totalPts = (state.scores.a || 0) + (state.scores.b || 0);
+  const sinceTxt = state.coupleStartDate
+    ? Math.floor((Date.now() - new Date(state.coupleStartDate + 'T00:00:00')) / 86400000) + ' jours ensemble 💞'
+    : 'Date de rencontre non renseignée';
+
+  wrap.innerHTML = `
+    <div class="secret-box" style="text-align:center;">
+      <div class="avatar" id="profil-avatar" style="width:84px; height:84px; margin:0 auto 10px; font-size:34px;">${myPhoto ? '' : '👤'}</div>
+      <h3 style="margin-bottom:2px;">${escapeHtml(myName)}</h3>
+      <div class="sub" style="margin-bottom:0;">${escapeHtml(sinceTxt)}</div>
+    </div>
+    <div class="players" style="margin-bottom:16px;">
+      <div class="player" style="padding:12px 8px;">
+        <div class="score" style="font-size:22px;">${state.scores[role] || 0}</div>
+        <div class="score-label">${escapeHtml(myName)}</div>
+      </div>
+      <div class="player" style="padding:12px 8px;">
+        <div class="score" style="font-size:22px;">${state.scores[otherRole] || 0}</div>
+        <div class="score-label">${escapeHtml(otherName)}</div>
+      </div>
+    </div>
+    ${streak > 0 ? `<div style="text-align:center; color:var(--gold-soft); font-size:13px; margin-bottom:16px;">🔥 ${streak} jour${streak > 1 ? 's' : ''} de série en cours</div>` : ''}
+    <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:16px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">🎯 ${totalPts} points cumulés à deux depuis le début</div>
+    <button class="pill-btn" id="profil-settings-btn"><span>⚙️</span><span>Paramètres</span><span class="pill-arrow">›</span></button>
+    <button class="pill-btn" id="profil-change-role-btn"><span>🔄</span><span>Changer de profil (${escapeHtml(myName)})</span><span class="pill-arrow">›</span></button>
+  `;
+  const avatarEl = document.getElementById('profil-avatar');
+  if(avatarEl && myPhoto) avatarEl.style.backgroundImage = `url(${myPhoto})`;
+  document.getElementById('profil-settings-btn').onclick = () => document.getElementById('settings-btn').click();
+  document.getElementById('profil-change-role-btn').onclick = () => document.getElementById('change-role-btn').click();
+}
 
 function renderAvatars(){
   if(!state || !state.photos) return;
@@ -2303,6 +2381,7 @@ function redeemReward(id, who){
   state.purchases.push(purchase);
   persist(); render();
   showToast(state.names[who] + ' échange ' + r.pts + ' points');
+  celebrate('🎁');
 }
 
 function renderPurchases(){
@@ -2405,6 +2484,7 @@ function validatePurchase(id){
   state.purchases = state.purchases.filter(x => x.id !== id);
   persist(); render();
   showToast('Achat validé ✅');
+  celebrate('✅');
 }
 
 function checkExpiredPurchases(){
@@ -2771,13 +2851,13 @@ const TAB_GROUPS = {
   defis: 'jouer', histoires: 'jouer',
   boutique: 'recompenses', achats: 'recompenses',
   messages: 'messages',
-  secret: 'profil', calendrier: 'profil', historique: 'profil',
+  'profil-accueil': 'profil', secret: 'profil', calendrier: 'profil', historique: 'profil',
 };
 const GROUP_TABS = {
   jouer: ['defis', 'histoires'],
   recompenses: ['boutique', 'achats'],
   messages: ['messages'],
-  profil: ['secret', 'calendrier', 'historique'],
+  profil: ['profil-accueil', 'secret', 'calendrier', 'historique'],
 };
 
 function selectGroup(groupName, preferredTab){
