@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root{
     --bg: #2b1216;
@@ -1410,6 +1411,7 @@ function proposeNegotiation(id){
   d.negotiation = { pts: val, by: myRole, ts: Date.now() };
   persist(); render();
   showToast('Contre-offre envoyée, en attente de réponse 🤝');
+  sendPushToPartner('🤝 Contre-offre', val + ' pts proposés pour : ' + d.text.slice(0, 80));
 }
 
 function renderNegotiations(){
@@ -2308,6 +2310,11 @@ function chooseStoryOption(nextId, effectPts, effectWho){
     state.scores[effectWho] = (state.scores[effectWho] || 0) + effectPts;
   }
   persist(); render();
+  const scenario = getScenarioById(state.story.scenarioId);
+  const nextNode = scenario && scenario.nodes[nextId];
+  if(nextNode && !nextNode.isEnding && nextNode.for && nextNode.for !== 'both' && nextNode.for !== myRole){
+    sendPushToPartner('📖 À toi de jouer', 'Votre histoire continue, c\'est ton tour !');
+  }
 }
 
 function renderHistoires(){
@@ -2600,6 +2607,7 @@ function redeemReward(id, who){
   persist(); render();
   showToast(state.names[who] + ' échange ' + r.pts + ' points');
   celebrate('🎁');
+  sendPushToPartner('🎁 Nouvel achat', state.names[who] + ' attend : ' + r.text.slice(0, 80));
 }
 
 function renderPurchases(){
@@ -2693,6 +2701,7 @@ function markPurchaseDone(id){
   p.status = 'done';
   persist(); render();
   showToast('Marqué comme fait — en attente de validation');
+  sendPushToPartner('✅ Fait !', p.text.slice(0, 100) + ' — à valider');
 }
 
 function validatePurchase(id){
@@ -2703,6 +2712,7 @@ function validatePurchase(id){
   persist(); render();
   showToast('Achat validé ✅');
   celebrate('✅');
+  sendPushToPartner('✅ Validé', p.text.slice(0, 100) + ' — validé par ' + state.names[p.owedBy === 'a' ? 'b' : 'a']);
 }
 
 function checkExpiredPurchases(){
@@ -2803,6 +2813,7 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
   ptsInput.value = '10';
   deadlineInput.value = daysFromNow(3);
   persist(); render();
+  sendPushToPartner('✨ Nouveau défi', text.slice(0, 100));
 });
 
 document.getElementById('draw-mystery-btn').addEventListener('click', drawMystery);
@@ -2952,6 +2963,53 @@ function requestNotifPermission(){
   }
 }
 
+const ONESIGNAL_APP_ID = 'c63cd588-a336-4624-a571-4040be288c57';
+const ONESIGNAL_REST_KEY = 'os_v2_app_yy6nlcfdgzdcjjlribal4kemk7yj2377e35uivv3kvxks4faco6zq2emgpjwjp32wa2h47arrae6dkxzm674udgutjh52ypy77x2ldy';
+
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal){
+  try{
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerParam: { scope: '/complices-app/' },
+      serviceWorkerPath: 'sw.js',
+    });
+    onAuthStateChanged(auth, async user => {
+      if(user && user.email){
+        try{ await OneSignal.login(user.email); }catch(e){ console.error('OneSignal login:', e); }
+        try{ await OneSignal.Notifications.requestPermission(); }catch(e){}
+      }
+    });
+  }catch(e){
+    console.error('OneSignal init:', e);
+  }
+});
+
+async function sendPushToPartner(title, body){
+  if(!auth.currentUser) return;
+  const myEmail = auth.currentUser.email;
+  const partnerEmail = myEmail === 'jordan1306@hotmail.fr' ? 'surles.cindy@hotmail.fr' : 'jordan1306@hotmail.fr';
+  try{
+    await fetch('https://api.onesignal.com/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Key ' + ONESIGNAL_REST_KEY,
+      },
+      body: JSON.stringify({
+        app_id: ONESIGNAL_APP_ID,
+        include_aliases: { external_id: [partnerEmail] },
+        target_channel: 'push',
+        headings: { en: title },
+        contents: { en: body },
+        url: 'https://jordan1306-prog.github.io/complices-app/',
+      }),
+    });
+  }catch(e){
+    console.error('sendPushToPartner:', e);
+  }
+}
+
 function notifyNewMessage(text){
   showToast('💬 Nouveau message reçu');
   if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
@@ -2978,6 +3036,7 @@ async function sendTextMessage(){
       senderEmail: auth.currentUser.email,
       ts: serverTimestamp()
     });
+    sendPushToPartner('💌 Nouveau message', text.slice(0, 100));
   }catch(e){
     showToast("Message non envoyé");
   }
@@ -3240,6 +3299,7 @@ async function sendImageMessage(file){
       senderEmail: auth.currentUser.email,
       ts: serverTimestamp()
     });
+    sendPushToPartner('💌 Nouvelle photo', 'Tu as reçu une photo');
   }catch(e){
     console.error(e);
     showToast('Photo non envoyée');
