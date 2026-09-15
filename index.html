@@ -763,7 +763,12 @@
         <div class="row">
           <input type="text" id="new-counter-name" placeholder="Nom du compteur (ex : Câlins)">
         </div>
-        <button class="btn btn-gold" id="add-counter-btn" style="width:100%;">Créer le compteur</button>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Type de compteur :</div>
+        <div class="assign" id="new-counter-mode">
+          <button data-mode="both" class="picked">Partagé (à deux)</button>
+          <button data-mode="directional">Qui l'a fait à qui</button>
+        </div>
+        <button class="btn btn-gold" id="add-counter-btn" style="width:100%; margin-top:10px;">Créer le compteur</button>
       </div>
     </div>
   </section>
@@ -1632,8 +1637,8 @@ const ROMANTIC_MESSAGES = [
   "La distance ne compte pas quand la complicité est là 💕",
 ];
 
-function addCounter(name){
-  state.counters.push({ id: cryptoId(), name, log: [] });
+function addCounter(name, mode){
+  state.counters.push({ id: cryptoId(), name, mode: mode || 'both', log: [] });
   persist(); renderCounters();
 }
 
@@ -1643,12 +1648,22 @@ function removeCounter(id){
   persist(); renderCounters();
 }
 
-function incrementCounter(id){
+function incrementCounter(id, explicitRole){
   const c = state.counters.find(x => x.id === id);
   if(!c) return;
-  c.log.push({ ts: Date.now(), by: myRole || null });
+  const by = c.mode === 'directional' ? (explicitRole || null) : null;
+  c.log.push({ ts: Date.now(), by });
   persist(); renderCounters();
   celebrate('💗');
+}
+
+function decrementCounter(id){
+  const c = state.counters.find(x => x.id === id);
+  if(!c || c.log.length === 0) return;
+  if(!confirm('Retirer la dernière entrée de « ' + c.name + ' » ?')) return;
+  c.log.pop();
+  persist(); renderCounters();
+  showToast('Correction effectuée');
 }
 
 function computeCounterStats(counter){
@@ -1698,20 +1713,50 @@ function renderCounters(){
       <div class="counter-chart">${bars}</div>
       <div class="m" style="text-align:center; margin:4px 0 10px;">${escapeHtml(state.names.a)} : ${stats.byPerson.a} · ${escapeHtml(state.names.b)} : ${stats.byPerson.b}</div>
     `;
+    const actionRow = document.createElement('div');
+    actionRow.style.display = 'flex';
+    actionRow.style.gap = '8px';
+    actionRow.style.marginBottom = '8px';
+    if(counter.mode === 'directional'){
+      const plusA = document.createElement('button');
+      plusA.className = 'btn btn-gold';
+      plusA.style.flex = '1';
+      plusA.textContent = '+1 ' + state.names.a;
+      plusA.onclick = () => incrementCounter(counter.id, 'a');
+      const plusB = document.createElement('button');
+      plusB.className = 'btn btn-gold';
+      plusB.style.flex = '1';
+      plusB.textContent = '+1 ' + state.names.b;
+      plusB.onclick = () => incrementCounter(counter.id, 'b');
+      actionRow.appendChild(plusA);
+      actionRow.appendChild(plusB);
+    } else {
+      const plusBtn = document.createElement('button');
+      plusBtn.className = 'btn btn-gold';
+      plusBtn.style.flex = '1';
+      plusBtn.textContent = '+1';
+      plusBtn.onclick = () => incrementCounter(counter.id);
+      actionRow.appendChild(plusBtn);
+    }
     const btnRow = document.createElement('div');
     btnRow.style.display = 'flex';
     btnRow.style.gap = '8px';
-    const plusBtn = document.createElement('button');
-    plusBtn.className = 'btn btn-gold';
-    plusBtn.style.flex = '1';
-    plusBtn.textContent = '+1';
-    plusBtn.onclick = () => incrementCounter(counter.id);
+    const minusBtn = document.createElement('button');
+    minusBtn.className = 'btn btn-ghost';
+    minusBtn.style.flex = '1';
+    minusBtn.textContent = '-1';
+    minusBtn.title = 'Retirer la dernière entrée (erreur)';
+    minusBtn.disabled = counter.log.length === 0;
+    if(minusBtn.disabled) minusBtn.style.opacity = '0.4';
+    minusBtn.onclick = () => decrementCounter(counter.id);
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
     delBtn.textContent = '✕';
+    delBtn.title = 'Supprimer tout le compteur';
     delBtn.onclick = () => removeCounter(counter.id);
-    btnRow.appendChild(plusBtn);
+    btnRow.appendChild(minusBtn);
     btnRow.appendChild(delBtn);
+    card.appendChild(actionRow);
     card.appendChild(btnRow);
     list.appendChild(card);
   });
@@ -1723,12 +1768,24 @@ document.getElementById('toggle-counter-form').addEventListener('click', () => {
   wrap.style.display = show ? 'block' : 'none';
 });
 
+let newCounterMode = 'both';
+document.querySelectorAll('#new-counter-mode button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    newCounterMode = btn.dataset.mode;
+    document.querySelectorAll('#new-counter-mode button').forEach(b => b.classList.remove('picked'));
+    btn.classList.add('picked');
+  });
+});
+
 document.getElementById('add-counter-btn').addEventListener('click', () => {
   const input = document.getElementById('new-counter-name');
   const name = input.value.trim();
   if(!name) return;
-  addCounter(name);
+  addCounter(name, newCounterMode);
   input.value = '';
+  newCounterMode = 'both';
+  document.querySelectorAll('#new-counter-mode button').forEach(b => b.classList.remove('picked'));
+  document.querySelector('#new-counter-mode button[data-mode="both"]').classList.add('picked');
   document.getElementById('counter-form-wrap').style.display = 'none';
   showToast('Compteur créé 📊');
 });
