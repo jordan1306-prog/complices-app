@@ -1,6 +1,6 @@
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_NAME = 'complices-v54';
+const CACHE_NAME = 'complices-v55';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './background.jpg'];
 
 self.addEventListener('install', event => {

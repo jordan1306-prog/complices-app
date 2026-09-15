@@ -476,8 +476,9 @@
   .signout{
     position:fixed; top:16px; right:16px; background:none; border:0.5px solid var(--line);
     color: var(--muted); border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer;
-    font-family:'Manrope',sans-serif;
+    font-family:'Manrope',sans-serif; z-index:10;
   }
+  body.has-update-banner .signout{ top:62px !important; }
 
   .chat-box{
     display:flex; flex-direction:column; gap:10px;
@@ -3867,6 +3868,7 @@ function showUpdateBanner(worker){
   banner.id = 'update-banner';
   banner.innerHTML = `<span>✨ Nouvelle version disponible</span><button id="update-banner-btn">Actualiser</button>`;
   document.body.appendChild(banner);
+  document.body.classList.add('has-update-banner');
   document.getElementById('update-banner-btn').onclick = () => {
     try{ worker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
     banner.querySelector('span').textContent = 'Mise à jour...';
