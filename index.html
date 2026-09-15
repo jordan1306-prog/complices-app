@@ -118,6 +118,40 @@
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
 
+  .game-box{
+    background: linear-gradient(160deg, var(--card), var(--card-2));
+    border: 0.5px solid rgba(201,162,77,0.3);
+    border-radius: 20px; padding: 24px 18px; margin-top: 18px;
+    text-align:center; box-shadow: var(--shadow);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  }
+  .game-box-icon{
+    width:56px; height:56px; margin:0 auto 10px; border-radius:50%;
+    background: radial-gradient(circle, rgba(201,51,63,0.35), rgba(201,51,63,0.05));
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    border: 1px solid rgba(201,162,77,0.4);
+  }
+  .game-box h3{ margin:0 0 4px; font-size:20px; color: var(--gold-soft); font-weight:600; }
+  .game-box .sub{ text-align:center; }
+  .game-box .assign{ justify-content:center; }
+  .dice-result-card{
+    text-align:center; padding:20px 16px; margin:14px 0;
+    background: var(--bg-2); border:1px solid var(--gold); border-radius:16px;
+    font-family:'Cormorant Garamond',serif; font-size:20px; color: var(--gold-soft);
+    animation: diceReveal 0.35s ease;
+  }
+  @keyframes diceReveal{
+    0%{ transform: scale(0.85) rotate(-4deg); opacity:0; }
+    100%{ transform: scale(1) rotate(0); opacity:1; }
+  }
+  .dice-face-group{ margin-bottom:14px; text-align:left; }
+  .dice-face-label{ font-size:12px; color:var(--gold-soft); margin-bottom:6px; font-weight:600; }
+  .dice-face-group input.dice-face-input{
+    width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line);
+    border-radius:8px; padding:9px 10px; color:var(--cream); font-size:13px;
+    font-family:'Manrope',sans-serif;
+  }
+
   .secret-box{
     background: linear-gradient(160deg, var(--card), var(--card-2));
     border: 0.5px solid rgba(201,162,77,0.35);
@@ -496,7 +530,6 @@
     <h1>Complices</h1>
     <div class="header-divider"><span>♡</span></div>
     <div class="header-tagline">Plus qu'un jeu, une histoire</div>
-    <div class="header-divider small"><span>♡</span></div>
     <p id="daily-message">Défis, envies et petites promesses — à deux.</p>
     <button class="pill-btn" id="days-together-btn" style="margin:12px auto 0;">
       <span id="days-together-icon">📅</span>
@@ -512,7 +545,7 @@
         <div class="avatar" id="avatar-a">👤</div>
         <div class="avatar-edit">✎</div>
       </div>
-      <input class="name" id="name-a" value="Elle" maxlength="16" title="Touche pour changer le prénom">
+      <input class="name" id="name-a" value="Elle" maxlength="16" title="Touche pour changer">
       <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-a">0</div>
       <div class="score-label">points</div>
@@ -522,30 +555,25 @@
         <div class="avatar" id="avatar-b">👤</div>
         <div class="avatar-edit">✎</div>
       </div>
-      <input class="name" id="name-b" value="Lui" maxlength="16" title="Touche pour changer le prénom">
+      <input class="name" id="name-b" value="Lui" maxlength="16" title="Touche pour changer">
       <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-b">0</div>
       <div class="score-label">points</div>
     </div>
   </div>
   <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
-  <div style="text-align:center; font-size:10.5px; color:var(--muted); margin:-12px 0 14px;">✎ touchez un prénom ou une photo pour la modifier</div>
 
-  <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin-bottom:12px;"></div>
+  <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin:14px 0 4px;"></div>
 
-  <div id="today-defi-box" style="display:none;"></div>
+  <div id="today-defi-box" style="display:none; margin-top:10px;"></div>
 
-  <button class="pill-btn pill-btn-cta" id="play-now-btn">
+  <button class="pill-btn pill-btn-cta" id="play-now-btn" style="margin-top:16px;">
     <span>▶</span><span>Jouer maintenant</span><span class="pill-arrow">›</span>
   </button>
-  <div style="display:flex; gap:8px; margin-bottom:10px;">
+  <div style="display:flex; gap:8px; margin-bottom:6px;">
     <button class="pill-btn" id="quick-messages-btn" style="flex:1;"><span>💬</span><span>Messages</span><span class="pill-arrow">›</span></button>
     <button class="pill-btn" id="quick-boutique-btn" style="flex:1;"><span>🎁</span><span>Récompenses</span><span class="pill-arrow">›</span></button>
   </div>
-
-  <div class="header-divider small"><span>♡</span></div>
-  <div class="header-tagline" style="font-size:10px; line-height:1.6;">Chaque jour est une<br>nouvelle occasion de se redécouvrir</div>
-  <div class="header-divider small" style="margin-bottom:18px;"><span>♡</span></div>
   </div>
 
   <nav id="sub-nav" style="display:none;">
@@ -584,12 +612,15 @@
     </div>
     <div id="defis-list"></div>
 
-    <div class="secret-box" style="margin-top:22px;">
-      <h3>🎁 Boîte à défis mystère</h3>
-      <div class="sub">Pioche un défi surprise (50 pts, 48h pour le relever). Pour qui ?</div>
+    <div class="game-box">
+      <div class="game-box-icon">🎁</div>
+      <h3>Boîte à défis mystère</h3>
+      <div class="sub">Pioche un défi surprise — 50 pts, 48h pour le relever.</div>
       <div class="assign" id="mystery-assign"></div>
-      <button class="btn btn-rose" id="draw-mystery-btn" style="width:100%; margin:12px 0;">🎲 Piocher un défi mystère</button>
-      <button class="btn btn-ghost" id="toggle-mystery-form" style="width:100%;">Gérer le contenu de la boîte</button>
+      <button class="pill-btn pill-btn-cta" id="draw-mystery-btn" style="margin-top:14px;">
+        <span>🎲</span><span>Piocher un défi</span>
+      </button>
+      <button class="btn btn-ghost" id="toggle-mystery-form" style="width:100%; margin-top:8px;">Gérer le contenu</button>
       <div id="mystery-form-wrap" style="display:none; margin-top:12px;">
         <div class="row">
           <input type="text" id="new-mystery-text" placeholder="Ajouter une idée à la boîte...">
@@ -599,28 +630,35 @@
       </div>
     </div>
 
-    <div class="secret-box" style="margin-top:22px;">
-      <h3>🎲 Dés à deux</h3>
-      <div class="sub">Deux dés à 6 faces, remplis avec ce que vous voulez. Lancez-les à deux, en direct.</div>
-      <button class="btn btn-rose" id="roll-dice-btn" style="width:100%; margin:12px 0;">🎲 Lancer les dés</button>
-      <div id="dice-result" style="display:none; text-align:center; padding:16px; background:var(--bg-2); border-radius:12px; margin-bottom:12px; font-family:'Cormorant Garamond',serif; font-size:19px; color:var(--gold-soft);"></div>
-      <button class="btn btn-ghost" id="dice-to-defi-btn" style="width:100%; display:none; margin-bottom:10px;">✨ Transformer en défi</button>
+    <div class="game-box">
+      <div class="game-box-icon">🎲</div>
+      <h3>Dés à deux</h3>
+      <div class="sub">Deux dés à 6 faces, remplis avec ce que vous voulez.</div>
+      <button class="pill-btn pill-btn-cta" id="roll-dice-btn" style="margin-top:14px;">
+        <span>🎲</span><span>Lancer les dés</span>
+      </button>
+      <div id="dice-result" class="dice-result-card" style="display:none;"></div>
+      <button class="btn btn-ghost" id="dice-to-defi-btn" style="width:100%; display:none; margin-bottom:8px;">✨ Transformer en défi</button>
       <button class="btn btn-ghost" id="toggle-dice-form" style="width:100%;">Modifier les faces des dés</button>
       <div id="dice-form-wrap" style="display:none; margin-top:12px;">
-        <div style="font-size:12px; color:var(--gold-soft); margin-bottom:6px;">Dé 1</div>
-        <input type="text" class="dice-face-input" data-die="1" data-idx="0" placeholder="Face 1" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="1" data-idx="1" placeholder="Face 2" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="1" data-idx="2" placeholder="Face 3" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="1" data-idx="3" placeholder="Face 4" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="1" data-idx="4" placeholder="Face 5" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="1" data-idx="5" placeholder="Face 6" style="width:100%; margin-bottom:14px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <div style="font-size:12px; color:var(--gold-soft); margin-bottom:6px;">Dé 2</div>
-        <input type="text" class="dice-face-input" data-die="2" data-idx="0" placeholder="Face 1" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="2" data-idx="1" placeholder="Face 2" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="2" data-idx="2" placeholder="Face 3" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="2" data-idx="3" placeholder="Face 4" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="2" data-idx="4" placeholder="Face 5" style="width:100%; margin-bottom:6px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
-        <input type="text" class="dice-face-input" data-die="2" data-idx="5" placeholder="Face 6" style="width:100%; margin-bottom:10px; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--cream); font-size:13px;">
+        <div class="dice-face-group">
+          <div class="dice-face-label">🎲 Dé 1</div>
+          <input type="text" class="dice-face-input" data-die="1" data-idx="0" placeholder="Face 1">
+          <input type="text" class="dice-face-input" data-die="1" data-idx="1" placeholder="Face 2">
+          <input type="text" class="dice-face-input" data-die="1" data-idx="2" placeholder="Face 3">
+          <input type="text" class="dice-face-input" data-die="1" data-idx="3" placeholder="Face 4">
+          <input type="text" class="dice-face-input" data-die="1" data-idx="4" placeholder="Face 5">
+          <input type="text" class="dice-face-input" data-die="1" data-idx="5" placeholder="Face 6">
+        </div>
+        <div class="dice-face-group">
+          <div class="dice-face-label">🎲 Dé 2</div>
+          <input type="text" class="dice-face-input" data-die="2" data-idx="0" placeholder="Face 1">
+          <input type="text" class="dice-face-input" data-die="2" data-idx="1" placeholder="Face 2">
+          <input type="text" class="dice-face-input" data-die="2" data-idx="2" placeholder="Face 3">
+          <input type="text" class="dice-face-input" data-die="2" data-idx="3" placeholder="Face 4">
+          <input type="text" class="dice-face-input" data-die="2" data-idx="4" placeholder="Face 5">
+          <input type="text" class="dice-face-input" data-die="2" data-idx="5" placeholder="Face 6">
+        </div>
         <button class="btn btn-gold" id="save-dice-btn" style="width:100%;">Enregistrer les dés</button>
       </div>
     </div>
@@ -1453,6 +1491,8 @@ document.getElementById('roll-dice-btn').addEventListener('click', () => {
   const f2 = d2[Math.floor(Math.random() * d2.length)];
   lastDiceResult = `${f1} — ${f2}`;
   const resultEl = document.getElementById('dice-result');
+  resultEl.style.display = 'none';
+  void resultEl.offsetWidth;
   resultEl.textContent = '🎲 ' + lastDiceResult;
   resultEl.style.display = 'block';
   document.getElementById('dice-to-defi-btn').style.display = 'block';
