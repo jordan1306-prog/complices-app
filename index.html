@@ -3853,10 +3853,9 @@ if('serviceWorker' in navigator){
       });
     }).catch(()=>{});
 
-    let reloadedOnce = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if(reloadedOnce) return;
-      reloadedOnce = true;
+      if(window.reloadedOnce) return;
+      window.reloadedOnce = true;
       window.location.reload();
     });
   });
@@ -3871,8 +3870,14 @@ function showUpdateBanner(worker){
   document.body.classList.add('has-update-banner');
   document.getElementById('update-banner-btn').onclick = () => {
     try{ worker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
-    banner.querySelector('span').textContent = 'Mise à jour...';
-    setTimeout(() => { window.location.reload(); }, 600);
+    banner.querySelector('span').textContent = 'Mise à jour en cours, patiente quelques secondes...';
+    document.getElementById('update-banner-btn').style.display = 'none';
+    setTimeout(() => {
+      if(!window.reloadedOnce){
+        window.reloadedOnce = true;
+        window.location.reload();
+      }
+    }, 5000);
   };
 }
 </script>
