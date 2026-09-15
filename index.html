@@ -546,6 +546,8 @@
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
     <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
     <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
+    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
+    <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:14px;">🔍 Diagnostic notifications</button>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
   </div>
 </div>
@@ -2966,24 +2968,57 @@ function requestNotifPermission(){
 const ONESIGNAL_APP_ID = 'c63cd588-a336-4624-a571-4040be288c57';
 const ONESIGNAL_REST_KEY = 'os_v2_app_yy6nlcfdgzdcjjlribal4kemk7yj2377e35uivv3kvxks4faco6zq2emgpjwjp32wa2h47arrae6dkxzm674udgutjh52ypy77x2ldy';
 
+window.oneSignalDebugLog = ['App démarrée'];
+function osLog(msg){
+  console.log('[OneSignal]', msg);
+  window.oneSignalDebugLog.push(msg);
+}
+
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal){
+  window.OneSignalRef = OneSignal;
+  osLog('SDK chargé, OneSignalDeferred exécuté');
   try{
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
       serviceWorkerParam: { scope: '/complices-app/' },
       serviceWorkerPath: 'sw.js',
     });
+    osLog('init() terminé sans erreur');
     onAuthStateChanged(auth, async user => {
       if(user && user.email){
-        try{ await OneSignal.login(user.email); }catch(e){ console.error('OneSignal login:', e); }
-        try{ await OneSignal.Notifications.requestPermission(); }catch(e){}
+        osLog('Utilisateur connecté : ' + user.email);
+        try{
+          await OneSignal.login(user.email);
+          osLog('login() réussi pour ' + user.email);
+        }catch(e){
+          osLog('ERREUR login() : ' + e.message);
+        }
+        try{
+          const perm = await OneSignal.Notifications.requestPermission();
+          osLog('requestPermission() résultat : ' + perm);
+        }catch(e){
+          osLog('ERREUR requestPermission() : ' + e.message);
+        }
+        try{
+          const subId = OneSignal.User.PushSubscription.id;
+          const optedIn = OneSignal.User.PushSubscription.optedIn;
+          osLog('Subscription ID : ' + (subId || 'AUCUN') + ' — opted in : ' + optedIn);
+        }catch(e){
+          osLog('ERREUR lecture PushSubscription : ' + e.message);
+        }
       }
     });
   }catch(e){
-    console.error('OneSignal init:', e);
+    osLog('ERREUR init() : ' + e.message);
   }
 });
+
+setTimeout(() => {
+  if(!window.OneSignalRef){
+    osLog('ALERTE : le SDK OneSignal ne s\'est jamais chargé après 6 secondes (script bloqué, adblocker, ou hors ligne ?)');
+  }
+}, 6000);
 
 async function sendPushToPartner(title, body){
   if(!auth.currentUser) return;
@@ -3282,6 +3317,21 @@ document.getElementById('reset-scores-btn').addEventListener('click', () => {
   persist(); render();
   showToast('Points remis à 0 ✅ (option maintenant désactivée)');
   document.getElementById('settings-panel').style.display = 'none';
+});
+
+document.getElementById('diag-notif-btn').addEventListener('click', async () => {
+  let extra = 'Permission navigateur : ' + (('Notification' in window) ? Notification.permission : 'API non supportée') + '\n';
+  extra += 'App ID configuré : ' + ONESIGNAL_APP_ID + '\n';
+  extra += 'Email connecté : ' + (auth.currentUser ? auth.currentUser.email : 'aucun') + '\n\n';
+  if(window.OneSignalRef){
+    try{
+      extra += 'Subscription ID actuel : ' + (window.OneSignalRef.User.PushSubscription.id || 'AUCUN') + '\n';
+      extra += 'Opted in actuel : ' + window.OneSignalRef.User.PushSubscription.optedIn + '\n\n';
+    }catch(e){
+      extra += 'Erreur lecture live : ' + e.message + '\n\n';
+    }
+  }
+  alert(extra + '--- Journal ---\n' + window.oneSignalDebugLog.join('\n'));
 });
 
 async function sendImageMessage(file){
