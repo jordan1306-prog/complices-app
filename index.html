@@ -3852,32 +3852,22 @@ if('serviceWorker' in navigator){
         });
       });
     }).catch(()=>{});
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if(window.reloadedOnce) return;
-      window.reloadedOnce = true;
-      window.location.reload();
-    });
   });
 }
 
 function showUpdateBanner(worker){
   if(document.getElementById('update-banner')) return;
+  if(sessionStorage.getItem('complices-update-dismissed')) return;
   const banner = document.createElement('div');
   banner.id = 'update-banner';
-  banner.innerHTML = `<span>✨ Nouvelle version disponible</span><button id="update-banner-btn">Actualiser</button>`;
+  banner.innerHTML = `<span>✨ Nouvelle version disponible</span><button id="update-banner-btn">OK</button>`;
   document.body.appendChild(banner);
   document.body.classList.add('has-update-banner');
   document.getElementById('update-banner-btn').onclick = () => {
     try{ worker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
-    banner.querySelector('span').textContent = 'Mise à jour en cours, patiente quelques secondes...';
-    document.getElementById('update-banner-btn').style.display = 'none';
-    setTimeout(() => {
-      if(!window.reloadedOnce){
-        window.reloadedOnce = true;
-        window.location.reload();
-      }
-    }, 5000);
+    sessionStorage.setItem('complices-update-dismissed', '1');
+    banner.remove();
+    document.body.classList.remove('has-update-banner');
   };
 }
 </script>
