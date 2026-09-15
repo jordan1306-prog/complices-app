@@ -536,6 +536,7 @@
       <span id="days-together-label">Ajouter la date de votre rencontre</span>
       <span class="pill-arrow">›</span>
     </button>
+    <input type="date" id="start-date-input" style="position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;">
     <button class="invite-btn" id="invite-btn">💌 Inviter</button>
   </header>
 
@@ -1615,17 +1616,23 @@ function renderDaysTogether(){
     label.textContent = 'Ajouter la date de votre rencontre';
   }
   btn.onclick = () => {
-    const input = prompt('Date de votre rencontre (JJ/MM/AAAA) :', '');
-    if(!input) return;
-    const parts = input.split('/');
-    if(parts.length !== 3){ showToast('Format attendu : JJ/MM/AAAA'); return; }
-    const iso = parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
-    if(isNaN(new Date(iso).getTime())){ showToast('Date invalide'); return; }
-    state.coupleStartDate = iso;
-    persist(); renderDaysTogether();
-    showToast('Date enregistrée 💞');
+    const dateInput = document.getElementById('start-date-input');
+    if(state.coupleStartDate) dateInput.value = state.coupleStartDate;
+    if(dateInput.showPicker){
+      try{ dateInput.showPicker(); return; }catch(e){}
+    }
+    dateInput.click();
   };
 }
+
+document.getElementById('start-date-input').addEventListener('change', e => {
+  const iso = e.target.value;
+  if(!iso) return;
+  if(isNaN(new Date(iso).getTime())){ showToast('Date invalide'); return; }
+  state.coupleStartDate = iso;
+  persist(); renderDaysTogether();
+  showToast('Date enregistrée 💞');
+});
 
 function renderTodayDefiBox(){
   const box = document.getElementById('today-defi-box');
