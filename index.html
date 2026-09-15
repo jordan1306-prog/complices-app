@@ -548,7 +548,8 @@
     <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
     <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
     <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
-    <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:14px;">🔍 Diagnostic notifications</button>
+    <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
+    <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%; margin-bottom:14px;">📤 Envoyer une notif test au/à la partenaire</button>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
   </div>
 </div>
@@ -2946,7 +2947,7 @@ function startMessageListener(){
         badge.style.display = 'none';
       }
     }
-    chatBox.scrollTop = chatBox.scrollHeight;
+    scrollChatToBottom();
 
     if(!messagesFirstLoad && newestOther && newestOther.id !== lastSeenMsgId){
       notifyNewMessage(newestOther.text);
@@ -3021,12 +3022,14 @@ setTimeout(() => {
   }
 }, 6000);
 
+window.lastPushResult = null;
+
 async function sendPushToPartner(title, body){
   if(!auth.currentUser) return;
   const myEmail = auth.currentUser.email;
   const partnerEmail = myEmail === 'jordan1306@hotmail.fr' ? 'surles.cindy@hotmail.fr' : 'jordan1306@hotmail.fr';
   try{
-    await fetch('https://api.onesignal.com/notifications', {
+    const res = await fetch('https://api.onesignal.com/notifications', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3041,8 +3044,20 @@ async function sendPushToPartner(title, body){
         url: 'https://jordan1306-prog.github.io/complices-app/',
       }),
     });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){
+      window.lastPushResult = 'ERREUR HTTP ' + res.status + ' : ' + JSON.stringify(data);
+      osLog('sendPushToPartner ERREUR ' + res.status + ' : ' + JSON.stringify(data));
+    } else if(data.errors){
+      window.lastPushResult = 'ERREUR API : ' + JSON.stringify(data.errors);
+      osLog('sendPushToPartner ERREUR API : ' + JSON.stringify(data.errors));
+    } else {
+      window.lastPushResult = 'OK — id: ' + (data.id || '?') + ', destinataires touchés : ' + (data.recipients !== undefined ? data.recipients : '?');
+      osLog('sendPushToPartner OK : ' + JSON.stringify(data));
+    }
   }catch(e){
-    console.error('sendPushToPartner:', e);
+    window.lastPushResult = 'ERREUR RÉSEAU : ' + e.message;
+    osLog('sendPushToPartner ERREUR RÉSEAU : ' + e.message);
   }
 }
 
@@ -3192,8 +3207,21 @@ function selectGroup(groupName, preferredTab){
   const targetTab = (preferredTab && tabs.includes(preferredTab)) ? preferredTab : tabs[0];
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === targetTab));
   document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + targetTab));
-  if(targetTab === 'messages') markMessagesAsRead();
+  if(targetTab === 'messages'){
+    markMessagesAsRead();
+    scrollChatToBottom();
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollChatToBottom(){
+  const chatBox = document.getElementById('chat-box');
+  if(!chatBox) return;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  requestAnimationFrame(() => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+    setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 200);
+  });
 }
 
 async function markMessagesAsRead(){
@@ -3332,7 +3360,13 @@ document.getElementById('diag-notif-btn').addEventListener('click', async () => 
       extra += 'Erreur lecture live : ' + e.message + '\n\n';
     }
   }
+  extra += 'Dernier envoi de push : ' + (window.lastPushResult || 'aucun envoi encore tenté') + '\n\n';
   alert(extra + '--- Journal ---\n' + window.oneSignalDebugLog.join('\n'));
+});
+
+document.getElementById('diag-test-push-btn').addEventListener('click', async () => {
+  await sendPushToPartner('🔔 Test', 'Ceci est une notification de test');
+  alert('Résultat de l\'envoi :\n\n' + window.lastPushResult);
 });
 
 async function sendImageMessage(file){
