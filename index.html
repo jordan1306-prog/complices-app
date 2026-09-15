@@ -2982,7 +2982,7 @@ OneSignalDeferred.push(async function(OneSignal){
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
       serviceWorkerParam: { scope: '/complices-app/' },
-      serviceWorkerPath: 'sw.js',
+      serviceWorkerPath: 'complices-app/sw.js',
     });
     osLog('init() terminé sans erreur');
     onAuthStateChanged(auth, async user => {
