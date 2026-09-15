@@ -2968,7 +2968,6 @@ function requestNotifPermission(){
 }
 
 const ONESIGNAL_APP_ID = 'c63cd588-a336-4624-a571-4040be288c57';
-const ONESIGNAL_REST_KEY = 'os_v2_app_yy6nlcfdgzdcjjlribal4kemk7yj2377e35uivv3kvxks4faco6zq2emgpjwjp32wa2h47arrae6dkxzm674udgutjh52ypy77x2ldy';
 
 window.oneSignalDebugLog = ['App démarrée'];
 function osLog(msg){
@@ -3029,19 +3028,15 @@ async function sendPushToPartner(title, body){
   const myEmail = auth.currentUser.email;
   const partnerEmail = myEmail === 'jordan1306@hotmail.fr' ? 'surles.cindy@hotmail.fr' : 'jordan1306@hotmail.fr';
   try{
-    const res = await fetch('https://api.onesignal.com/notifications', {
+    const res = await fetch('https://complices-push.jordan1306.workers.dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Key ' + ONESIGNAL_REST_KEY,
       },
       body: JSON.stringify({
-        app_id: ONESIGNAL_APP_ID,
-        include_aliases: { external_id: [partnerEmail] },
-        target_channel: 'push',
-        headings: { en: title },
-        contents: { en: body },
-        url: 'https://jordan1306-prog.github.io/complices-app/',
+        title: title,
+        message: body,
+        userId: partnerEmail,
       }),
     });
     const data = await res.json().catch(() => ({}));
