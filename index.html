@@ -562,7 +562,7 @@
 
 <div id="settings-panel" style="display:none;">
   <div class="login-card" style="max-width:360px;">
-    <h1 style="font-size:24px;">Paramètres</h1>
+    <h1 style="font-size:24px; cursor:pointer;" id="settings-title">Paramètres</h1>
     <p style="margin-bottom:16px;">Personnalise l'app</p>
     <div class="sub" style="text-align:left; margin-bottom:8px;">Fond d'écran personnalisé (ta propre photo)</div>
     <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
@@ -570,9 +570,11 @@
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
     <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
     <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
-    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
-    <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
-    <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%; margin-bottom:14px;">📤 Envoyer une notif test au/à la partenaire</button>
+    <div id="settings-dev-zone" style="display:none;">
+      <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
+      <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
+      <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%; margin-bottom:14px;">📤 Envoyer une notif test au/à la partenaire</button>
+    </div>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
   </div>
 </div>
@@ -3188,6 +3190,15 @@ document.getElementById('settings-btn').addEventListener('click', () => {
 });
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
+});
+
+let settingsTitleTaps = 0;
+document.getElementById('settings-title').addEventListener('click', () => {
+  settingsTitleTaps++;
+  if(settingsTitleTaps >= 5){
+    document.getElementById('settings-dev-zone').style.display = 'block';
+    settingsTitleTaps = 0;
+  }
 });
 
 document.getElementById('notif-btn').addEventListener('click', () => {
