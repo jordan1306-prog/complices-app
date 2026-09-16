@@ -306,6 +306,22 @@
   section{ display:none; }
   section.active{ display:block; }
 
+  @keyframes dashFadeIn{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  #dashboard-area.dashboard-enter > *{
+    opacity:0; transform:translateY(14px);
+    animation: dashFadeIn 0.5s ease forwards;
+  }
+  #dashboard-area.dashboard-enter > *:nth-child(1){ animation-delay:0.05s; }
+  #dashboard-area.dashboard-enter > *:nth-child(2){ animation-delay:0.12s; }
+  #dashboard-area.dashboard-enter > *:nth-child(3){ animation-delay:0.19s; }
+  #dashboard-area.dashboard-enter > *:nth-child(4){ animation-delay:0.26s; }
+  #dashboard-area.dashboard-enter > *:nth-child(5){ animation-delay:0.33s; }
+  #dashboard-area.dashboard-enter > *:nth-child(6){ animation-delay:0.40s; }
+  #dashboard-area.dashboard-enter > *:nth-child(7){ animation-delay:0.47s; }
+
   .card{
     background: var(--card);
     border: 0.5px solid var(--line);
@@ -977,6 +993,7 @@ function daysFromNow(n){
 const defaultState = () => ({
   names: { a: 'Elle', b: 'Lui' },
   scores: { a: 0, b: 0 },
+  mysteryPing: { a: false, b: false },
   defis: [
     { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a', deadline: daysFromNow(1) },
     { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b', deadline: daysFromNow(3) },
@@ -1176,6 +1193,7 @@ function normalizeState(s){
   }
   if(!s.mysteryBoxA) s.mysteryBoxA = def.mysteryBoxA;
   if(!s.mysteryBoxB) s.mysteryBoxB = def.mysteryBoxB;
+  if(!s.mysteryPing) s.mysteryPing = { a: false, b: false };
   delete s.mysteryBox;
   delete s.mysteryAssign;
   if(!s.dailyTurn) s.dailyTurn = 'a';
@@ -1209,6 +1227,14 @@ async function loadState(){
   ensureDailyChallenge();
   document.getElementById('new-defi-deadline').value = daysFromNow(3);
   render();
+  if(myRole && state.mysteryPing && state.mysteryPing[myRole]){
+    const dash = document.getElementById('dashboard-area');
+    dash.classList.remove('dashboard-enter');
+    void dash.offsetWidth;
+    dash.classList.add('dashboard-enter');
+    state.mysteryPing[myRole] = false;
+    persist();
+  }
 }
 
 function persist(){
@@ -1671,6 +1697,9 @@ function drawMystery(){
 
 function addMysteryItem(text){
   myMysteryBox().push({ id: cryptoId(), text });
+  const partnerRole = myRole === 'b' ? 'a' : 'b';
+  if(!state.mysteryPing) state.mysteryPing = { a: false, b: false };
+  state.mysteryPing[partnerRole] = true;
   persist(); render();
 }
 
@@ -2958,11 +2987,27 @@ document.getElementById('toggle-positions-list').addEventListener('click', () =>
   wrap.style.display = show ? 'block' : 'none';
 });
 
+let mysteryNotifBatch = { count: 0, timer: null };
+function notifyMysteryAdded(){
+  mysteryNotifBatch.count++;
+  if(mysteryNotifBatch.timer) clearTimeout(mysteryNotifBatch.timer);
+  mysteryNotifBatch.timer = setTimeout(() => {
+    const n = mysteryNotifBatch.count;
+    const msg = n > 1
+      ? n + ' nouveaux fantasmes secrets ajoutés à sa boîte...'
+      : 'Un nouveau fantasme secret vient d\'être ajouté à sa boîte...';
+    sendPushToPartner('🎁 Nouveau(x) fantasme(s)', msg);
+    mysteryNotifBatch.count = 0;
+    mysteryNotifBatch.timer = null;
+  }, 4000);
+}
+
 document.getElementById('add-mystery-btn').addEventListener('click', () => {
   const input = document.getElementById('new-mystery-text');
   const text = input.value.trim();
   if(!text) return;
   addMysteryItem(text);
+  notifyMysteryAdded();
   input.value = '';
 });
 
