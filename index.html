@@ -480,6 +480,27 @@
   }
   body.has-update-banner .signout{ top:62px !important; }
 
+  body.chat-fullscreen{ overflow:hidden; }
+  body.chat-fullscreen .signout,
+  body.chat-fullscreen #bottom-nav{ display:none !important; }
+  body.chat-fullscreen #tab-messages{
+    position:fixed; inset:0; z-index:60;
+    display:flex; flex-direction:column;
+    padding: calc(14px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    margin:0;
+  }
+  body.chat-fullscreen #tab-messages .chat-box{
+    flex:1 1 auto; height:auto; min-height:0;
+  }
+  .chat-fullscreen-header{
+    display:none; align-items:center; gap:12px; padding-bottom:10px; flex-shrink:0;
+  }
+  body.chat-fullscreen .chat-fullscreen-header{ display:flex; }
+  .chat-fullscreen-header .title{
+    font-family:'Cormorant Garamond', serif; font-size:20px; color: var(--gold-soft);
+  }
+
   .chat-box{
     display:flex; flex-direction:column; gap:10px;
     height: 50vh; min-height:320px; overflow-y:auto;
@@ -808,6 +829,10 @@
   </section>
 
   <section id="tab-messages">
+    <div class="chat-fullscreen-header">
+      <button class="icon-btn" id="chat-back-btn" title="Retour">←</button>
+      <div class="title">💬 Messages</div>
+    </div>
     <div class="chat-box" id="chat-box"></div>
     <div class="upload-preview" id="upload-preview" style="display:none;">Envoi de la photo...</div>
     <div class="chat-input-row">
@@ -3195,6 +3220,7 @@ const GROUP_TABS = {
 };
 
 function selectGroup(groupName, preferredTab){
+  document.body.classList.toggle('chat-fullscreen', groupName === 'messages');
   document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.group === groupName));
   const dashboard = document.getElementById('dashboard-area');
   const subNav = document.getElementById('sub-nav');
@@ -3251,6 +3277,8 @@ function goToTab(tabName){
   const group = TAB_GROUPS[tabName] || 'accueil';
   selectGroup(group, tabName);
 }
+
+document.getElementById('chat-back-btn').addEventListener('click', () => selectGroup('accueil'));
 
 document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
   btn.addEventListener('click', () => selectGroup(btn.dataset.group));
