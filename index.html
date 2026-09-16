@@ -502,13 +502,16 @@
   .msg .when{ font-size:10px; color: var(--muted); margin-top:3px; }
 
   .chat-input-row{
-    display:flex; gap:8px; align-items:center;
+    display:flex; gap:8px; align-items:flex-end;
     position: sticky; bottom: 0; background: var(--bg);
     padding-top: 6px;
   }
-  .chat-input-row input[type=text]{
+  .chat-input-row input[type=text],
+  .chat-input-row textarea{
     flex:1; background: var(--card); border:0.5px solid var(--line); border-radius:20px;
     padding:11px 16px; color: var(--cream); font-family:'Manrope',sans-serif; font-size:14px;
+    resize:none; overflow-y:auto; max-height:120px; line-height:1.35;
+    box-sizing:border-box;
   }
   .icon-btn{
     background: var(--card); border:0.5px solid var(--line); border-radius:50%;
@@ -812,7 +815,7 @@
       <button class="icon-btn" id="chat-photo-btn" title="Choisir dans la galerie">🖼️</button>
       <input type="file" id="chat-camera-input" accept="image/*" capture="environment">
       <input type="file" id="chat-file-input" accept="image/*">
-      <input type="text" id="chat-text-input" placeholder="Écris un message...">
+      <textarea id="chat-text-input" placeholder="Écris un message..." rows="1" autocomplete="off" autocorrect="on"></textarea>
       <button class="icon-btn send" id="chat-send-btn" title="Envoyer">➤</button>
     </div>
   </section>
@@ -3075,6 +3078,7 @@ async function sendTextMessage(){
   const text = input.value.trim();
   if(!text) return;
   input.value = '';
+  input.style.height = 'auto';
   try{
     await addDoc(collection(db, 'messages'), {
       type: 'text',
@@ -3090,7 +3094,14 @@ async function sendTextMessage(){
 
 document.getElementById('chat-send-btn').addEventListener('click', sendTextMessage);
 document.getElementById('chat-text-input').addEventListener('keydown', e => {
-  if(e.key === 'Enter') sendTextMessage();
+  if(e.key === 'Enter' && !e.shiftKey && window.matchMedia('(pointer: fine)').matches){
+    e.preventDefault();
+    sendTextMessage();
+  }
+});
+document.getElementById('chat-text-input').addEventListener('input', function(){
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
 function compressImageToDataUrl(file, maxSize = 900){
