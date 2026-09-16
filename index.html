@@ -32,6 +32,7 @@
     --muted: #c9a3a3;
     --line: rgba(245,236,231,0.14);
     --danger: #e0554a;
+    --amber: #d9a15b;
     --shadow: 0 6px 18px rgba(10,4,6,0.35);
   }
   *{box-sizing:border-box;}
@@ -393,6 +394,9 @@
   .defi-tag-progress{ background: rgba(201,162,77,0.25); color: var(--gold-soft); border:0.5px solid rgba(201,162,77,0.5); }
   .card.defi-pending{ border-color: rgba(201,51,63,0.6); box-shadow: 0 0 0 1px rgba(201,51,63,0.3); }
   .card.defi-inprogress{ opacity:0.85; }
+  .card.defi-type-daily{ border-left:4px solid var(--gold-soft); }
+  .card.defi-type-mystery{ border-left:4px solid var(--rose-deep); }
+  .card.defi-type-manual{ border-left:4px solid var(--amber); }
   .mystery-item{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
     padding:8px 0; border-bottom:0.5px solid var(--line); font-size:13px;
@@ -692,7 +696,7 @@
       <div style="font-size:11px; color:var(--muted); margin:10px 0 6px;">À relever avant le :</div>
       <input type="date" id="new-defi-deadline">
       <div class="err" id="defi-err">Donne un nom au défi et choisis un(e) destinataire.</div>
-      <button class="btn btn-gold" id="add-defi-btn" style="margin-top:10px; width:100%;">Ajouter le défi</button>
+      <button class="btn btn-gold" id="add-defi-btn" style="margin-top:10px; width:100%;">Envoyer le défi</button>
     </div>
     <div id="defis-list"></div>
 
@@ -1400,12 +1404,33 @@ function formatCountdown(ms){
   return h + 'h ' + String(m).padStart(2,'0') + 'min restantes';
 }
 
+function defiCategory(d){
+  return d.daily ? 'daily' : (d.mystery ? 'mystery' : 'manual');
+}
+
+function capOnePerCategory(list){
+  const picked = {};
+  list.forEach(d => {
+    const cat = defiCategory(d);
+    const existing = picked[cat];
+    if(!existing){
+      picked[cat] = d;
+    } else {
+      const existingPriority = existing.status === 'accepted' ? 1 : 0;
+      const dPriority = d.status === 'accepted' ? 1 : 0;
+      if(dPriority >= existingPriority) picked[cat] = d;
+    }
+  });
+  return Object.values(picked);
+}
+
 function renderDefis(){
   const list = document.getElementById('defis-list');
   list.innerHTML = '';
-  const visibleDefis = (myRole === 'a' || myRole === 'b')
+  const forRole = (myRole === 'a' || myRole === 'b')
     ? state.defis.filter(d => d.for === myRole)
     : state.defis;
+  const visibleDefis = capOnePerCategory(forRole);
   if(!(myRole === 'a' || myRole === 'b')){
     list.innerHTML = '<div class="empty">Choisis d\'abord qui tu es ci-dessus pour voir tes défis.</div>';
     return;
@@ -1421,7 +1446,8 @@ function renderDefis(){
   });
   sorted.forEach(d => {
     const card = document.createElement('div');
-    card.className = 'card ' + (d.status === 'accepted' ? 'defi-inprogress' : 'defi-pending');
+    card.className = 'card ' + (d.status === 'accepted' ? 'defi-inprogress' : 'defi-pending')
+      + ' ' + (d.daily ? 'defi-type-daily' : (d.mystery ? 'defi-type-mystery' : 'defi-type-manual'));
     let deadlineHtml = '';
     if(d.status === 'accepted' && d.acceptDeadline){
       const remaining = d.acceptDeadline - Date.now();
@@ -1492,15 +1518,21 @@ function renderDefis(){
       btnWrap.appendChild(editBtn);
     }
 
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-danger';
-    delBtn.textContent = '✕';
-    delBtn.onclick = () => {
-      if(!confirm('Supprimer ce défi ?')) return;
-      state.defis = state.defis.filter(x => x.id !== d.id);
-      persist(); render();
-    };
-    btnWrap.appendChild(delBtn);
+    if(d.status === 'accepted'){
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger';
+      delBtn.textContent = '🚫 Abandonner';
+      delBtn.onclick = () => {
+        if(!confirm('Abandonner ce défi ? Les points seront crédités à ton/ta partenaire.')) return;
+        const other = d.for === 'a' ? 'b' : 'a';
+        state.scores[other] += d.pts;
+        addHistory({ type:'defi', who: other, label: d.text + ' (abandonné)', pts: d.pts, status:'expired', missedBy: d.for });
+        state.defis = state.defis.filter(x => x.id !== d.id);
+        persist(); render();
+        showToast('Défi abandonné — points transférés à ' + state.names[other]);
+      };
+      btnWrap.appendChild(delBtn);
+    }
 
     card.appendChild(btnWrap);
     list.appendChild(card);
@@ -1680,6 +1712,11 @@ function ensureDailyChallenge(){
 }
 
 function drawMystery(){
+  const already = state.defis.some(d => d.for === myRole && d.mystery);
+  if(already){
+    showToast('Tu as déjà un fantasme en attente, termine-le avant d\'en piocher un autre.');
+    return;
+  }
   const partnerBox = myRole === 'b' ? state.mysteryBoxA : state.mysteryBoxB;
   if(!partnerBox || partnerBox.length === 0){
     showToast('La boîte à fantasmes de ton/ta partenaire est vide pour le moment !');
@@ -2962,12 +2999,18 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
     return;
   }
   err.style.display = 'none';
+  const already = state.defis.some(d => d.for === state.newDefiAssign && !d.daily && !d.mystery);
+  if(already){
+    showToast('Il y a déjà un défi en attente pour ' + state.names[state.newDefiAssign] + ', attends qu\'il soit résolu.');
+    return;
+  }
   const deadline = deadlineInput.value || daysFromNow(3);
   state.defis.push({ id: cryptoId(), text, pts, for: state.newDefiAssign, deadline });
   nameInput.value = '';
   ptsInput.value = '10';
   deadlineInput.value = daysFromNow(3);
   persist(); render();
+  showToast('Défi envoyé ✨');
   sendPushToPartner('✨ Nouveau défi', text.slice(0, 100));
 });
 
