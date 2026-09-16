@@ -682,18 +682,18 @@
 
     <div class="game-box">
       <div class="game-box-icon">🎁</div>
-      <h3>Boîte à défis mystère</h3>
-      <div class="sub">Pioche un défi surprise — 50 pts, 48h pour le relever.</div>
-      <div class="assign" id="mystery-assign"></div>
+      <h3>Boîte à fantasmes</h3>
+      <div class="sub">Pioche un fantasme surprise dans la liste secrète de ton/ta partenaire — 50 pts, 48h pour le réaliser.</div>
       <button class="pill-btn pill-btn-cta" id="draw-mystery-btn" style="margin-top:14px;">
-        <span>🎲</span><span>Piocher un défi</span>
+        <span>🎲</span><span>Piocher un fantasme</span>
       </button>
-      <button class="btn btn-ghost" id="toggle-mystery-form" style="width:100%; margin-top:8px;">Gérer le contenu</button>
+      <button class="btn btn-ghost" id="toggle-mystery-form" style="width:100%; margin-top:8px;">Gérer mes fantasmes</button>
       <div id="mystery-form-wrap" style="display:none; margin-top:12px;">
+        <div class="sub" style="margin-bottom:8px;">Visible uniquement par toi. Ton/ta partenaire ne verra jamais cette liste — seulement ce qui est pioché.</div>
         <div class="row">
-          <input type="text" id="new-mystery-text" placeholder="Ajouter une idée à la boîte...">
+          <input type="text" id="new-mystery-text" placeholder="Ajoute un fantasme...">
         </div>
-        <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin-bottom:10px;">Ajouter à la boîte</button>
+        <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin-bottom:10px;">Ajouter à ma boîte</button>
         <div id="mystery-list"></div>
       </div>
     </div>
@@ -991,18 +991,20 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Strip-tease privé", pts: 55 },
     { id: cryptoId(), text: "Soirée à thème au choix", pts: 100 },
   ],
-  mysteryBox: [
+  mysteryBoxA: [
     { id: cryptoId(), text: "Restaurant pour elle" },
-    { id: cryptoId(), text: "Restaurant pour lui" },
-    { id: cryptoId(), text: "Préliminaires pour lui" },
     { id: cryptoId(), text: "Préliminaires pour elle" },
     { id: cryptoId(), text: "Plaisir à deux" },
-    { id: cryptoId(), text: "Journée du oui pour lui" },
     { id: cryptoId(), text: "Journée du oui pour elle" },
-    { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
     { id: cryptoId(), text: "Utiliser un sex toy sur elle" },
   ],
-  mysteryAssign: 'a',
+  mysteryBoxB: [
+    { id: cryptoId(), text: "Restaurant pour lui" },
+    { id: cryptoId(), text: "Préliminaires pour lui" },
+    { id: cryptoId(), text: "Plaisir à deux" },
+    { id: cryptoId(), text: "Journée du oui pour lui" },
+    { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
+  ],
   dailyTurn: 'a',
   dailyChallenge: { date: '' },
   calendarNotes: [],
@@ -1168,8 +1170,14 @@ document.getElementById('change-role-btn').addEventListener('click', () => {
 
 function normalizeState(s){
   const def = defaultState();
-  if(!s.mysteryBox) s.mysteryBox = def.mysteryBox;
-  if(!s.mysteryAssign) s.mysteryAssign = 'a';
+  if(!s.mysteryBoxA && !s.mysteryBoxB && s.mysteryBox){
+    s.mysteryBoxA = s.mysteryBox.map(x => ({ ...x }));
+    s.mysteryBoxB = s.mysteryBox.map(x => ({ ...x, id: cryptoId() }));
+  }
+  if(!s.mysteryBoxA) s.mysteryBoxA = def.mysteryBoxA;
+  if(!s.mysteryBoxB) s.mysteryBoxB = def.mysteryBoxB;
+  delete s.mysteryBox;
+  delete s.mysteryAssign;
   if(!s.dailyTurn) s.dailyTurn = 'a';
   if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
   if(!s.calendarNotes) s.calendarNotes = [];
@@ -1280,7 +1288,6 @@ function render(){
   renderTodayDefiBox();
   renderHistoires();
   renderAssignPicker();
-  renderMysteryAssign();
   renderMysteryList();
   renderDefis();
   renderRewards();
@@ -1331,28 +1338,20 @@ function renderAssignPicker(){
   });
 }
 
-function renderMysteryAssign(){
-  const wrap = document.getElementById('mystery-assign');
-  if(!wrap) return;
-  wrap.innerHTML = '';
-  ['a','b'].forEach(k => {
-    const b = document.createElement('button');
-    b.textContent = 'Pour ' + state.names[k];
-    b.className = state.mysteryAssign === k ? 'picked' : '';
-    b.onclick = () => { state.mysteryAssign = k; persist(); renderMysteryAssign(); };
-    wrap.appendChild(b);
-  });
+function myMysteryBox(){
+  return myRole === 'b' ? state.mysteryBoxB : state.mysteryBoxA;
 }
 
 function renderMysteryList(){
   const list = document.getElementById('mystery-list');
   if(!list) return;
   list.innerHTML = '';
-  if(!state.mysteryBox || state.mysteryBox.length === 0){
-    list.innerHTML = '<div class="empty">La boîte est vide.</div>';
+  const box = myMysteryBox();
+  if(!box || box.length === 0){
+    list.innerHTML = '<div class="empty">Ta boîte est vide.</div>';
     return;
   }
-  state.mysteryBox.forEach(item => {
+  box.forEach(item => {
     const row = document.createElement('div');
     row.className = 'mystery-item';
     const txt = document.createElement('div');
@@ -1408,7 +1407,7 @@ function renderDefis(){
       const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
       deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
     }
-    const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Défi mystère — ' : '');
+    const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Fantasme — ' : '');
     const statusTag = d.status === 'accepted'
       ? '<div class="defi-tag defi-tag-progress">⏳ En cours</div>'
       : '<div class="defi-tag defi-tag-new">🆕 En attente de ta réponse</div>';
@@ -1655,23 +1654,23 @@ function ensureDailyChallenge(){
 }
 
 function drawMystery(){
-  if(!state.mysteryBox || state.mysteryBox.length === 0){
-    showToast('La boîte mystère est vide, ajoute des idées !');
+  const partnerBox = myRole === 'b' ? state.mysteryBoxA : state.mysteryBoxB;
+  if(!partnerBox || partnerBox.length === 0){
+    showToast('La boîte à fantasmes de ton/ta partenaire est vide pour le moment !');
     return;
   }
-  const item = state.mysteryBox[Math.floor(Math.random() * state.mysteryBox.length)];
-  const assignee = state.mysteryAssign === 'b' ? 'b' : 'a';
+  const item = partnerBox[Math.floor(Math.random() * partnerBox.length)];
   state.defis.push({
-    id: cryptoId(), text: item.text, pts: 50, for: assignee,
+    id: cryptoId(), text: item.text, pts: 50, for: myRole,
     deadline: daysFromNow(2), mystery: true
   });
   persist(); render();
-  showToast('🎁 Défi mystère pioché pour ' + state.names[assignee]);
+  showToast('🎁 Fantasme pioché, à toi de le réaliser !');
   celebrate('🎁');
 }
 
 function addMysteryItem(text){
-  state.mysteryBox.push({ id: cryptoId(), text });
+  myMysteryBox().push({ id: cryptoId(), text });
   persist(); render();
 }
 
@@ -1737,7 +1736,11 @@ document.getElementById('save-dice-btn').addEventListener('click', () => {
 });
 
 function removeMysteryItem(id){
-  state.mysteryBox = state.mysteryBox.filter(x => x.id !== id);
+  if(myRole === 'b'){
+    state.mysteryBoxB = state.mysteryBoxB.filter(x => x.id !== id);
+  } else {
+    state.mysteryBoxA = state.mysteryBoxA.filter(x => x.id !== id);
+  }
   persist(); render();
 }
 
