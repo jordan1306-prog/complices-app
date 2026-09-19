@@ -1557,6 +1557,43 @@ function editDefi(id){
   showToast('Défi modifié');
 }
 
+const ACCEPT_TEASERS = [
+  "🔥 Ton défi vient d'être accepté... prépare-toi.",
+  "😏 C'est un oui. Patience, ça arrive...",
+  "🎯 Défi accepté ! Le compte à rebours commence.",
+  "💋 Ton complice a dit oui... à toi de deviner la suite.",
+  "😈 Accepté sans hésiter. Tu vas aimer ça.",
+  "🌙 Le défi est accepté, la surprise se prépare...",
+  "✨ Un oui qui promet beaucoup...",
+  "🔥 Ça vient de devenir sérieux. Défi accepté.",
+];
+
+const DAILY_HINTS = {
+  simple: [
+    "Un petit geste tout doux t'attend aujourd'hui 💕",
+    "Rien de fou, juste de quoi te faire sourire 😊",
+    "Une attention simple mais qui compte 🌸",
+    "De la tendresse au programme aujourd'hui 🤍",
+  ],
+  exciting: [
+    "Ça va chauffer un peu aujourd'hui 😏",
+    "Un petit défi qui titille la curiosité 🔥",
+    "De quoi pimenter la journée, sans trop en dire...",
+    "Une surprise coquine se prépare 😉",
+  ],
+  hot: [
+    "Accroche-toi, ça va être torride 🔥🔥",
+    "Ce soir pourrait être mémorable 😈",
+    "Prépare-toi, celui-là ne fait pas dans la demi-mesure...",
+    "Une soirée qui s'annonce chaude 🌶️",
+  ],
+};
+function dailyHintFor(d){
+  const tier = d.pts <= 12 ? 'simple' : (d.pts <= 22 ? 'exciting' : 'hot');
+  const arr = DAILY_HINTS[tier];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function acceptDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
@@ -1564,6 +1601,12 @@ function acceptDefi(id){
   d.acceptDeadline = Date.now() + 24 * 3600000;
   persist(); render();
   showToast('Défi accepté — 24h pour le relever ⏳');
+  if(d.daily){
+    sendPushToPartner('✨ Défi du jour accepté', dailyHintFor(d));
+  } else {
+    const teaser = ACCEPT_TEASERS[Math.floor(Math.random() * ACCEPT_TEASERS.length)];
+    sendPushToPartner('Défi accepté', teaser);
+  }
 }
 
 function refuseDefi(id){
