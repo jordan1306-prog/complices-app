@@ -265,19 +265,6 @@
   }
   nav button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
 
-  #update-banner{
-    position:fixed; top:0; left:0; right:0; z-index:30;
-    background: linear-gradient(90deg, var(--gold), var(--rose-deep));
-    color:#fdf1f0; font-family:'Manrope',sans-serif; font-weight:600; font-size:12.5px;
-    display:flex; align-items:center; justify-content:center; gap:12px;
-    padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top));
-    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-  }
-  #update-banner-btn{
-    background:#fdf1f0; color: var(--gold-deep, #7a1233); border:none; border-radius:14px;
-    padding:5px 14px; font-weight:700; font-size:12px; cursor:pointer;
-  }
-
   #bottom-nav{
     position:fixed; left:0; right:0; bottom:0; z-index:15;
     display:flex; justify-content:space-around; align-items:center;
@@ -498,7 +485,6 @@
     color: var(--muted); border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer;
     font-family:'Manrope',sans-serif; z-index:10;
   }
-  body.has-update-banner .signout{ top:62px !important; }
 
   body.chat-fullscreen{ overflow:hidden; }
   body.chat-fullscreen .signout,
@@ -574,7 +560,6 @@
   </div>
 </div>
 
-<button class="signout" id="signout-btn" style="display:none;">Déconnexion</button>
 <button class="signout" id="settings-btn" style="display:none; top:16px; left:16px; right:auto;">⚙️</button>
 <button class="signout" id="notif-btn" style="display:none; top:16px; left:64px; right:auto; position:fixed;">
   🔔<span id="notif-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--red); color:#fff; font-size:10px; font-weight:700; border-radius:10px; min-width:16px; height:16px; line-height:16px; text-align:center; padding:0 3px;">0</span>
@@ -595,6 +580,9 @@
       <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
       <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%; margin-bottom:14px;">📤 Envoyer une notif test au/à la partenaire</button>
     </div>
+    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Compte</div>
+    <button class="btn btn-ghost" id="signout-btn" style="width:100%; margin-bottom:14px;">Déconnexion</button>
+    <div class="sub" style="text-align:left; margin-bottom:14px; opacity:0.6; font-size:11px;">Version 2026.09.20</div>
     <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
   </div>
 </div>
@@ -937,7 +925,6 @@ onAuthStateChanged(auth, user => {
   if(user){
     loginView.style.display = 'none';
     appView.style.display = 'block';
-    signoutBtn.style.display = 'block';
     document.getElementById('settings-btn').style.display = 'block';
     document.getElementById('notif-btn').style.display = 'block';
     selectGroup('accueil');
@@ -950,7 +937,6 @@ onAuthStateChanged(auth, user => {
   } else {
     loginView.style.display = 'flex';
     appView.style.display = 'none';
-    signoutBtn.style.display = 'none';
     document.getElementById('settings-btn').style.display = 'none';
     document.getElementById('notif-btn').style.display = 'none';
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
@@ -986,7 +972,10 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
   }
 });
 
-signoutBtn.addEventListener('click', () => signOut(auth));
+signoutBtn.addEventListener('click', () => {
+  document.getElementById('settings-panel').style.display = 'none';
+  signOut(auth);
+});
 
 function daysFromNow(n){
   const d = new Date();
@@ -4149,28 +4138,19 @@ if('serviceWorker' in navigator){
         if(!newWorker) return;
         newWorker.addEventListener('statechange', () => {
           if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-            showUpdateBanner(newWorker);
+            try{ newWorker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
           }
         });
       });
     }).catch(()=>{});
-  });
-}
 
-function showUpdateBanner(worker){
-  if(document.getElementById('update-banner')) return;
-  if(sessionStorage.getItem('complices-update-dismissed')) return;
-  const banner = document.createElement('div');
-  banner.id = 'update-banner';
-  banner.innerHTML = `<span>✨ Nouvelle version disponible</span><button id="update-banner-btn">OK</button>`;
-  document.body.appendChild(banner);
-  document.body.classList.add('has-update-banner');
-  document.getElementById('update-banner-btn').onclick = () => {
-    try{ worker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
-    sessionStorage.setItem('complices-update-dismissed', '1');
-    banner.remove();
-    document.body.classList.remove('has-update-banner');
-  };
+    let reloadedOnce = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(reloadedOnce) return;
+      reloadedOnce = true;
+      window.location.reload();
+    });
+  });
 }
 </script>
 </body>
