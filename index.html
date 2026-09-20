@@ -1706,6 +1706,7 @@ function completeDefi(id){
   persist(); render();
   showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
   celebrate('🎉');
+  sendPushToPartner('🎉 Défi réussi', d.text.slice(0, 80) + ' (+' + d.pts + ' pts)');
 }
 
 function checkExpiredDefis(){
