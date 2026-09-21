@@ -793,6 +793,23 @@
     <div id="profil-overview"></div>
 
     <div class="secret-box" style="margin-top:18px;">
+      <h3>⚖️ Ajuster les points</h3>
+      <div class="sub">Nécessite la validation de ton/ta partenaire — impossible de s'ajouter des points seul·e.</div>
+      <div id="point-adjust-pending"></div>
+      <div class="assign" id="adjust-who-picker">
+        <button data-who="a" class="picked">Pour Elle</button>
+        <button data-who="b">Pour Lui</button>
+      </div>
+      <div class="row">
+        <input type="number" id="adjust-amount" placeholder="Montant (ex : 34 ou -10)">
+      </div>
+      <div class="row">
+        <input type="text" id="adjust-reason" placeholder="Raison (ex : correction après un bug)" maxlength="140">
+      </div>
+      <button class="btn btn-gold" id="propose-adjust-btn" style="width:100%; margin-top:6px;">Proposer l'ajustement</button>
+    </div>
+
+    <div class="secret-box" style="margin-top:18px;">
       <h3>📊 Statistiques</h3>
       <div class="sub">Créez vos propres compteurs, incrémentez-les au moment venu, suivez l'évolution.</div>
       <div id="counters-list"></div>
@@ -939,6 +956,7 @@ onAuthStateChanged(auth, user => {
     appView.style.display = 'none';
     document.getElementById('settings-btn').style.display = 'none';
     document.getElementById('notif-btn').style.display = 'none';
+    stateLoaded = false;
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubSecretFlags){ unsubSecretFlags(); unsubSecretFlags = null; }
   }
@@ -986,6 +1004,7 @@ function daysFromNow(n){
 const defaultState = () => ({
   names: { a: 'Elle', b: 'Lui' },
   scores: { a: 0, b: 0 },
+  pointAdjustments: [],
   mysteryPing: { a: false, b: false },
   defis: [
     { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a', deadline: daysFromNow(1) },
@@ -1141,6 +1160,7 @@ function cryptoId(){ return Math.random().toString(36).slice(2,10); }
 
 let state = null;
 let saveTimer = null;
+let stateLoaded = false;
 let myRole = localStorage.getItem('complices-role') || null;
 
 function setMyRole(role){
@@ -1187,6 +1207,7 @@ function normalizeState(s){
   if(!s.mysteryBoxA) s.mysteryBoxA = def.mysteryBoxA;
   if(!s.mysteryBoxB) s.mysteryBoxB = def.mysteryBoxB;
   if(!s.mysteryPing) s.mysteryPing = { a: false, b: false };
+  if(!s.pointAdjustments) s.pointAdjustments = [];
   delete s.mysteryBox;
   delete s.mysteryAssign;
   if(!s.dailyTurn) s.dailyTurn = 'a';
@@ -1210,10 +1231,14 @@ async function loadState(){
   try{
     const snap = await getDoc(stateDocRef);
     state = snap.exists() ? normalizeState(snap.data()) : defaultState();
+    stateLoaded = true;
   }catch(e){
     console.error(e);
     state = defaultState();
-    showToast("Connexion à Firebase impossible, mode local");
+    stateLoaded = false;
+    showToast("Connexion à Firebase impossible, tes données ne seront pas modifiées. Réessaie plus tard.");
+    render();
+    return;
   }
   checkExpiredDefis();
   checkExpiredPurchases();
@@ -1231,6 +1256,10 @@ async function loadState(){
 }
 
 function persist(){
+  if(!stateLoaded){
+    console.warn('persist() ignoré : les données n\'ont pas été chargées avec succès.');
+    return;
+  }
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     try{
@@ -1316,6 +1345,7 @@ function render(){
   renderAvatars();
   renderProfilOverview();
   renderCounters();
+  renderPointAdjustments();
 }
 
 function computeStreak(){
@@ -1910,6 +1940,86 @@ function computeCounterStats(counter){
   return { total, thisWeek, thisMonth, byPerson, weeks };
 }
 
+function renderPointAdjustments(){
+  const wrap = document.getElementById('point-adjust-pending');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  const list = state.pointAdjustments || [];
+  if(list.length === 0) return;
+  list.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '10px';
+    const sign = a.amount > 0 ? '+' : '';
+    const title = document.createElement('div');
+    title.style.fontWeight = '700';
+    title.textContent = sign + a.amount + ' pts pour ' + state.names[a.who];
+    card.appendChild(title);
+    if(a.reason){
+      const reasonEl = document.createElement('div');
+      reasonEl.style.fontSize = '12px';
+      reasonEl.style.color = 'var(--muted)';
+      reasonEl.textContent = a.reason;
+      card.appendChild(reasonEl);
+    }
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.gap = '8px';
+    btnWrap.style.marginTop = '8px';
+    if(a.requestedBy === myRole){
+      const statusEl = document.createElement('div');
+      statusEl.style.fontSize = '12px';
+      statusEl.style.color = 'var(--muted)';
+      statusEl.textContent = 'En attente de validation par ton/ta partenaire...';
+      card.appendChild(statusEl);
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost';
+      cancelBtn.textContent = 'Annuler';
+      cancelBtn.onclick = () => cancelPointAdjustment(a.id);
+      btnWrap.appendChild(cancelBtn);
+    } else {
+      const okBtn = document.createElement('button');
+      okBtn.className = 'btn btn-gold';
+      okBtn.textContent = '✅ Valider';
+      okBtn.onclick = () => validatePointAdjustment(a.id);
+      const noBtn = document.createElement('button');
+      noBtn.className = 'btn btn-danger';
+      noBtn.textContent = '❌ Refuser';
+      noBtn.onclick = () => refusePointAdjustment(a.id);
+      btnWrap.appendChild(okBtn);
+      btnWrap.appendChild(noBtn);
+    }
+    card.appendChild(btnWrap);
+    wrap.appendChild(card);
+  });
+}
+
+function validatePointAdjustment(id){
+  const a = state.pointAdjustments.find(x => x.id === id);
+  if(!a) return;
+  state.scores[a.who] = (state.scores[a.who] || 0) + a.amount;
+  addHistory({ type:'adjustment', who: a.who, label: 'Ajustement manuel' + (a.reason ? ' — ' + a.reason : ''), pts: a.amount, status:'completed' });
+  state.pointAdjustments = state.pointAdjustments.filter(x => x.id !== id);
+  persist(); render();
+  showToast('Ajustement validé ✅');
+  sendPushToPartner('✅ Ajustement validé', (a.amount > 0 ? '+' : '') + a.amount + ' pts pour ' + state.names[a.who]);
+}
+
+function refusePointAdjustment(id){
+  const a = state.pointAdjustments.find(x => x.id === id);
+  if(!a) return;
+  state.pointAdjustments = state.pointAdjustments.filter(x => x.id !== id);
+  persist(); render();
+  showToast('Ajustement refusé');
+  sendPushToPartner('❌ Ajustement refusé', 'Ta proposition de ' + (a.amount > 0 ? '+' : '') + a.amount + ' pts a été refusée');
+}
+
+function cancelPointAdjustment(id){
+  state.pointAdjustments = state.pointAdjustments.filter(x => x.id !== id);
+  persist(); render();
+  showToast('Proposition annulée');
+}
+
 function renderCounters(){
   const list = document.getElementById('counters-list');
   if(!list || !state) return;
@@ -1996,6 +2106,36 @@ document.getElementById('toggle-counter-form').addEventListener('click', () => {
 });
 
 let newCounterMode = 'both';
+let adjustWho = 'a';
+document.querySelectorAll('#adjust-who-picker button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    adjustWho = btn.dataset.who;
+    document.querySelectorAll('#adjust-who-picker button').forEach(b => b.classList.remove('picked'));
+    btn.classList.add('picked');
+  });
+});
+
+document.getElementById('propose-adjust-btn').addEventListener('click', () => {
+  const amountInput = document.getElementById('adjust-amount');
+  const reasonInput = document.getElementById('adjust-reason');
+  const amount = parseInt(amountInput.value, 10);
+  if(!amount || amount === 0){
+    showToast('Indique un montant différent de zéro.');
+    return;
+  }
+  const reason = reasonInput.value.trim();
+  state.pointAdjustments.push({
+    id: cryptoId(), who: adjustWho, amount, reason,
+    requestedBy: myRole, ts: Date.now()
+  });
+  persist(); render();
+  amountInput.value = '';
+  reasonInput.value = '';
+  showToast('Proposition envoyée, en attente de validation ✋');
+  const sign = amount > 0 ? '+' : '';
+  sendPushToPartner('⚖️ Ajustement de points proposé', sign + amount + ' pts pour ' + state.names[adjustWho] + (reason ? ' — ' + reason : ''));
+});
+
 document.querySelectorAll('#new-counter-mode button').forEach(btn => {
   btn.addEventListener('click', () => {
     newCounterMode = btn.dataset.mode;
