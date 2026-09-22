@@ -3652,14 +3652,15 @@ function getNotificationItems(){
   if(!state || !myRole) return [];
   const items = [];
   const now = Date.now();
-  state.defis.forEach(d => {
-    if(d.for === myRole && d.status !== 'accepted' && d.deadline){
+  const myDefis = capOnePerCategory(state.defis.filter(d => d.for === myRole));
+  myDefis.forEach(d => {
+    if(d.status !== 'accepted' && d.deadline){
       const remaining = new Date(d.deadline + 'T23:59:59') - now;
       if(remaining > 0){
         items.push({ text: '🆕 À accepter avant le ' + new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ' : ' + d.text, tab: 'defis' });
       }
     }
-    if(d.for === myRole && d.status === 'accepted' && d.acceptDeadline){
+    if(d.status === 'accepted' && d.acceptDeadline){
       const remaining = d.acceptDeadline - now;
       if(remaining > 0){
         items.push({ text: '⏰ Plus que ' + formatCountdown(remaining) + ' pour : ' + d.text, tab: 'defis' });
