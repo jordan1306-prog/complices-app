@@ -3459,6 +3459,7 @@ async function sendTextMessage(){
   if(!text) return;
   input.value = '';
   input.style.height = 'auto';
+  localStorage.removeItem('complices-chat-draft');
   try{
     await addDoc(collection(db, 'messages'), {
       type: 'text',
@@ -3482,7 +3483,17 @@ document.getElementById('chat-text-input').addEventListener('keydown', e => {
 document.getElementById('chat-text-input').addEventListener('input', function(){
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  localStorage.setItem('complices-chat-draft', this.value);
 });
+(function restoreChatDraft(){
+  const draft = localStorage.getItem('complices-chat-draft');
+  if(draft){
+    const input = document.getElementById('chat-text-input');
+    input.value = draft;
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  }
+})();
 
 function compressImageToDataUrl(file, maxSize = 900){
   return new Promise((resolve, reject) => {
@@ -4279,18 +4290,14 @@ if('serviceWorker' in navigator){
         if(!newWorker) return;
         newWorker.addEventListener('statechange', () => {
           if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            // Prépare la nouvelle version en arrière-plan, sans jamais recharger
+            // la page toute seule : ça prendra effet à la prochaine ouverture
+            // naturelle de l'app, pour ne jamais couper une saisie en cours.
             try{ newWorker.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
           }
         });
       });
     }).catch(()=>{});
-
-    let reloadedOnce = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if(reloadedOnce) return;
-      reloadedOnce = true;
-      window.location.reload();
-    });
   });
 }
 </script>
