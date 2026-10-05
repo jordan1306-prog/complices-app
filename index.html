@@ -573,6 +573,13 @@
     <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
     <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
+    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Cadence du défi du jour (chacun·e de votre côté)</div>
+    <select id="defi-frequency-select" style="width:100%; margin-bottom:14px; padding:11px; border-radius:12px; background:var(--card); color:var(--cream); border:0.5px solid var(--line); font-family:'Manrope',sans-serif; font-size:14px;">
+      <option value="7">Tous les jours</option>
+      <option value="3">3 fois par semaine</option>
+      <option value="2">2 fois par semaine</option>
+      <option value="1">1 fois par semaine</option>
+    </select>
     <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
     <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
     <div id="settings-dev-zone" style="display:none;">
@@ -1034,8 +1041,9 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Journée du oui pour lui" },
     { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
   ],
-  dailyTurn: 'a',
-  dailyChallenge: { date: '' },
+  defiFrequency: 7,
+  dailyChallengeA: { date: '' },
+  dailyChallengeB: { date: '' },
   calendarNotes: [],
   goal: { target: 500 },
   purchases: [],
@@ -1210,8 +1218,15 @@ function normalizeState(s){
   if(!s.pointAdjustments) s.pointAdjustments = [];
   delete s.mysteryBox;
   delete s.mysteryAssign;
-  if(!s.dailyTurn) s.dailyTurn = 'a';
-  if(!s.dailyChallenge) s.dailyChallenge = { date: '' };
+  if(!s.defiFrequency) s.defiFrequency = 7;
+  if(!s.dailyChallengeA && !s.dailyChallengeB && s.dailyChallenge){
+    s.dailyChallengeA = { date: s.dailyChallenge.date || '' };
+    s.dailyChallengeB = { date: s.dailyChallenge.date || '' };
+  }
+  if(!s.dailyChallengeA) s.dailyChallengeA = { date: '' };
+  if(!s.dailyChallengeB) s.dailyChallengeB = { date: '' };
+  delete s.dailyTurn;
+  delete s.dailyChallenge;
   if(!s.calendarNotes) s.calendarNotes = [];
   if(!s.goal) s.goal = { target: 500 };
   if(!s.purchases) s.purchases = [];
@@ -1760,18 +1775,28 @@ function checkExpiredDefis(){
 }
 
 function ensureDailyChallenge(){
-  const today = daysFromNow(0);
-  if(state.dailyChallenge && state.dailyChallenge.date === today) return;
-  const pick = DAILY_POOL[Math.floor(Math.random() * DAILY_POOL.length)];
-  const assignee = state.dailyTurn === 'b' ? 'b' : 'a';
-  state.defis.push({
-    id: cryptoId(), text: pick.text, pts: pick.pts, for: assignee,
-    deadline: daysFromNow(1), daily: true
+  const freq = state.defiFrequency || 7;
+  const intervalDays = 7 / freq;
+  const now = Date.now();
+  let anyCreated = false;
+  ['a', 'b'].forEach(role => {
+    const key = role === 'a' ? 'dailyChallengeA' : 'dailyChallengeB';
+    const lastDate = state[key] && state[key].date ? state[key].date : '';
+    const lastMs = lastDate ? new Date(lastDate + 'T00:00:00').getTime() : 0;
+    const daysSince = (now - lastMs) / 86400000;
+    if(daysSince < intervalDays) return;
+    const already = state.defis.some(d => d.for === role && d.daily);
+    if(already) return;
+    const pick = DAILY_POOL[Math.floor(Math.random() * DAILY_POOL.length)];
+    state.defis.push({
+      id: cryptoId(), text: pick.text, pts: pick.pts, for: role,
+      deadline: daysFromNow(1), daily: true
+    });
+    state[key] = { date: daysFromNow(0) };
+    anyCreated = true;
+    showToast('✨ Nouveau défi du jour pour ' + state.names[role]);
   });
-  state.dailyTurn = assignee === 'a' ? 'b' : 'a';
-  state.dailyChallenge = { date: today };
-  persist();
-  showToast('✨ Nouveau défi du jour pour ' + state.names[assignee]);
+  if(anyCreated) persist();
 }
 
 function drawMystery(){
@@ -3542,6 +3567,9 @@ renderDailyMessage();
 
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'flex';
+  if(state){
+    document.getElementById('defi-frequency-select').value = String(state.defiFrequency || 7);
+  }
   const resetBtn = document.getElementById('reset-scores-btn');
   if(state && state.scoresResetUsed){
     resetBtn.disabled = true;
@@ -3555,6 +3583,12 @@ document.getElementById('settings-btn').addEventListener('click', () => {
 });
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
+});
+document.getElementById('defi-frequency-select').addEventListener('change', function(){
+  if(!state) return;
+  state.defiFrequency = parseInt(this.value, 10) || 7;
+  persist();
+  showToast('Cadence mise à jour ✨');
 });
 
 let settingsTitleTaps = 0;
