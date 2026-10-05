@@ -573,15 +573,18 @@
     <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
     <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
     <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
-    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Cadence du défi du jour (chacun·e de votre côté)</div>
-    <select id="defi-frequency-select" style="width:100%; margin-bottom:14px; padding:11px; border-radius:12px; background:var(--card); color:var(--cream); border:0.5px solid var(--line); font-family:'Manrope',sans-serif; font-size:14px;">
-      <option value="7">Tous les jours</option>
-      <option value="3">3 fois par semaine</option>
-      <option value="2">2 fois par semaine</option>
-      <option value="1">1 fois par semaine</option>
-    </select>
-    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Remise à zéro des points (après des tests par exemple)</div>
-    <button class="btn btn-danger" id="reset-scores-btn" style="width:100%; margin-bottom:14px; border:0.5px solid var(--danger);">⚠️ Remettre les points à 0</button>
+    <div style="border-top:0.5px solid var(--line); padding-top:14px; margin-bottom:14px;">
+      <div class="sub" style="text-align:left; margin-bottom:2px;">Cadence du défi du jour</div>
+      <div style="font-size:11px; color:var(--muted); text-align:left; margin-bottom:10px;">Chacun·e reçoit le sien de son côté.</div>
+      <div id="defi-frequency-current" style="font-size:13px; color:var(--gold-soft); text-align:left; margin-bottom:8px;">Actuellement : —</div>
+      <select id="defi-frequency-select" style="width:100%; margin-bottom:8px; padding:11px; border-radius:12px; background:var(--card); color:var(--cream); border:0.5px solid var(--line); font-family:'Manrope',sans-serif; font-size:14px;">
+        <option value="7">Tous les jours</option>
+        <option value="3">3 fois par semaine</option>
+        <option value="2">2 fois par semaine</option>
+        <option value="1">1 fois par semaine</option>
+      </select>
+      <button class="btn btn-gold" id="apply-frequency-btn" style="width:100%;">Appliquer</button>
+    </div>
     <div id="settings-dev-zone" style="display:none;">
       <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
       <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
@@ -3565,30 +3568,27 @@ function applyStoredBackground(){
 applyStoredBackground();
 renderDailyMessage();
 
+const FREQUENCY_LABELS = { 7: 'tous les jours', 3: '3 fois par semaine', 2: '2 fois par semaine', 1: '1 fois par semaine' };
+
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'flex';
   if(state){
-    document.getElementById('defi-frequency-select').value = String(state.defiFrequency || 7);
-  }
-  const resetBtn = document.getElementById('reset-scores-btn');
-  if(state && state.scoresResetUsed){
-    resetBtn.disabled = true;
-    resetBtn.textContent = 'Déjà utilisé — indisponible';
-    resetBtn.style.opacity = '0.5';
-  } else {
-    resetBtn.disabled = false;
-    resetBtn.textContent = '⚠️ Remettre les points à 0';
-    resetBtn.style.opacity = '1';
+    const freq = state.defiFrequency || 7;
+    document.getElementById('defi-frequency-select').value = String(freq);
+    document.getElementById('defi-frequency-current').textContent = 'Actuellement : ' + (FREQUENCY_LABELS[freq] || 'tous les jours');
   }
 });
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
 });
-document.getElementById('defi-frequency-select').addEventListener('change', function(){
+document.getElementById('apply-frequency-btn').addEventListener('click', () => {
   if(!state) return;
-  state.defiFrequency = parseInt(this.value, 10) || 7;
+  const select = document.getElementById('defi-frequency-select');
+  const freq = parseInt(select.value, 10) || 7;
+  state.defiFrequency = freq;
   persist();
-  showToast('Cadence mise à jour ✨');
+  document.getElementById('defi-frequency-current').textContent = 'Actuellement : ' + (FREQUENCY_LABELS[freq] || 'tous les jours');
+  showToast('Cadence appliquée ✨');
 });
 
 let settingsTitleTaps = 0;
@@ -3775,21 +3775,6 @@ document.getElementById('reset-bg-btn').addEventListener('click', () => {
   localStorage.removeItem('complices-bg');
   applyStoredBackground();
   showToast('Fond réinitialisé');
-});
-
-document.getElementById('reset-scores-btn').addEventListener('click', () => {
-  if(state.scoresResetUsed){
-    showToast('Ce bouton a déjà été utilisé une fois, il n\'est plus disponible');
-    return;
-  }
-  if(!confirm('Remettre les points de ' + state.names.a + ' et ' + state.names.b + ' à 0 ? Cette action est irréversible et ne pourra être faite qu\'une seule fois.')) return;
-  if(!confirm('Vraiment sûr·e ? Les points actuels (' + state.scores.a + ' et ' + state.scores.b + ') seront définitivement perdus.')) return;
-  state.scores.a = 0;
-  state.scores.b = 0;
-  state.scoresResetUsed = true;
-  persist(); render();
-  showToast('Points remis à 0 ✅ (option maintenant désactivée)');
-  document.getElementById('settings-panel').style.display = 'none';
 });
 
 document.getElementById('diag-notif-btn').addEventListener('click', async () => {
