@@ -829,40 +829,50 @@
   </section>
 
   <section id="tab-profil-accueil">
-    <div id="profil-overview"></div>
-
-    <div class="secret-box" style="margin-top:18px;">
-      <h3>⚖️ Ajuster les points</h3>
-      <div class="sub">Nécessite la validation de ton/ta partenaire — impossible de s'ajouter des points seul·e.</div>
-      <div id="point-adjust-pending"></div>
-      <div class="assign" id="adjust-who-picker">
-        <button data-who="a" class="picked">Pour Elle</button>
-        <button data-who="b">Pour Lui</button>
-      </div>
-      <div class="row">
-        <input type="number" id="adjust-amount" placeholder="Montant (ex : 34 ou -10)">
-      </div>
-      <div class="row">
-        <input type="text" id="adjust-reason" placeholder="Raison (ex : correction après un bug)" maxlength="140">
-      </div>
-      <button class="btn btn-gold" id="propose-adjust-btn" style="width:100%; margin-top:6px;">Proposer l'ajustement</button>
+    <div id="profil-sub-main">
+      <div id="profil-overview"></div>
+      <button class="pill-btn" id="profil-adjust-btn" style="margin-top:10px;"><span>⚖️</span><span>Ajuster les points</span><span class="pill-arrow">›</span></button>
+      <button class="pill-btn" id="profil-stats-btn" style="margin-top:10px;"><span>📊</span><span>Statistiques</span><span class="pill-arrow">›</span></button>
     </div>
 
-    <div class="secret-box" style="margin-top:18px;">
-      <h3>📊 Statistiques</h3>
-      <div class="sub">Créez vos propres compteurs, incrémentez-les au moment venu, suivez l'évolution.</div>
-      <div id="counters-list"></div>
-      <button class="btn btn-ghost" id="toggle-counter-form" style="width:100%; margin-top:8px;">+ Ajouter un compteur</button>
-      <div id="counter-form-wrap" style="display:none; margin-top:12px;">
+    <div id="profil-sub-adjust" style="display:none;">
+      <button class="btn btn-ghost" id="back-from-adjust" style="margin-bottom:14px;">← Retour</button>
+      <div class="secret-box">
+        <h3>⚖️ Ajuster les points</h3>
+        <div class="sub">Nécessite la validation de ton/ta partenaire — impossible de s'ajouter des points seul·e.</div>
+        <div id="point-adjust-pending"></div>
+        <div class="assign" id="adjust-who-picker">
+          <button data-who="a" class="picked">Pour Elle</button>
+          <button data-who="b">Pour Lui</button>
+        </div>
         <div class="row">
-          <input type="text" id="new-counter-name" placeholder="Nom du compteur (ex : Câlins)">
+          <input type="number" id="adjust-amount" placeholder="Montant (ex : 34 ou -10)">
         </div>
-        <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Type de compteur :</div>
-        <div class="assign" id="new-counter-mode">
-          <button data-mode="both" class="picked">Partagé (à deux)</button>
-          <button data-mode="directional">Qui l'a fait à qui</button>
+        <div class="row">
+          <input type="text" id="adjust-reason" placeholder="Raison (ex : correction après un bug)" maxlength="140">
         </div>
-        <button class="btn btn-gold" id="add-counter-btn" style="width:100%; margin-top:10px;">Créer le compteur</button>
+        <button class="btn btn-gold" id="propose-adjust-btn" style="width:100%; margin-top:6px;">Proposer l'ajustement</button>
+      </div>
+    </div>
+
+    <div id="profil-sub-stats" style="display:none;">
+      <button class="btn btn-ghost" id="back-from-stats" style="margin-bottom:14px;">← Retour</button>
+      <div class="secret-box">
+        <h3>📊 Statistiques</h3>
+        <div class="sub">Créez vos propres compteurs, incrémentez-les au moment venu, suivez l'évolution.</div>
+        <div id="counters-list"></div>
+        <button class="btn btn-ghost" id="toggle-counter-form" style="width:100%; margin-top:8px;">+ Ajouter un compteur</button>
+        <div id="counter-form-wrap" style="display:none; margin-top:12px;">
+          <div class="row">
+            <input type="text" id="new-counter-name" placeholder="Nom du compteur (ex : Câlins)">
+          </div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Type de compteur :</div>
+          <div class="assign" id="new-counter-mode">
+            <button data-mode="both" class="picked">Partagé (à deux)</button>
+            <button data-mode="directional">Qui l'a fait à qui</button>
+          </div>
+          <button class="btn btn-gold" id="add-counter-btn" style="width:100%; margin-top:10px;">Créer le compteur</button>
+        </div>
       </div>
     </div>
   </section>
@@ -3627,6 +3637,16 @@ document.getElementById('back-from-bg').addEventListener('click', () => showSett
 document.getElementById('back-from-defis').addEventListener('click', () => showSettingsView('settings-main'));
 document.getElementById('back-from-depannage').addEventListener('click', () => showSettingsView('settings-main'));
 
+function showProfilView(id){
+  ['profil-sub-main', 'profil-sub-adjust', 'profil-sub-stats'].forEach(v => {
+    document.getElementById(v).style.display = (v === id) ? 'block' : 'none';
+  });
+}
+document.getElementById('profil-adjust-btn').addEventListener('click', () => showProfilView('profil-sub-adjust'));
+document.getElementById('profil-stats-btn').addEventListener('click', () => showProfilView('profil-sub-stats'));
+document.getElementById('back-from-adjust').addEventListener('click', () => showProfilView('profil-sub-main'));
+document.getElementById('back-from-stats').addEventListener('click', () => showProfilView('profil-sub-main'));
+
 document.getElementById('add-pool-defi-btn').addEventListener('click', () => {
   if(!state) return;
   const textInput = document.getElementById('new-pool-defi-text');
@@ -3683,6 +3703,9 @@ const GROUP_TABS = {
 
 function selectGroup(groupName, preferredTab){
   document.body.classList.toggle('chat-fullscreen', groupName === 'messages');
+  if(groupName === 'profil' && document.getElementById('profil-sub-main')){
+    showProfilView('profil-sub-main');
+  }
   document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.group === groupName));
   const dashboard = document.getElementById('dashboard-area');
   const subNav = document.getElementById('sub-nav');
