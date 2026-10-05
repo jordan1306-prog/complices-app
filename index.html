@@ -567,13 +567,33 @@
 
 <div id="settings-panel" style="display:none;">
   <div class="login-card" style="max-width:360px;">
-    <h1 style="font-size:24px; cursor:pointer;" id="settings-title">Paramètres</h1>
-    <p style="margin-bottom:16px;">Personnalise l'app</p>
-    <div class="sub" style="text-align:left; margin-bottom:8px;">Fond d'écran personnalisé (ta propre photo)</div>
-    <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
-    <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
-    <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%; margin-bottom:14px;">Réinitialiser le fond</button>
-    <div style="border-top:0.5px solid var(--line); padding-top:14px; margin-bottom:14px;">
+
+    <div id="settings-main">
+      <h1 style="font-size:24px;">Paramètres</h1>
+      <p style="margin-bottom:16px;">Personnalise l'app</p>
+
+      <button class="pill-btn" id="settings-cat-bg" style="width:100%; margin-bottom:10px;"><span>🖼️</span><span>Fond d'écran</span><span class="pill-arrow">›</span></button>
+      <button class="pill-btn" id="settings-cat-defis" style="width:100%; margin-bottom:10px;"><span>🎯</span><span>Défis</span><span class="pill-arrow">›</span></button>
+      <button class="pill-btn" id="settings-cat-depannage" style="width:100%; margin-bottom:14px;"><span>🔧</span><span>Dépannage</span><span class="pill-arrow">›</span></button>
+
+      <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Compte</div>
+      <button class="btn btn-ghost" id="signout-btn" style="width:100%; margin-bottom:14px;">Déconnexion</button>
+      <div class="sub" style="text-align:left; margin-bottom:14px; opacity:0.6; font-size:11px;">Version 2026.09.20</div>
+      <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
+    </div>
+
+    <div id="settings-sub-bg" style="display:none;">
+      <button class="btn btn-ghost" id="back-from-bg" style="margin-bottom:14px;">← Retour</button>
+      <h1 style="font-size:20px;">🖼️ Fond d'écran</h1>
+      <div class="sub" style="text-align:left; margin-bottom:8px;">Personnalisé (ta propre photo)</div>
+      <input type="file" id="bg-file-input" accept="image/*" style="margin-bottom:10px; width:100%; color:var(--muted); font-size:12px;">
+      <button class="btn btn-gold" id="apply-bg-btn" style="width:100%; margin-bottom:8px;">Appliquer</button>
+      <button class="btn btn-ghost" id="reset-bg-btn" style="width:100%;">Réinitialiser le fond</button>
+    </div>
+
+    <div id="settings-sub-defis" style="display:none;">
+      <button class="btn btn-ghost" id="back-from-defis" style="margin-bottom:14px;">← Retour</button>
+      <h1 style="font-size:20px;">🎯 Défis</h1>
       <div class="sub" style="text-align:left; margin-bottom:2px;">Cadence du défi du jour</div>
       <div style="font-size:11px; color:var(--muted); text-align:left; margin-bottom:10px;">Chacun·e reçoit le sien de son côté.</div>
       <div id="defi-frequency-current" style="font-size:13px; color:var(--gold-soft); text-align:left; margin-bottom:8px;">Actuellement : —</div>
@@ -583,17 +603,26 @@
         <option value="2">2 fois par semaine</option>
         <option value="1">1 fois par semaine</option>
       </select>
-      <button class="btn btn-gold" id="apply-frequency-btn" style="width:100%;">Appliquer</button>
+      <button class="btn btn-gold" id="apply-frequency-btn" style="width:100%; margin-bottom:14px;">Appliquer</button>
+
+      <div class="sub" style="text-align:left; margin-bottom:4px; border-top:0.5px solid var(--line); padding-top:14px;">Rajouter un défi à la réserve</div>
+      <div style="font-size:11px; color:var(--muted); text-align:left; margin-bottom:10px;">Rejoint le tirage aléatoire du défi du jour. Jamais listé nulle part, même ici — garde la surprise intacte.</div>
+      <div class="row">
+        <input type="text" id="new-pool-defi-text" placeholder="Texte du défi..." maxlength="200">
+      </div>
+      <div class="row">
+        <input type="number" id="new-pool-defi-pts" placeholder="Points (ex : 15)" min="1">
+      </div>
+      <button class="btn btn-gold" id="add-pool-defi-btn" style="width:100%;">Ajouter à la réserve</button>
     </div>
-    <div id="settings-dev-zone" style="display:none;">
-      <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Dépannage</div>
+
+    <div id="settings-sub-depannage" style="display:none;">
+      <button class="btn btn-ghost" id="back-from-depannage" style="margin-bottom:14px;">← Retour</button>
+      <h1 style="font-size:20px;">🔧 Dépannage</h1>
       <button class="btn btn-ghost" id="diag-notif-btn" style="width:100%; margin-bottom:8px;">🔍 Diagnostic notifications</button>
-      <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%; margin-bottom:14px;">📤 Envoyer une notif test au/à la partenaire</button>
+      <button class="btn btn-ghost" id="diag-test-push-btn" style="width:100%;">📤 Envoyer une notif test au/à la partenaire</button>
     </div>
-    <div class="sub" style="text-align:left; margin-bottom:8px; border-top:0.5px solid var(--line); padding-top:14px;">Compte</div>
-    <button class="btn btn-ghost" id="signout-btn" style="width:100%; margin-bottom:14px;">Déconnexion</button>
-    <div class="sub" style="text-align:left; margin-bottom:14px; opacity:0.6; font-size:11px;">Version 2026.09.20</div>
-    <button class="btn btn-ghost" id="close-settings-btn" style="width:100%;">Fermer</button>
+
   </div>
 </div>
 
@@ -1045,6 +1074,7 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
   ],
   defiFrequency: 7,
+  customDailyPool: [],
   dailyChallengeA: { date: '' },
   dailyChallengeB: { date: '' },
   calendarNotes: [],
@@ -1222,6 +1252,7 @@ function normalizeState(s){
   delete s.mysteryBox;
   delete s.mysteryAssign;
   if(!s.defiFrequency) s.defiFrequency = 7;
+  if(!s.customDailyPool) s.customDailyPool = [];
   if(!s.dailyChallengeA && !s.dailyChallengeB && s.dailyChallenge){
     s.dailyChallengeA = { date: s.dailyChallenge.date || '' };
     s.dailyChallengeB = { date: s.dailyChallenge.date || '' };
@@ -1790,7 +1821,8 @@ function ensureDailyChallenge(){
     if(daysSince < intervalDays) return;
     const already = state.defis.some(d => d.for === role && d.daily);
     if(already) return;
-    const pick = DAILY_POOL[Math.floor(Math.random() * DAILY_POOL.length)];
+    const pool = DAILY_POOL.concat(state.customDailyPool || []);
+    const pick = pool[Math.floor(Math.random() * pool.length)];
     state.defis.push({
       id: cryptoId(), text: pick.text, pts: pick.pts, for: role,
       deadline: daysFromNow(1), daily: true
@@ -3570,8 +3602,15 @@ renderDailyMessage();
 
 const FREQUENCY_LABELS = { 7: 'tous les jours', 3: '3 fois par semaine', 2: '2 fois par semaine', 1: '1 fois par semaine' };
 
+function showSettingsView(id){
+  ['settings-main', 'settings-sub-bg', 'settings-sub-defis', 'settings-sub-depannage'].forEach(v => {
+    document.getElementById(v).style.display = (v === id) ? 'block' : 'none';
+  });
+}
+
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'flex';
+  showSettingsView('settings-main');
   if(state){
     const freq = state.defiFrequency || 7;
     document.getElementById('defi-frequency-select').value = String(freq);
@@ -3581,6 +3620,29 @@ document.getElementById('settings-btn').addEventListener('click', () => {
 document.getElementById('close-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-panel').style.display = 'none';
 });
+document.getElementById('settings-cat-bg').addEventListener('click', () => showSettingsView('settings-sub-bg'));
+document.getElementById('settings-cat-defis').addEventListener('click', () => showSettingsView('settings-sub-defis'));
+document.getElementById('settings-cat-depannage').addEventListener('click', () => showSettingsView('settings-sub-depannage'));
+document.getElementById('back-from-bg').addEventListener('click', () => showSettingsView('settings-main'));
+document.getElementById('back-from-defis').addEventListener('click', () => showSettingsView('settings-main'));
+document.getElementById('back-from-depannage').addEventListener('click', () => showSettingsView('settings-main'));
+
+document.getElementById('add-pool-defi-btn').addEventListener('click', () => {
+  if(!state) return;
+  const textInput = document.getElementById('new-pool-defi-text');
+  const ptsInput = document.getElementById('new-pool-defi-pts');
+  const text = textInput.value.trim();
+  const pts = parseInt(ptsInput.value, 10);
+  if(!text || !pts || pts <= 0){
+    showToast('Indique un texte et un nombre de points valide.');
+    return;
+  }
+  state.customDailyPool.push({ text, pts });
+  persist();
+  textInput.value = '';
+  ptsInput.value = '';
+  showToast('Ajouté à la réserve secrète ✨');
+});
 document.getElementById('apply-frequency-btn').addEventListener('click', () => {
   if(!state) return;
   const select = document.getElementById('defi-frequency-select');
@@ -3589,15 +3651,6 @@ document.getElementById('apply-frequency-btn').addEventListener('click', () => {
   persist();
   document.getElementById('defi-frequency-current').textContent = 'Actuellement : ' + (FREQUENCY_LABELS[freq] || 'tous les jours');
   showToast('Cadence appliquée ✨');
-});
-
-let settingsTitleTaps = 0;
-document.getElementById('settings-title').addEventListener('click', () => {
-  settingsTitleTaps++;
-  if(settingsTitleTaps >= 5){
-    document.getElementById('settings-dev-zone').style.display = 'block';
-    settingsTitleTaps = 0;
-  }
 });
 
 document.getElementById('notif-btn').addEventListener('click', () => {
