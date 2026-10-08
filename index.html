@@ -1085,6 +1085,7 @@ const defaultState = () => ({
   ],
   defiFrequency: 7,
   customDailyPool: [],
+  dailyOffsetApplied: true,
   dailyChallengeA: { date: '' },
   dailyChallengeB: { date: '' },
   calendarNotes: [],
@@ -1263,6 +1264,14 @@ function normalizeState(s){
   delete s.mysteryAssign;
   if(!s.defiFrequency) s.defiFrequency = 7;
   if(!s.customDailyPool) s.customDailyPool = [];
+  if(!s.dailyOffsetApplied){
+    if(s.dailyChallengeB && s.dailyChallengeB.date){
+      const d = new Date(s.dailyChallengeB.date + 'T00:00:00');
+      d.setDate(d.getDate() - 3);
+      s.dailyChallengeB.date = d.toISOString().slice(0, 10);
+    }
+    s.dailyOffsetApplied = true;
+  }
   if(!s.dailyChallengeA && !s.dailyChallengeB && s.dailyChallenge){
     s.dailyChallengeA = { date: s.dailyChallenge.date || '' };
     s.dailyChallengeB = { date: s.dailyChallenge.date || '' };
