@@ -816,8 +816,29 @@
         <div class="row">
           <input type="text" id="new-mystery-text" placeholder="Ajoute un fantasme...">
         </div>
-        <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin-bottom:10px;">Ajouter à ma boîte</button>
-        <div id="mystery-list"></div>
+        <div style="font-size:11px; color:var(--muted); margin:6px 0;">Intensité :</div>
+        <div class="assign" id="mystery-level-picker">
+          <button data-level="soft" class="picked">💕 Soft</button>
+          <button data-level="medium">😏 Medium</button>
+          <button data-level="hard">🔥 Hard</button>
+        </div>
+        <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin:10px 0;">Ajouter à ma boîte</button>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Filtrer l'affichage :</div>
+        <div class="assign" id="mystery-filter-picker">
+          <button data-filter="all" class="picked">Tous</button>
+          <button data-filter="soft">Soft</button>
+          <button data-filter="medium">Medium</button>
+          <button data-filter="hard">Hard</button>
+        </div>
+        <div id="mystery-list" style="margin-top:10px;"></div>
+      </div>
+      <div style="margin-top:8px;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Piocher selon l'intensité :</div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-ghost" id="draw-soft-btn" style="flex:1; font-size:12px;">💕 Soft</button>
+          <button class="btn btn-ghost" id="draw-medium-btn" style="flex:1; font-size:12px;">😏 Medium</button>
+          <button class="btn btn-ghost" id="draw-hard-btn" style="flex:1; font-size:12px;">🔥 Hard</button>
+        </div>
       </div>
     </div>
 
@@ -1037,21 +1058,38 @@
 
 
 <div id="soiree-mode">
-  <div class="soiree-card">
-    <h2>🌙 Mode Soirée</h2>
-    <div class="sub" style="margin-bottom:12px;">Écran simplifié pour jouer à deux</div>
-    <div id="soiree-defi" style="margin-bottom:14px;"></div>
-    <button class="pill-btn pill-btn-cta" id="soiree-roll-btn" style="margin-bottom:10px;">
-      <span>🎲</span><span>Lancer les dés</span>
-    </button>
-    <div id="soiree-dice-result" class="dice-result-card" style="display:none; margin:10px 0;"></div>
+  <div class="soiree-card" style="max-height:85vh; overflow-y:auto;">
+    <h2>🔥 Mode Soirée</h2>
+    <div class="sub" style="margin-bottom:10px;">Pour jouer collés l'un à l'autre</div>
+
+    <div id="soiree-defi" style="margin-bottom:12px;"></div>
+
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button class="btn btn-gold" id="soiree-roll-btn" style="flex:1;">🎲 Dés</button>
+      <button class="btn btn-rose" id="soiree-random-act-btn" style="flex:1;">💋 Acte au hasard</button>
+    </div>
+    <div id="soiree-dice-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
+    <div id="soiree-act-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
+
     <div class="soiree-timer" id="soiree-timer">—</div>
-    <div class="sub" id="soiree-timer-label">Timer libre</div>
+    <div class="sub" id="soiree-timer-label">Choisis un round</div>
+
+    <div style="display:flex; gap:6px; margin:10px 0; flex-wrap:wrap; justify-content:center;">
+      <button class="btn btn-ghost" id="soiree-t5" style="font-size:12px; padding:8px 12px;">⏱ 5 min</button>
+      <button class="btn btn-ghost" id="soiree-t7" style="font-size:12px; padding:8px 12px;">⏱ 7 min</button>
+      <button class="btn btn-ghost" id="soiree-t10" style="font-size:12px; padding:8px 12px;">⏱ 10 min</button>
+      <button class="btn btn-ghost" id="soiree-t15" style="font-size:12px; padding:8px 12px;">⏱ 15 min</button>
+    </div>
+
+    <div style="border-top:0.5px solid var(--line); margin:12px 0 8px; padding-top:10px;">
+      <div class="sub" style="margin-bottom:6px;">Actions rapides</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <button class="btn btn-ghost" id="soiree-swap-btn" style="width:100%; font-size:13px;">🔄 Changer qui mène</button>
+        <button class="btn btn-ghost" id="soiree-complete-btn" style="width:100%; font-size:13px;">✅ Valider mon défi en cours</button>
+      </div>
+    </div>
   </div>
-  <div style="display:flex; gap:10px; width:100%; max-width:380px;">
-    <button class="btn btn-ghost" id="soiree-timer-btn" style="flex:1;">⏱ 10 min</button>
-    <button class="btn btn-ghost" id="soiree-close-btn" style="flex:1;">Fermer</button>
-  </div>
+  <button class="btn btn-ghost" id="soiree-close-btn" style="width:100%; max-width:380px; margin-top:12px;">Fermer le mode soirée</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1158,35 +1196,40 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a', deadline: daysFromNow(2) },
   ],
   rewards: [
-    { id: cryptoId(), text: "Massage complet de 20 minutes", pts: 40 },
-    { id: cryptoId(), text: "Choix des préliminaires pour la soirée", pts: 60 },
-    { id: cryptoId(), text: "Choix de la position pour la prochaine fois", pts: 50 },
-    { id: cryptoId(), text: "Strip-tease privé", pts: 55 },
-    { id: cryptoId(), text: "Soirée à thème au choix", pts: 100 },
+    { id: cryptoId(), text: "Massage sensuel complet (20 min)", pts: 40 },
+    { id: cryptoId(), text: "Je choisis les préliminaires", pts: 50 },
+    { id: cryptoId(), text: "Je choisis la position + le rythme", pts: 55 },
+    { id: cryptoId(), text: "Strip-tease privé jusqu'au bout", pts: 50 },
+    { id: cryptoId(), text: "Tu m'obéis pendant 15 minutes", pts: 60 },
+    { id: cryptoId(), text: "Un orgasme, maintenant — à ma façon", pts: 70 },
+    { id: cryptoId(), text: "Tu ne touches pas, tu reçois seulement", pts: 65 },
+    { id: cryptoId(), text: "Soirée où c'est moi qui décide de tout", pts: 90 },
+    { id: cryptoId(), text: "Pipe / cunnilingus jusqu'à l'orgasme", pts: 55 },
+    { id: cryptoId(), text: "On recommence une 2e fois ce soir", pts: 80 },
   ],
   mysteryBoxA: [
-    { id: cryptoId(), text: "Restaurant pour elle" },
-    { id: cryptoId(), text: "Préliminaires pour elle" },
-    { id: cryptoId(), text: "Plaisir à deux" },
-    { id: cryptoId(), text: "Journée du oui pour elle" },
-    { id: cryptoId(), text: "Utiliser un sex toy sur elle" },
-    { id: cryptoId(), text: "La sucer / le lécher jusqu'à l'orgasme" },
-    { id: cryptoId(), text: "La baiser contre le mur" },
-    { id: cryptoId(), text: "La faire jouir deux fois de suite" },
-    { id: cryptoId(), text: "La prendre les yeux bandés" },
-    { id: cryptoId(), text: "Un 69 complet" },
+    { id: cryptoId(), text: "Préliminaires longs rien que pour elle", level: "soft" },
+    { id: cryptoId(), text: "Massage à l'huile jusqu'à ce qu'elle craque", level: "soft" },
+    { id: cryptoId(), text: "La faire jouir avec la langue uniquement", level: "medium" },
+    { id: cryptoId(), text: "La prendre contre le mur", level: "medium" },
+    { id: cryptoId(), text: "Yeux bandés — elle reçoit sans voir", level: "medium" },
+    { id: cryptoId(), text: "Utiliser un sextoy sur elle jusqu'à l'orgasme", level: "hard" },
+    { id: cryptoId(), text: "Elle obéit à 3 ordres ce soir", level: "hard" },
+    { id: cryptoId(), text: "La faire jouir deux fois de suite", level: "hard" },
+    { id: cryptoId(), text: "69 complet", level: "medium" },
+    { id: cryptoId(), text: "Journée du oui pour elle", level: "hard" },
   ],
   mysteryBoxB: [
-    { id: cryptoId(), text: "Restaurant pour lui" },
-    { id: cryptoId(), text: "Préliminaires pour lui" },
-    { id: cryptoId(), text: "Plaisir à deux" },
-    { id: cryptoId(), text: "Journée du oui pour lui" },
-    { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
-    { id: cryptoId(), text: "Lui faire une pipe jusqu'à l'orgasme" },
-    { id: cryptoId(), text: "Le baiser contre le mur" },
-    { id: cryptoId(), text: "Le faire jouir deux fois de suite" },
-    { id: cryptoId(), text: "Le prendre / se faire prendre les yeux bandés" },
-    { id: cryptoId(), text: "Un 69 complet" },
+    { id: cryptoId(), text: "Préliminaires longs rien que pour lui", level: "soft" },
+    { id: cryptoId(), text: "Massage sensuel jusqu'à ce qu'il craque", level: "soft" },
+    { id: cryptoId(), text: "Lui faire une pipe jusqu'à l'orgasme", level: "medium" },
+    { id: cryptoId(), text: "Le prendre / se faire prendre contre le mur", level: "medium" },
+    { id: cryptoId(), text: "Yeux bandés — il reçoit sans voir", level: "medium" },
+    { id: cryptoId(), text: "Utiliser un sextoy sur lui jusqu'à l'orgasme", level: "hard" },
+    { id: cryptoId(), text: "Il obéit à 3 ordres ce soir", level: "hard" },
+    { id: cryptoId(), text: "Le faire jouir deux fois de suite", level: "hard" },
+    { id: cryptoId(), text: "69 complet", level: "medium" },
+    { id: cryptoId(), text: "Journée du oui pour lui", level: "hard" },
   ],
   defiFrequency: 7,
   customDailyPool: [],
@@ -1621,6 +1664,9 @@ function myMysteryBox(){
   return myRole === 'b' ? state.mysteryBoxB : state.mysteryBoxA;
 }
 
+let mysteryFilter = 'all';
+let mysteryAddLevel = 'soft';
+
 function renderMysteryList(){
   const list = document.getElementById('mystery-list');
   if(!list) return;
@@ -1630,11 +1676,17 @@ function renderMysteryList(){
     list.innerHTML = '<div class="empty">Ta boîte est vide.</div>';
     return;
   }
-  box.forEach(item => {
+  const filtered = mysteryFilter === 'all' ? box : box.filter(i => (i.level || 'medium') === mysteryFilter);
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">Rien dans ce niveau.</div>';
+    return;
+  }
+  const levelLabel = { soft: '💕', medium: '😏', hard: '🔥' };
+  filtered.forEach(item => {
     const row = document.createElement('div');
     row.className = 'mystery-item';
     const txt = document.createElement('div');
-    txt.textContent = item.text;
+    txt.textContent = (levelLabel[item.level] || '😏') + ' ' + item.text;
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
     delBtn.textContent = '✕';
@@ -2049,6 +2101,41 @@ function ensureDailyChallenge(){
   if(anyCreated) persist();
 }
 
+
+function drawMysteryLevel(level){
+  const already = state.defis.some(d => d.for === myRole && d.mystery);
+  if(already){
+    showToast('Tu as déjà un fantasme en attente, termine-le avant d\'en piocher un autre.');
+    return;
+  }
+  const partnerBox = myRole === 'b' ? state.mysteryBoxA : state.mysteryBoxB;
+  if(!partnerBox || partnerBox.length === 0){
+    showToast('La boîte à fantasmes de ton/ta partenaire est vide pour le moment !');
+    return;
+  }
+  let pool = partnerBox;
+  if(level){
+    pool = partnerBox.filter(i => (i.level || 'medium') === level);
+    if(pool.length === 0){
+      showToast('Aucun fantasme ' + level + ' dans sa boîte pour le moment');
+      return;
+    }
+  }
+  const item = pool[Math.floor(Math.random() * pool.length)];
+  const mysteryDefi = {
+    id: cryptoId(), text: item.text, pts: level === 'hard' ? 60 : (level === 'soft' ? 35 : 50),
+    for: myRole, deadline: daysFromNow(2), mystery: true
+  };
+  const mHint = getHintForDefi(mysteryDefi);
+  mysteryDefi.hint = mHint.short;
+  mysteryDefi.hintDetail = mHint.detail;
+  state.defis.push(mysteryDefi);
+  persist(); render();
+  showToast('🎁 Fantasme ' + (level || '') + ' pioché !');
+  celebrate('🎁');
+  sendPushToPartner('🎁 Fantasme pioché — ' + mHint.short, state.names[myRole] + ' a pioché : ' + mHint.detail);
+}
+
 function drawMystery(){
   const already = state.defis.some(d => d.for === myRole && d.mystery);
   if(already){
@@ -2075,8 +2162,8 @@ function drawMystery(){
   sendPushToPartner('🎁 Fantasme pioché — ' + mHint.short, state.names[myRole] + ' a pioché un fantasme : ' + mHint.detail);
 }
 
-function addMysteryItem(text){
-  myMysteryBox().push({ id: cryptoId(), text });
+function addMysteryItem(text, level){
+  myMysteryBox().push({ id: cryptoId(), text, level: level || mysteryAddLevel || 'medium' });
   const partnerRole = myRole === 'b' ? 'a' : 'b';
   if(!state.mysteryPing) state.mysteryPing = { a: false, b: false };
   state.mysteryPing[partnerRole] = true;
@@ -3503,10 +3590,33 @@ document.getElementById('add-mystery-btn').addEventListener('click', () => {
   const input = document.getElementById('new-mystery-text');
   const text = input.value.trim();
   if(!text) return;
-  addMysteryItem(text);
+  addMysteryItem(text, mysteryAddLevel);
   notifyMysteryAdded();
   input.value = '';
+  showToast('Fantasme ' + mysteryAddLevel + ' ajouté 🔒');
 });
+
+// Level picker for adding
+document.getElementById('mystery-level-picker')?.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-level]');
+  if(!btn) return;
+  mysteryAddLevel = btn.dataset.level;
+  document.querySelectorAll('#mystery-level-picker button').forEach(b => b.classList.toggle('picked', b === btn));
+});
+
+// Filter picker for list
+document.getElementById('mystery-filter-picker')?.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-filter]');
+  if(!btn) return;
+  mysteryFilter = btn.dataset.filter;
+  document.querySelectorAll('#mystery-filter-picker button').forEach(b => b.classList.toggle('picked', b === btn));
+  renderMysteryList();
+});
+
+document.getElementById('draw-soft-btn')?.addEventListener('click', () => drawMysteryLevel('soft'));
+document.getElementById('draw-medium-btn')?.addEventListener('click', () => drawMysteryLevel('medium'));
+document.getElementById('draw-hard-btn')?.addEventListener('click', () => drawMysteryLevel('hard'));
+
 
 document.getElementById('add-reward-btn').addEventListener('click', () => {
   const nameInput = document.getElementById('new-reward-name');
@@ -4624,13 +4734,36 @@ setInterval(() => {
 // === UX Improvements JS ===
 let soireeTimerInterval = null;
 let soireeTimerEnd = null;
+let soireeLeader = null; // 'a' or 'b'
+
+const SOIREE_ACTS = [
+  "Embrasse le cou pendant 1 minute",
+  "Enlève un vêtement à l'autre",
+  "Embrasse uniquement le corps (pas la bouche) 2 min",
+  "Fais un massage des cuisses",
+  "Chuchote quelque chose de sale à l'oreille",
+  "Embrasse le ventre en descendant lentement",
+  "Laisse l'autre te guider les mains",
+  "Fais durer un baiser 30 secondes",
+  "Utilise seulement ta langue pendant 2 minutes",
+  "Change de position maintenant",
+  "Arrête tout 20 secondes… puis reprends plus fort",
+  "Regarde-le/la dans les yeux en le/la touchant",
+  "Fais-le/la supplier avant de continuer",
+  "Embrasse l'intérieur des cuisses",
+  "Prends le contrôle pendant 3 minutes",
+  "Laisse l'autre faire ce qu'il/elle veut pendant 3 min",
+];
 
 function openSoireeMode(){
   const el = document.getElementById('soiree-mode');
   if(!el) return;
   el.classList.add('active');
+  soireeLeader = myRole || 'a';
   renderSoireeDefi();
   document.getElementById('soiree-dice-result').style.display = 'none';
+  const actEl = document.getElementById('soiree-act-result');
+  if(actEl) actEl.style.display = 'none';
 }
 
 function closeSoireeMode(){
@@ -4640,16 +4773,38 @@ function closeSoireeMode(){
 
 function renderSoireeDefi(){
   const box = document.getElementById('soiree-defi');
-  if(!box || !state || !myRole){ if(box) box.innerHTML = '<div class="sub">Choisis d\'abord qui tu es</div>'; return; }
-  const todays = state.defis.filter(d => d.daily && d.for === myRole);
-  if(todays.length === 0){
-    box.innerHTML = '<div class="sub">Pas de défi du jour pour le moment</div>';
+  if(!box || !state) return;
+  if(!myRole){
+    box.innerHTML = '<div class="sub">Choisis d\'abord qui tu es (onglet Jouer)</div>';
     return;
   }
-  const d = todays[0];
-  box.innerHTML = `<div style="font-size:14px; color:var(--gold-soft); margin-bottom:4px;">✨ Défi du jour</div>
-    <div style="font-size:16px; font-weight:600;">${escapeHtml(d.text)}</div>
-    <div style="font-size:13px; color:var(--muted); margin-top:4px;">+${d.pts} pts</div>`;
+  const accepted = state.defis.filter(d => d.for === myRole && d.status === 'accepted');
+  const pending = state.defis.filter(d => d.for === myRole && d.status !== 'accepted');
+  let html = '';
+  if(accepted.length){
+    const d = accepted[0];
+    html += `<div style="background:rgba(201,51,63,0.15); border:0.5px solid var(--gold); border-radius:12px; padding:12px; margin-bottom:8px;">
+      <div style="font-size:12px; color:var(--gold-soft); margin-bottom:4px;">🎯 Ton défi en cours</div>
+      <div style="font-size:15px; font-weight:600;">${escapeHtml(d.text)}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:4px;">+${d.pts} pts</div>
+    </div>`;
+  } else if(pending.length){
+    const d = pending[0];
+    html += `<div style="background:var(--bg-2); border-radius:12px; padding:12px; margin-bottom:8px;">
+      <div style="font-size:12px; color:var(--rose); margin-bottom:4px;">🆕 Défi en attente</div>
+      <div style="font-size:14px;">${escapeHtml(d.text)}</div>
+      <button class="btn btn-gold" id="soiree-accept-btn" style="width:100%; margin-top:8px; font-size:13px;">✅ Accepter maintenant</button>
+    </div>`;
+  } else {
+    html += `<div class="sub" style="margin-bottom:8px;">Pas de défi en cours — utilise les dés ou un acte au hasard</div>`;
+  }
+  const leaderName = state.names[soireeLeader] || '…';
+  html += `<div style="font-size:12px; color:var(--gold-soft);">👑 C'est <b>${escapeHtml(leaderName)}</b> qui mène ce round</div>`;
+  box.innerHTML = html;
+  const accBtn = document.getElementById('soiree-accept-btn');
+  if(accBtn && pending.length){
+    accBtn.onclick = () => { acceptDefi(pending[0].id); renderSoireeDefi(); };
+  }
 }
 
 function startSoireeTimer(minutes){
@@ -4657,16 +4812,16 @@ function startSoireeTimer(minutes){
   soireeTimerEnd = Date.now() + minutes * 60000;
   const label = document.getElementById('soiree-timer-label');
   const timerEl = document.getElementById('soiree-timer');
-  label.textContent = 'Timer en cours';
+  label.textContent = 'Round en cours — ' + minutes + ' min';
   soireeTimerInterval = setInterval(() => {
     const remaining = soireeTimerEnd - Date.now();
     if(remaining <= 0){
       clearInterval(soireeTimerInterval);
       soireeTimerInterval = null;
       timerEl.textContent = '00:00';
-      label.textContent = 'Temps écoulé 🔔';
+      label.textContent = 'Round terminé 🔥 — lance le suivant';
       if('Notification' in window && Notification.permission === 'granted'){
-        new Notification('Complices 🌙', { body: 'Le timer du mode soirée est terminé !' });
+        try { new Notification('Complices 🔥', { body: 'Round terminé !' }); } catch(e){}
       }
       return;
     }
@@ -4676,27 +4831,55 @@ function startSoireeTimer(minutes){
   }, 250);
 }
 
+const SOIREE_DICE_FALLBACK_1 = ['Embrasse', 'Lèche', 'Masse', 'Mordille', 'Caresse', 'Suce'];
+const SOIREE_DICE_FALLBACK_2 = ['le cou', 'les cuisses', 'la bouche', 'le ventre', 'partout', 'plus bas'];
+
 document.getElementById('soiree-btn')?.addEventListener('click', openSoireeMode);
 document.getElementById('soiree-close-btn')?.addEventListener('click', closeSoireeMode);
-document.getElementById('soiree-timer-btn')?.addEventListener('click', () => {
-  const mins = prompt('Combien de minutes ?', '10');
-  if(mins === null) return;
-  const n = parseInt(mins, 10);
-  if(!n || n <= 0) return;
-  startSoireeTimer(n);
+['soiree-t5','soiree-t7','soiree-t10','soiree-t15'].forEach(id => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('click', () => startSoireeTimer(parseInt(id.replace('soiree-t',''), 10)));
 });
+
 document.getElementById('soiree-roll-btn')?.addEventListener('click', () => {
-  const d1 = (state.dice?.d1 || []).filter(f => f && f.trim());
-  const d2 = (state.dice?.d2 || []).filter(f => f && f.trim());
-  if(d1.length === 0 || d2.length === 0){
-    showToast('Remplis les faces des dés d\'abord (onglet Jouer)');
-    return;
-  }
+  let d1 = (state?.dice?.d1 || []).filter(f => f && f.trim());
+  let d2 = (state?.dice?.d2 || []).filter(f => f && f.trim());
+  if(d1.length === 0) d1 = SOIREE_DICE_FALLBACK_1;
+  if(d2.length === 0) d2 = SOIREE_DICE_FALLBACK_2;
   const f1 = d1[Math.floor(Math.random() * d1.length)];
   const f2 = d2[Math.floor(Math.random() * d2.length)];
   const resultEl = document.getElementById('soiree-dice-result');
   resultEl.textContent = '🎲 ' + f1 + ' — ' + f2;
   resultEl.style.display = 'block';
+  const actEl = document.getElementById('soiree-act-result');
+  if(actEl) actEl.style.display = 'none';
+});
+
+document.getElementById('soiree-random-act-btn')?.addEventListener('click', () => {
+  const act = SOIREE_ACTS[Math.floor(Math.random() * SOIREE_ACTS.length)];
+  const actEl = document.getElementById('soiree-act-result');
+  actEl.textContent = '💋 ' + act;
+  actEl.style.display = 'block';
+  document.getElementById('soiree-dice-result').style.display = 'none';
+});
+
+document.getElementById('soiree-swap-btn')?.addEventListener('click', () => {
+  soireeLeader = soireeLeader === 'a' ? 'b' : 'a';
+  renderSoireeDefi();
+  showToast('👑 ' + state.names[soireeLeader] + ' mène maintenant');
+});
+
+document.getElementById('soiree-complete-btn')?.addEventListener('click', () => {
+  if(!myRole || !state) return;
+  const accepted = state.defis.filter(d => d.for === myRole && d.status === 'accepted');
+  if(!accepted.length){
+    showToast('Aucun défi en cours à valider');
+    return;
+  }
+  if(!confirm('Valider ce défi : ' + accepted[0].text + ' ?')) return;
+  completeDefi(accepted[0].id);
+  renderSoireeDefi();
 });
 
 // History filters
