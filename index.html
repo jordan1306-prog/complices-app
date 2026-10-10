@@ -1170,6 +1170,11 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Plaisir à deux" },
     { id: cryptoId(), text: "Journée du oui pour elle" },
     { id: cryptoId(), text: "Utiliser un sex toy sur elle" },
+    { id: cryptoId(), text: "La sucer / le lécher jusqu'à l'orgasme" },
+    { id: cryptoId(), text: "La baiser contre le mur" },
+    { id: cryptoId(), text: "La faire jouir deux fois de suite" },
+    { id: cryptoId(), text: "La prendre les yeux bandés" },
+    { id: cryptoId(), text: "Un 69 complet" },
   ],
   mysteryBoxB: [
     { id: cryptoId(), text: "Restaurant pour lui" },
@@ -1177,6 +1182,11 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Plaisir à deux" },
     { id: cryptoId(), text: "Journée du oui pour lui" },
     { id: cryptoId(), text: "Utiliser un sex toy sur lui" },
+    { id: cryptoId(), text: "Lui faire une pipe jusqu'à l'orgasme" },
+    { id: cryptoId(), text: "Le baiser contre le mur" },
+    { id: cryptoId(), text: "Le faire jouir deux fois de suite" },
+    { id: cryptoId(), text: "Le prendre / se faire prendre les yeux bandés" },
+    { id: cryptoId(), text: "Un 69 complet" },
   ],
   defiFrequency: 7,
   customDailyPool: [],
@@ -1301,6 +1311,47 @@ const DAILY_POOL = [
   { text: "Envoie une photo qui laisse deviner sans tout montrer", pts: 26 },
   { text: "Propose un massage à l'huile ce soir", pts: 27 },
   { text: "Termine la soirée par un slow très rapproché", pts: 23 },
+  // === Défis vraiment sexuels ===
+  { text: "Fais-lui une pipe / un cunnilingus jusqu'à l'orgasme", pts: 40 },
+  { text: "Baise-le/la contre un mur", pts: 45 },
+  { text: "Utilise ta langue uniquement pendant 10 minutes, sans les mains", pts: 35 },
+  { text: "Fais-le/la jouir avec seulement tes doigts", pts: 35 },
+  { text: "Envoie une photo nue (visage caché) dans la journée", pts: 30 },
+  { text: "Laisse-toi baiser les yeux bandés", pts: 40 },
+  { text: "Choisis une position et tiens-la jusqu'à l'orgasme de l'autre", pts: 38 },
+  { text: "Fais un 69 complet ce soir", pts: 42 },
+  { text: "Domine complètement l'autre pendant 15 minutes", pts: 45 },
+  { text: "Soumets-toi : obéis à 3 ordres sexuels ce soir", pts: 40 },
+  { text: "Baise dans une pièce où vous ne le faites jamais", pts: 38 },
+  { text: "Utilise un sextoy sur l'autre jusqu'à l'orgasme", pts: 40 },
+  { text: "Fais-le/la jouir deux fois de suite", pts: 50 },
+  { text: "Parle sale pendant tout le rapport", pts: 30 },
+  { text: "Filme-vous (pour vous seulement) pendant 2 minutes", pts: 45 },
+  { text: "Fais un strip-tease complet puis baise immédiatement", pts: 40 },
+  { text: "Prends l'autre par-derrière jusqu'à l'orgasme", pts: 42 },
+  { text: "Fais-toi prendre en levrette", pts: 40 },
+  { text: "Laisse l'autre te remplir / jouir en toi", pts: 45 },
+  { text: "Commence par une fellation / cunnilingus et finis en pénétration", pts: 40 },
+  { text: "Baise sans vous embrasser sur la bouche", pts: 28 },
+  { text: "Utilise de la glace ou un glaçon sur le corps de l'autre", pts: 32 },
+  { text: "Fais-le/la jouir uniquement avec ta bouche", pts: 38 },
+  { text: "Change de position 4 fois pendant le même rapport", pts: 35 },
+  { text: "Fais un jeu de rôle sexuel complet (au moins 10 min)", pts: 45 },
+  { text: "Attache légèrement les poignets de l'autre", pts: 40 },
+  { text: "Fais-le/la supplier avant de le/la toucher", pts: 35 },
+  { text: "Jouis sur le corps de l'autre (ventre, seins, visage…)", pts: 42 },
+  { text: "Fais une séance de edge (amener au bord 3 fois sans jouir)", pts: 40 },
+  { text: "Baise dans la douche", pts: 38 },
+  { text: "Réveille l'autre avec une pipe / un cunnilingus", pts: 40 },
+  { text: "Fais-le/la jouir en le/la regardant dans les yeux", pts: 35 },
+  { text: "Utilise un miroir pour vous regarder pendant l'acte", pts: 32 },
+  { text: "Interdis à l'autre de te toucher pendant que tu le/la caresses", pts: 35 },
+  { text: "Fais un massage sensuel qui se termine en baise", pts: 38 },
+  { text: "Choisis 3 endroits du corps à lécher / sucer exclusivement", pts: 30 },
+  { text: "Baise lentement pendant 15 minutes sans accélérer", pts: 35 },
+  { text: "Fais-le/la jouir avec un jouet pendant que tu le/la regards", pts: 42 },
+  { text: "Laisse l'autre décider de tout ce soir (positions, rythme, fin)", pts: 40 },
+  { text: "Fais une nuit où l'un des deux ne peut que recevoir", pts: 45 },
 ];
 
 function cryptoId(){ return Math.random().toString(36).slice(2,10); }
@@ -1761,41 +1812,50 @@ function editDefi(id){
   showToast('Défi modifié');
 }
 
-const ACCEPT_TEASERS = [
-  "🔥 Ton défi vient d'être accepté... prépare-toi.",
-  "😏 C'est un oui. Patience, ça arrive...",
-  "🎯 Défi accepté ! Le compte à rebours commence.",
-  "💋 Ton complice a dit oui... à toi de deviner la suite.",
-  "😈 Accepté sans hésiter. Tu vas aimer ça.",
-  "🌙 Le défi est accepté, la surprise se prépare...",
-  "✨ Un oui qui promet beaucoup...",
-  "🔥 Ça vient de devenir sérieux. Défi accepté.",
-];
+// Indices subtils — donnent une ambiance sans spoiler
+function getHintForDefi(d){
+  const t = (d.text || '').toLowerCase();
+  const pts = d.pts || 0;
 
-const DAILY_HINTS = {
-  simple: [
-    "Un petit geste tout doux t'attend aujourd'hui 💕",
-    "Rien de fou, juste de quoi te faire sourire 😊",
-    "Une attention simple mais qui compte 🌸",
-    "De la tendresse au programme aujourd'hui 🤍",
-  ],
-  exciting: [
-    "Ça va chauffer un peu aujourd'hui 😏",
-    "Un petit défi qui titille la curiosité 🔥",
-    "De quoi pimenter la journée, sans trop en dire...",
-    "Une surprise coquine se prépare 😉",
-  ],
-  hot: [
-    "Accroche-toi, ça va être torride 🔥🔥",
-    "Ce soir pourrait être mémorable 😈",
-    "Prépare-toi, celui-là ne fait pas dans la demi-mesure...",
-    "Une soirée qui s'annonce chaude 🌶️",
-  ],
-};
-function dailyHintFor(d){
-  const tier = d.pts <= 12 ? 'simple' : (d.pts <= 22 ? 'exciting' : 'hot');
-  const arr = DAILY_HINTS[tier];
-  return arr[Math.floor(Math.random() * arr.length)];
+  // Ambiance plutôt que acte précis
+  if(/pipe|fellation|sucer|bouche|gorge|avaler|cunnilingus|lécher|langue|69/.test(t))
+    return { short: '💋 Bouche', detail: 'Quelque chose va se passer… près de ta bouche.' };
+  if(/bandé|bandeau|yeux bandés|aveugle/.test(t))
+    return { short: '🌑 Obscurité', detail: 'Tu ne verras peut‑être pas grand‑chose.' };
+  if(/mur|contre le mur|plaqué|plaque|levrette|par-derrière|derrière|doggy/.test(t))
+    return { short: '📐 Position', detail: 'Le lit ne sera peut‑être pas nécessaire.' };
+  if(/domina|domine|soumis|obéir|ordre|supplier|attache|menotte|lien|corde/.test(t))
+    return { short: '⛓️ Contrôle', detail: 'Quelqu’un va mener la danse ce soir.' };
+  if(/sextoy|jouet|vibro|god/.test(t))
+    return { short: '✨ Surprise', detail: 'Un petit accessoire pourrait s’inviter.' };
+  if(/photo|selfie|envoie une photo|nude|nue|filme|vidéo|filmer/.test(t))
+    return { short: '📱 Écran', detail: 'Ton téléphone (ou le sien) aura un rôle.' };
+  if(/douche|bain/.test(t))
+    return { short: '💧 Ailleurs', detail: 'Ça ne se passera pas forcément dans la chambre.' };
+  if(/réveille|matin|réveil/.test(t))
+    return { short: '🌅 Matin', detail: 'Le début de journée pourrait être… particulier.' };
+  if(/glace|glaçon|huile|massage|sensoriel/.test(t))
+    return { short: '🖐️ Toucher', detail: 'Les sensations vont être mises en avant.' };
+  if(/strip|déshabill|tenue sexy/.test(t))
+    return { short: '👗 Habillé·e ?', detail: 'Les vêtements ne resteront peut‑être pas longtemps.' };
+  if(/jeu de rôle|rôle|personnage/.test(t))
+    return { short: '🎭 Personnage', detail: 'Vous ne serez plus tout à fait vous‑mêmes.' };
+  if(/edge|bord|retarder/.test(t))
+    return { short: '⏳ Patience', detail: 'Le plaisir risque d’être… différé.' };
+  if(/orgasme|jouir|jouis|deux fois|plusieurs fois/.test(t))
+    return { short: '🔥 Intensité', detail: 'Ce ne sera pas qu’un petit moment.' };
+  if(/baise|baiser|pénétr|prendre|prends|position/.test(t))
+    return { short: '🛏️ Corps à corps', detail: 'Les corps vont se rapprocher. Beaucoup.' };
+  if(/message|texto|écrit|mot doux/.test(t) && pts <= 15)
+    return { short: '💬 Mots', detail: 'Quelques mots devraient suffire à faire monter la température.' };
+  if(/câlin|bisou|embrasse|main dans la main/.test(t) && pts <= 12)
+    return { short: '🤍 Douceur', detail: 'Rien de fou… juste de la tendresse.' };
+
+  // Fallback selon intensité (points)
+  if(pts >= 40) return { short: '🔥 Nuit chaude', detail: 'Prépare‑toi à une soirée mémorable.' };
+  if(pts >= 25) return { short: '😏 Coquin', detail: 'Ça va titiller, sans trop en dire.' };
+  if(pts >= 15) return { short: '✨ Suggestif', detail: 'Une petite surprise se prépare.' };
+  return { short: '💕 Attention', detail: 'Un geste simple, mais qui compte.' };
 }
 
 function acceptDefi(id){
@@ -1803,14 +1863,15 @@ function acceptDefi(id){
   if(!d) return;
   d.status = 'accepted';
   d.acceptDeadline = Date.now() + 24 * 3600000;
+  // Stocker l'indice pour qu'il reste visible tant que le défi n'est pas fini
+  const hint = getHintForDefi(d);
+  d.hint = hint.short;
+  d.hintDetail = hint.detail;
+  d.hintForPartner = true; // le partenaire doit voir l'indice
   persist(); render();
   showToast('Défi accepté — 24h pour le relever ⏳');
-  if(d.daily){
-    sendPushToPartner('✨ Défi du jour accepté', dailyHintFor(d));
-  } else {
-    const teaser = ACCEPT_TEASERS[Math.floor(Math.random() * ACCEPT_TEASERS.length)];
-    sendPushToPartner('Défi accepté', teaser);
-  }
+  // Push au partenaire avec un indice fiable
+  sendPushToPartner('✨ Défi accepté — ' + hint.short, hint.detail);
 }
 
 function refuseDefi(id){
@@ -2000,13 +2061,18 @@ function drawMystery(){
     return;
   }
   const item = partnerBox[Math.floor(Math.random() * partnerBox.length)];
-  state.defis.push({
+  const mysteryDefi = {
     id: cryptoId(), text: item.text, pts: 50, for: myRole,
     deadline: daysFromNow(2), mystery: true
-  });
+  };
+  const mHint = getHintForDefi(mysteryDefi);
+  mysteryDefi.hint = mHint.short;
+  mysteryDefi.hintDetail = mHint.detail;
+  state.defis.push(mysteryDefi);
   persist(); render();
   showToast('🎁 Fantasme pioché, à toi de le réaliser !');
   celebrate('🎁');
+  sendPushToPartner('🎁 Fantasme pioché — ' + mHint.short, state.names[myRole] + ' a pioché un fantasme : ' + mHint.detail);
 }
 
 function addMysteryItem(text){
@@ -3919,29 +3985,60 @@ function getNotificationItems(){
   if(!state || !myRole) return [];
   const items = [];
   const now = Date.now();
-  const myDefis = capOnePerCategory(state.defis.filter(d => d.for === myRole));
-  myDefis.forEach(d => {
-    if(d.status !== 'accepted' && d.deadline){
-      const remaining = new Date(d.deadline + 'T23:59:59') - now;
-      if(remaining > 0){
-        items.push({ text: '🆕 À accepter avant le ' + new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ' : ' + d.text, tab: 'defis' });
-      }
-    }
-    if(d.status === 'accepted' && d.acceptDeadline){
-      const remaining = d.acceptDeadline - now;
-      if(remaining > 0){
-        items.push({ text: '⏰ Plus que ' + formatCountdown(remaining) + ' pour : ' + d.text, tab: 'defis' });
-      }
+  const partnerRole = myRole === 'a' ? 'b' : 'a';
+
+  // --- Mes défis (ceux que JE dois faire) : restent tant qu'ils ne sont pas terminés ---
+  state.defis.filter(d => d.for === myRole).forEach(d => {
+    if(d.status !== 'accepted'){
+      // En attente d'acceptation → afficher le texte complet
+      const deadlineTxt = d.deadline
+        ? ' (avant le ' + new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ')'
+        : '';
+      items.push({
+        text: '🆕 À accepter' + deadlineTxt + ' : ' + d.text,
+        tab: 'defis',
+        persistent: true
+      });
+    } else {
+      // Accepté → reste visible jusqu'à ce qu'il soit terminé (pas seulement jusqu'au deadline)
+      const remaining = d.acceptDeadline ? (d.acceptDeadline - now) : 0;
+      const timeTxt = remaining > 0
+        ? '⏰ Plus que ' + formatCountdown(remaining)
+        : '⏰ Délai dépassé — termine-le vite';
+      items.push({
+        text: timeTxt + ' pour : ' + d.text,
+        tab: 'defis',
+        persistent: true
+      });
     }
   });
+
+  // --- Indices pour le partenaire : défis acceptés par l'autre, pas encore terminés ---
+  state.defis.filter(d => d.for === partnerRole && d.status === 'accepted' && d.hintForPartner).forEach(d => {
+    const hint = d.hint || (getHintForDefi(d).short);
+    const detail = d.hintDetail || (getHintForDefi(d).detail);
+    items.push({
+      text: '💡 Indice — ' + state.names[partnerRole] + ' a accepté un défi : ' + hint + ' — ' + detail,
+      tab: 'defis',
+      persistent: true
+    });
+  });
+
+  // --- Achats en attente ---
   state.purchases.forEach(p => {
-    if(p.owedBy === myRole && p.status === 'pending' && p.deadline){
+    if(p.owedBy === myRole && p.status === 'pending'){
       const remaining = p.deadline - now;
-      if(remaining > 0){
-        items.push({ text: '🛍️ Plus que ' + formatCountdown(remaining) + ' pour : ' + p.text + ' (achat de ' + state.names[p.boughtBy] + ')', tab: 'achats' });
-      }
+      const timeTxt = remaining > 0
+        ? '🛍️ Plus que ' + formatCountdown(remaining)
+        : '🛍️ Délai dépassé';
+      items.push({
+        text: timeTxt + ' pour : ' + p.text + ' (achat de ' + state.names[p.boughtBy] + ')',
+        tab: 'achats',
+        persistent: true
+      });
     }
   });
+
   return items;
 }
 
