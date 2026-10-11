@@ -599,6 +599,18 @@
     padding:28px 22px; width:100%; max-width:360px; text-align:center;
   }
 
+
+  .pos-card{
+    background: var(--bg-2); border:0.5px solid var(--line); border-radius:12px;
+    padding:12px 14px; margin-bottom:8px;
+  }
+  .pos-card .pos-name{ font-weight:700; color:var(--gold-soft); font-size:14px; margin-bottom:2px; }
+  .pos-card .pos-tag{
+    display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+    margin-bottom:6px; background:rgba(201,51,63,0.2); color:var(--gold-soft);
+  }
+  .pos-card .pos-desc{ font-size:13px; color:var(--cream); line-height:1.45; }
+
 </style>
 </head>
 <body>
@@ -886,15 +898,19 @@
       <button class="btn btn-gold" id="add-reward-btn" style="margin-top:2px; width:100%;">Ajouter à la boutique</button>
     </div>
     <div id="rewards-list"></div>
-    <a href="https://fr.wikipedia.org/wiki/Kama-sutra" target="_blank" rel="noopener" id="guide-link-btn" class="btn btn-ghost" style="display:block; text-align:center; text-decoration:none; margin-top:16px;">📖 Guide des positions (lien externe)</a>
-    <button class="btn btn-ghost" id="edit-guide-link-btn" style="width:100%; margin-top:8px; font-size:11px;">✎ Changer ce lien</button>
-
-    <button class="btn btn-ghost" id="toggle-positions-list" style="width:100%; margin-top:8px;">💡 Idées de noms à chercher ensemble</button>
+    <button class="pill-btn" id="toggle-positions-list" style="margin-top:16px;">
+      <span>📖</span><span>Guide des positions</span><span class="pill-arrow">›</span>
+    </button>
     <div class="secret-box" id="positions-list-wrap" style="display:none; margin-top:10px;">
-      <div class="sub" style="margin-bottom:10px;">Cherchez ces noms sur un site de votre choix pour voir à quoi ça correspond :</div>
-      <div style="font-size:13.5px; line-height:2; color:var(--cream);">
-        Le missionnaire · L'andromaque · La levrette · Le lotus · La cuillère · Le 69 · La brouette · Le doggy style · La levrette debout · Le cowgirl · Le reverse cowgirl · Le missionnaire surélevé · L'étau · Le papillon · La chaise · Le face à face assis
+      <h3 style="margin:0 0 4px; color:var(--gold-soft);">📖 Positions</h3>
+      <div class="sub" style="margin-bottom:12px;">Descriptions simples pour essayer ensemble — sans quitter l'app.</div>
+      <div class="assign" id="positions-filter" style="margin-bottom:12px; flex-wrap:wrap;">
+        <button data-pos-filter="all" class="picked">Toutes</button>
+        <button data-pos-filter="douce">💕 Douce</button>
+        <button data-pos-filter="classique">🔥 Classique</button>
+        <button data-pos-filter="intense">🌶️ Intense</button>
       </div>
+      <div id="positions-guide-list"></div>
     </div>
   </section>
 
@@ -3238,12 +3254,53 @@ document.getElementById('save-story-btn').addEventListener('click', () => {
   showToast('Histoire créée ✍️');
 });
 
-function renderGuideLink(){
-  const link = document.getElementById('guide-link-btn');
-  if(link && state.guideLink) link.href = state.guideLink;
+
+const POSITIONS_GUIDE = [
+  { name: "Le missionnaire", tag: "classique", desc: "Partenaire allongé·e sur le dos, l'autre au-dessus face à face. Idéal pour les baisers et le contact visuel." },
+  { name: "Le missionnaire surélevé", tag: "classique", desc: "Comme le missionnaire, mais avec un coussin sous les hanches de celui/celle en dessous pour un angle plus profond." },
+  { name: "L'andromaque (cowgirl)", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon face à lui/elle. Celle/celui du dessus contrôle le rythme." },
+  { name: "Reverse cowgirl", tag: "classique", desc: "Comme l'andromaque, mais tourné·e dos au partenaire. Angle différent, vue plaisante pour l'un·e des deux." },
+  { name: "La levrette (doggy)", tag: "classique", desc: "À quatre pattes, partenaire derrière. Pénétration profonde, mains libres pour caresser." },
+  { name: "La levrette debout", tag: "intense", desc: "Plié·e en avant (lit, mur, meuble), partenaire derrière. Plus dynamique, très intense." },
+  { name: "La cuillère", tag: "douce", desc: "Tous les deux allongés sur le côté, l'un derrière l'autre. Doux, intime, parfait pour y aller lentement." },
+  { name: "Le 69", tag: "classique", desc: "Tête-bêche : chacun·e a la bouche au niveau du sexe de l'autre. Plaisir simultané oral." },
+  { name: "Le lotus", tag: "douce", desc: "Assis face à face, jambes enlacées. Très proche, rythmes lents, beaucoup de câlins possibles." },
+  { name: "Face à face assis", tag: "douce", desc: "Sur une chaise ou le bord du lit : un·e assis·e, l'autre sur ses genoux face à face. Contact max." },
+  { name: "La chaise", tag: "classique", desc: "Un·e assis·e sur une chaise solide, l'autre à califourchon. Bon appui, rythme facile à contrôler." },
+  { name: "L'étau", tag: "intense", desc: "Partenaire allongé·e, jambes relevées et serrées (ou sur les épaules). Sensation plus serrée et profonde." },
+  { name: "Le papillon", tag: "classique", desc: "Allongé·e au bord du lit, bassin au bord, partenaire debout ou à genoux entre les jambes. Angle excellent." },
+  { name: "La brouette", tag: "intense", desc: "Partenaire en appui sur les mains (ou avant-bras), l'autre soulève les jambes. Demande de l'équilibre et de la force." },
+  { name: "Contre le mur", tag: "intense", desc: "Debout, dos au mur ou face au mur. Porté·e ou une jambe relevée. Passionné, spontané." },
+  { name: "Cuisses croisées", tag: "douce", desc: "Allongé·e sur le dos, une jambe entre celles du partenaire. Frottements + pénétration possible, rythme lent." },
+  { name: "L'amazone latérale", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon mais tourné·e de côté. Moins de fatigue, angle intéressant." },
+  { name: "Pliée en avant assise", tag: "intense", desc: "Assis·e au bord du lit, buste penché en avant, partenaire derrière à genoux. Profondeur + accès aux mains." },
+  { name: "Les ciseaux", tag: "douce", desc: "Allongés sur le côté face à face, jambes entrelacées. Frottements intimes, pénétration possible, très connecté." },
+  { name: "Genoux au sol, buste relevé", tag: "classique", desc: "À genoux face à un dossier/lit, buste relevé, partenaire derrière. Variante de levrette plus droite." },
+];
+
+let positionsFilter = 'all';
+
+function renderPositionsGuide(){
+  const list = document.getElementById('positions-guide-list');
+  if(!list) return;
+  const filtered = positionsFilter === 'all'
+    ? POSITIONS_GUIDE
+    : POSITIONS_GUIDE.filter(p => p.tag === positionsFilter);
+  const tagLabel = { douce: '💕 Douce', classique: '🔥 Classique', intense: '🌶️ Intense' };
+  list.innerHTML = filtered.map(p => `
+    <div class="pos-card">
+      <div class="pos-name">${escapeHtml(p.name)}</div>
+      <div class="pos-tag">${tagLabel[p.tag] || p.tag}</div>
+      <div class="pos-desc">${escapeHtml(p.desc)}</div>
+    </div>
+  `).join('');
 }
 
-document.getElementById('edit-guide-link-btn').addEventListener('click', () => {
+function renderGuideLink(){
+  // Guide intégré dans l'app — plus de lien externe
+}
+
+document.getElementById('edit-guide-link-btn')?.addEventListener('click', () => {
   const current = state.guideLink || '';
   const input = prompt('Colle la nouvelle adresse (URL) du guide :', current);
   if(input === null) return;
@@ -3612,6 +3669,15 @@ document.getElementById('toggle-positions-list').addEventListener('click', () =>
   const wrap = document.getElementById('positions-list-wrap');
   const show = wrap.style.display === 'none';
   wrap.style.display = show ? 'block' : 'none';
+  if(show) renderPositionsGuide();
+});
+
+document.getElementById('positions-filter')?.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-pos-filter]');
+  if(!btn) return;
+  positionsFilter = btn.dataset.posFilter;
+  document.querySelectorAll('#positions-filter button').forEach(b => b.classList.toggle('picked', b === btn));
+  renderPositionsGuide();
 });
 
 let mysteryNotifBatch = { count: 0, timer: null };
