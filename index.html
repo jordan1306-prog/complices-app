@@ -2673,6 +2673,193 @@ document.getElementById('quick-messages-btn').addEventListener('click', () => go
 document.getElementById('quick-boutique-btn').addEventListener('click', () => goToTab('boutique'));
 
 const STORY_LIBRARY = [
+  // ========== SOFT ==========
+  {
+    id: 'soirée-canapé-soft',
+    title: 'Soirée canapé',
+    category: 'Soft',
+    emoji: '🛋️',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Vous êtes sur le canapé, un film en fond. Tu te rapproches et :", choices: [
+        { label: "Poses ta tête sur son épaule", next: 'n2' },
+        { label: "Prends sa main sans rien dire", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Tu sens la proximité. Tu :", choices: [
+        { label: "Serres sa main un peu plus fort", next: 'n3' },
+        { label: "Embrasses son front", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "L'ambiance devient douce. Tu proposes :", choices: [
+        { label: "Un long câlin, sans téléphone", next: 'end1', pts: 8, who: 'b' },
+        { label: "D'éteindre le film et de juste parler", next: 'end2', pts: 8, who: 'b' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Vous restez enlacés longtemps. Rien d'autre n'était nécessaire. 🤍" },
+      end2: { for: 'both', isEnding: true, text: "Fin — La conversation dure jusqu'à tard. Vous vous endormez proches. 🌙" },
+    }
+  },
+  {
+    id: 'petit-dej-lit-soft',
+    title: 'Petit-déj au lit',
+    category: 'Soft',
+    emoji: '🥐',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Tu prépares un plateau et le poses sur le lit. Tu dis :", choices: [
+        { label: "« Petit-déj surprise… reste allongé·e »", next: 'n2' },
+        { label: "Tu l'embrasses avant de parler", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Tu es touché·e. Tu :", choices: [
+        { label: "Tires l'autre sous la couette", next: 'n3' },
+        { label: "Partages une bouchée en souriant", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "Le moment reste tendre. Tu :", choices: [
+        { label: "Restes collé·e pour le reste de la matinée", next: 'end1', pts: 10, who: 'b' },
+        { label: "Proposes une douche à deux, sans précipitation", next: 'end2', pts: 10, who: 'b' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — La matinée s'étire en câlins et miettes de croissant. ☕" },
+      end2: { for: 'both', isEnding: true, text: "Fin — La douche est lente, chaude, et très douce. 🚿" },
+    }
+  },
+  {
+    id: 'message-doux-soft',
+    title: 'Le message qui change la journée',
+    category: 'Soft',
+    emoji: '💌',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Tu envoies un message en pleine journée :", choices: [
+        { label: "« Je pense à toi. Vraiment. »", next: 'n2' },
+        { label: "« J'ai hâte de te retrouver ce soir »", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Le message te fait sourire. Tu réponds :", choices: [
+        { label: "Un emoji cœur + une phrase courte", next: 'n3' },
+        { label: "« Pareil… raconte-moi ta journée »", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "Le soir, tu :", choices: [
+        { label: "L'accueilles avec un long câlin", next: 'end1', pts: 8, who: 'b' },
+        { label: "As préparé un petit rien qui fait plaisir", next: 'end2', pts: 8, who: 'b' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Le câlin dit tout ce que les messages avaient commencé. 🤍" },
+      end2: { for: 'both', isEnding: true, text: "Fin — La surprise du soir prolonge la douceur de la journée. 🌹" },
+    }
+  },
+
+  // ========== MEDIUM ==========
+  {
+    id: 'tension-salon-medium',
+    title: 'Tension dans le salon',
+    category: 'Medium',
+    emoji: '😏',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Le film n'intéresse plus personne. Tu glisses ta main sur sa cuisse et :", choices: [
+        { label: "La laisses là, sans monter plus haut", next: 'n2' },
+        { label: "Embrasses son cou lentement", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Tu sens le frisson. Tu :", choices: [
+        { label: "Te rapproches davantage", next: 'n3' },
+        { label: "Retournes la situation en l'attirant contre toi", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "La tension monte. Tu proposes :", choices: [
+        { label: "D'éteindre la lumière et de continuer ici", next: 'n4a' },
+        { label: "D'aller dans la chambre… lentement", next: 'n4b' },
+      ]},
+      n4a: { for: 'b', text: "Dans le noir du salon, tu :", choices: [
+        { label: "Laisses tes mains explorer un peu plus", next: 'end1', pts: 14, who: 'a' },
+        { label: "Demandes à l'autre d'arrêter de te faire attendre", next: 'end2', pts: 14, who: 'a' },
+      ]},
+      n4b: { for: 'b', text: "Sur le chemin de la chambre, tu :", choices: [
+        { label: "L'arrêtes dans le couloir pour un baiser plus long", next: 'end2', pts: 14, who: 'a' },
+        { label: "Le/la tires sur le lit sans un mot", next: 'end3', pts: 14, who: 'a' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Le salon devient le centre du monde pour un moment. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Plus de patience. Les corps prennent le relais. 😏" },
+      end3: { for: 'both', isEnding: true, text: "Fin — La chambre accueille ce que le salon avait commencé. 🛏️" },
+    }
+  },
+  {
+    id: 'douche-medium',
+    title: 'La douche qui dérape',
+    category: 'Medium',
+    emoji: '🚿',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Tu entres sous la douche pendant que l'autre y est déjà. Tu :", choices: [
+        { label: "Prends le savon et commences un massage", next: 'n2' },
+        { label: "Te colles dans le dos, sans un mot", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "L'eau chaude + ce contact. Tu :", choices: [
+        { label: "Te laisses faire", next: 'n3' },
+        { label: "Te retournes et embrasses franchement", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "Ça devient moins innocent. Tu :", choices: [
+        { label: "Laisses tes mains descendre un peu plus bas", next: 'n4' },
+        { label: "Proposes de sortir… pour continuer ailleurs", next: 'n4' },
+      ]},
+      n4: { for: 'b', text: "Tu réponds :", choices: [
+        { label: "« Reste encore un peu… »", next: 'end1', pts: 16, who: 'a' },
+        { label: "« Chambre. Maintenant. »", next: 'end2', pts: 16, who: 'a' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — La douche dure beaucoup plus longtemps que prévu. 💧" },
+      end2: { for: 'both', isEnding: true, text: "Fin — À peine séchés, déjà sur le lit. 🔥" },
+    }
+  },
+  {
+    id: 'message-coquin-medium',
+    title: 'Messages qui chauffent',
+    category: 'Medium',
+    emoji: '📱',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Tu envoies : « Ce soir j'ai une idée… » Tu ajoutes :", choices: [
+        { label: "Un indice vague et suggestif", next: 'n2' },
+        { label: "« Hâte de te toucher »", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Tu réponds en jouant le jeu :", choices: [
+        { label: "« Dis-m'en plus… »", next: 'n3' },
+        { label: "« Je rentre plus tôt alors »", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "Tu montes d'un cran :", choices: [
+        { label: "Tu décris ce que tu veux faire, sans tout dire", next: 'n4' },
+        { label: "Tu envoies une photo suggestive (visage caché)", next: 'n4' },
+      ]},
+      n4: { for: 'b', text: "Le soir, en rentrant, tu :", choices: [
+        { label: "Te jette dans ses bras", next: 'end1', pts: 15, who: 'a' },
+        { label: "Continues le jeu encore un moment", next: 'end2', pts: 15, who: 'a' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Les messages deviennent des actes dès la porte franchie. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — La tension a encore monté… et ça valait le coup. 😏" },
+    }
+  },
+  {
+    id: 'massage-medium',
+    title: 'Le massage qui change de ton',
+    category: 'Medium',
+    emoji: '💆',
+    start: 'n1',
+    nodes: {
+      n1: { for: 'a', text: "Tu proposes un massage. Au bout de quelques minutes, tes mains :", choices: [
+        { label: "Restent « presque » sages", next: 'n2' },
+        { label: "S'attardent volontairement plus bas", next: 'n2' },
+      ]},
+      n2: { for: 'b', text: "Tu sens le glissement. Tu :", choices: [
+        { label: "Laisses faire, un sourire dans la voix", next: 'n3' },
+        { label: "« C'est encore un massage, ça ? »", next: 'n3' },
+      ]},
+      n3: { for: 'a', text: "Tu assumes :", choices: [
+        { label: "« Plus vraiment… »", next: 'n4' },
+        { label: "Tu inverses les rôles", next: 'n4' },
+      ]},
+      n4: { for: 'b', text: "La suite se joue :", choices: [
+        { label: "Lentement, encore un peu de teasing", next: 'end1', pts: 16, who: 'a' },
+        { label: "Plus directement", next: 'end2', pts: 16, who: 'a' },
+      ]},
+      end1: { for: 'both', isEnding: true, text: "Fin — Le massage n'était qu'un prétexte. Un très bon prétexte. 😏" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Plus de détour. Les corps tranchent. 🔥" },
+    }
+  },
+
+  // ========== HARD ==========
   {
     id: 'message-mysterieux-hard',
     title: 'Le message mystérieux',
@@ -2680,316 +2867,170 @@ const STORY_LIBRARY = [
     emoji: '🔥',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu envoies un message : « Ce soir, tu es à moi. Pas de discussion. » Tu ajoutes :", choices: [
-        { label: "Une photo de ton entrejambe (floue mais claire)", next: 'n2' },
-        { label: "« Je vais te baiser jusqu’à ce que tu ne puisses plus marcher »", next: 'n2' },
-        { label: "Rien d’autre. Juste le silence.", next: 'n2b' },
+      n1: { for: 'a', text: "Tu envoies : « Ce soir, tu es à moi. » Tu ajoutes :", choices: [
+        { label: "Rien d'autre — le silence", next: 'n2' },
+        { label: "« À genoux quand tu rentres »", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Le message te fait battre le cœur et durcir/mouiller immédiatement. Tu réponds :", choices: [
-        { label: "« Oui… fais-le »", next: 'n3' },
-        { label: "« Montre-moi d’abord ce que tu comptes me faire »", next: 'n3alt' },
+      n2: { for: 'b', text: "Le message te fait réagir immédiatement. Tu réponds :", choices: [
+        { label: "« Oui… »", next: 'n3' },
+        { label: "« Qu'est-ce que tu comptes me faire ? »", next: 'n3' },
       ]},
-      n2b: { for: 'b', text: "Le silence te rend encore plus excitée. Tu réponds :", choices: [
-        { label: "« J’attends tes ordres »", next: 'n3' },
-        { label: "Tu envoies une photo de toi déjà à genoux", next: 'n3alt' },
+      n3: { for: 'a', text: "Quand iel rentre, tu :", choices: [
+        { label: "Le/la plaques contre la porte", next: 'n4' },
+        { label: "Pointes le sol — à genoux", next: 'n4' },
       ]},
-      n3: { for: 'a', text: "Tu souris. Tu décides comment tu vas commencer :", choices: [
-        { label: "La faire s’agenouiller dès qu’elle rentre", next: 'n4' },
-        { label: "La prendre contre le mur sans un mot", next: 'n4b' },
+      n4: { for: 'b', text: "Tu obéis / te laisses faire. Tu :", choices: [
+        { label: "Abandonnes tout contrôle", next: 'end1', pts: 18, who: 'a' },
+        { label: "Demandes encore plus", next: 'end2', pts: 18, who: 'a' },
       ]},
-      n3alt: { for: 'a', text: "Tu gardes le contrôle. Tu réponds :", choices: [
-        { label: "« À genoux. Bouche ouverte. »", next: 'n4' },
-        { label: "Tu envoies une photo de ta queue", next: 'n4b' },
-      ]},
-      n4: { for: 'b', text: "Tu rentres. Iel est déjà là. Tu sens le regard. Tu :", choices: [
-        { label: "T’agenouilles immédiatement", next: 'n5a' },
-        { label: "Attends qu’iel te le dise", next: 'n5b' },
-      ]},
-      n4b: { for: 'b', text: "Iel te plaque contre le mur. Tu sens sa main entre tes jambes. Tu :", choices: [
-        { label: "Écartes les cuisses sans parler", next: 'n5a' },
-        { label: "Gémis déjà", next: 'n5b' },
-      ]},
-      n5a: { for: 'a', text: "Tu la regardes à genoux. Tu :", choices: [
-        { label: "Lui fourres ta queue dans la bouche d’un coup", next: 'end1', pts: 18, who: 'b' },
-        { label: "La forces à te lécher jusqu’à ce qu’elle supplie", next: 'end2', pts: 18, who: 'b' },
-      ]},
-      n5b: { for: 'a', text: "Tu la sens déjà trempée/dure. Tu :", choices: [
-        { label: "La pénètres brutalement", next: 'end3', pts: 18, who: 'b' },
-        { label: "La fais jouir d’abord avec ta main, puis tu la prends", next: 'end4', pts: 18, who: 'b' },
-      ]},
-      end1: { for: 'both', isEnding: true, text: "Fin — Tu lui remplis la bouche jusqu’à ce qu’elle étouffe un peu. Elle avale tout. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Elle finit en larmes de plaisir, le visage trempé. Tu la baises ensuite sans douceur. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Tu la prends contre le mur jusqu’à ce qu’elle ne puisse plus tenir debout. 🔥" },
-      end4: { for: 'both', isEnding: true, text: "Fin — Elle jouit une première fois sur ta main, puis tu la prends encore plus fort. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — La soirée est dirigée d'un bout à l'autre. Intense. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Plus aucune retenue. Vous allez jusqu'au bout. 🔥" },
     }
   },
   {
-    id: 'chaleur-montante-hard',
-    title: 'Chaleur montante',
+    id: 'contre-le-mur-hard',
+    title: 'Contre le mur',
     category: 'Hard',
-    emoji: '🔥',
+    emoji: '🧱',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu envoies : « J’ai envie de te baiser très fort ce soir. » Tu ajoutes :", choices: [
-        { label: "« Je vais te défoncer »", next: 'n2' },
-        { label: "Une photo de ta main sur ta bite/chatte", next: 'n2' },
-        { label: "« Dis-moi où tu veux que je te prenne »", next: 'n2soft' },
+      n1: { for: 'a', text: "À peine rentrés, tu le/la pousses contre le mur. Tu :", choices: [
+        { label: "Embrasses fort, sans douceur", next: 'n2' },
+        { label: "Glisses une main entre ses jambes", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Tu es déjà trempée/dure. Tu réponds :", choices: [
-        { label: "« Fais-le. Maintenant. »", next: 'n3' },
-        { label: "« Pas encore… fais-moi attendre »", next: 'endSkip' },
+      n2: { for: 'b', text: "Tu es coincé·e. Tu :", choices: [
+        { label: "Écartes les jambes", next: 'n3' },
+        { label: "Attrapes sa nuque pour l'attirer", next: 'n3' },
       ]},
-      n2soft: { for: 'b', text: "Tu réponds en souriant :", choices: [
-        { label: "« Dans la bouche d’abord »", next: 'n3' },
-        { label: "« Contre le mur »", next: 'n3' },
+      n3: { for: 'a', text: "Tu ne perds pas de temps :", choices: [
+        { label: "Tu le/la prends ici, contre le mur", next: 'end1', pts: 20, who: 'b' },
+        { label: "Tu le/la fais jouir d'abord avec ta main", next: 'end2', pts: 20, who: 'b' },
       ]},
-      n3: { for: 'a', text: "Tu arrives. Tu la regardes. Tu décides :", choices: [
-        { label: "La forcer à genoux et lui enfoncer ta queue", next: 'n4a' },
-        { label: "La retourner et la prendre par-derrière d’un coup", next: 'n4b' },
-        { label: "La lécher jusqu’à ce qu’elle supplie", next: 'n4c' },
-      ]},
-      n4a: { for: 'b', text: "Ta gorge est pleine. Tu :", choices: [
-        { label: "Essaies de tout prendre", next: 'end1', pts: 20, who: 'a' },
-        { label: "Baves et regardes en l’air", next: 'end2', pts: 20, who: 'a' },
-      ]},
-      n4b: { for: 'b', text: "Tu es pliée en deux. Tu sens chaque coup. Tu :", choices: [
-        { label: "Pousses des cris", next: 'end3', pts: 20, who: 'a' },
-        { label: "Supplier « plus fort »", next: 'end4', pts: 20, who: 'a' },
-      ]},
-      n4c: { for: 'b', text: "Tu trembles déjà. Tu :", choices: [
-        { label: "Lui tiens la tête contre toi", next: 'end5', pts: 20, who: 'a' },
-        { label: "Jouis sur sa langue", next: 'end6', pts: 20, who: 'a' },
-      ]},
-      endSkip: { for: 'both', isEnding: true, text: "Fin — Tu décides d’attendre. La frustration n’en sera que meilleure plus tard. 🔥" },
-      end1: { for: 'both', isEnding: true, text: "Fin — Tu lui descends la gorge jusqu’au bout. Elle étouffe un peu. Tu jouis dans sa bouche. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Tu la regardes bavarde et soumise. Tu finis sur son visage. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Tu la baises si fort qu’elle ne peut plus parler. Elle jouit en criant. 🔥" },
-      end4: { for: 'both', isEnding: true, text: "Fin — Tu lui donnes exactement ce qu’elle demande. Jusqu’à ce qu’elle n’en puisse plus. 🔥" },
-      end5: { for: 'both', isEnding: true, text: "Fin — Tu la fais jouir plusieurs fois avec ta bouche avant de la prendre. 🔥" },
-      end6: { for: 'both', isEnding: true, text: "Fin — Elle jouit sur ta langue. Tu la montes immédiatement après. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Le mur a tout entendu. Vous aussi. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Un premier orgasme debout… puis la suite. 🔥" },
     }
   },
   {
-    id: 'jeu-de-confiance-hard',
-    title: 'Le jeu de confiance',
+    id: 'yeux-bandes-hard',
+    title: 'Les yeux bandés',
     category: 'Hard',
-    emoji: '🔒',
+    emoji: '🙈',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu dis : « Ce soir, tu m’appartiens. Mot de sécurité si tu veux arrêter. » Tu ajoutes :", choices: [
-        { label: "« À genoux. Maintenant. »", next: 'n2' },
-        { label: "« Enlève tout. Lentement. »", next: 'n2' },
+      n1: { for: 'a', text: "Tu sors un bandeau. Tu dis :", choices: [
+        { label: "« Fais-moi confiance. »", next: 'n2' },
+        { label: "« Ce soir, tu ne vois rien. »", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Ton cœur bat très fort. Tu réponds :", choices: [
-        { label: "« Oui… » et tu obéis", next: 'n3' },
-        { label: "« Pas ce soir »", next: 'endSkip' },
+      n2: { for: 'b', text: "Tu acceptes. Dans le noir :", choices: [
+        { label: "Tu attends, tendu·e", next: 'n3' },
+        { label: "Tu cherches un contact", next: 'n3' },
       ]},
-      n3: { for: 'a', text: "Tu la regardes soumise. Tu choisis :", choices: [
-        { label: "Lui bander les yeux et la toucher partout", next: 'n4a' },
-        { label: "La faire supplier avant de la toucher", next: 'n4b' },
+      n3: { for: 'a', text: "Tu prends ton temps. Tu :", choices: [
+        { label: "Effleures partout sauf là où iel veut", next: 'n4' },
+        { label: "Vas directement au but", next: 'n4' },
       ]},
-      n4a: { for: 'b', text: "Tu ne vois plus rien. Tu sens seulement ses mains. Tu :", choices: [
-        { label: "Gémis déjà", next: 'n5a' },
-        { label: "Essaies de rester silencieuse", next: 'n5b' },
+      n4: { for: 'b', text: "Sans la vue, tout est plus fort. Tu :", choices: [
+        { label: "Supplier", next: 'end1', pts: 20, who: 'a' },
+        { label: "Te laisses complètement porter", next: 'end2', pts: 20, who: 'a' },
       ]},
-      n4b: { for: 'b', text: "Tu es à genoux, excitée, sans être touchée. Tu :", choices: [
-        { label: "Supplier « touche-moi »", next: 'n5c' },
-        { label: "Attendre en silence", next: 'n5d' },
-      ]},
-      n5a: { for: 'a', text: "Tu entends ses gémissements. Tu :", choices: [
-        { label: "Lui enfonces deux doigts d’un coup", next: 'n6a' },
-        { label: "La prends dans la bouche sans prévenir", next: 'n6b' },
-      ]},
-      n5b: { for: 'a', text: "Elle se retient. Tu :", choices: [
-        { label: "La forces à jouir quand même", next: 'n6a' },
-        { label: "La tapes légèrement", next: 'n6b' },
-      ]},
-      n5c: { for: 'a', text: "Elle supplie. Tu :", choices: [
-        { label: "Lui donnes exactement ce qu’elle demande", next: 'n6c' },
-        { label: "La fais encore attendre", next: 'n6d' },
-      ]},
-      n5d: { for: 'a', text: "Elle reste silencieuse. Tu :", choices: [
-        { label: "La récompenses", next: 'n6c' },
-        { label: "La punis un peu", next: 'n6d' },
-      ]},
-      n6a: { for: 'b', text: "Tu sens ses doigts/sa bouche. Tu :", choices: [
-        { label: "Jouis immédiatement", next: 'end1' },
-        { label: "Supplier encore", next: 'end2' },
-      ]},
-      n6b: { for: 'b', text: "Tu n’en peux plus. Tu :", choices: [
-        { label: "Craques complètement", next: 'end2' },
-        { label: "Supplier « baise-moi »", next: 'end3' },
-      ]},
-      n6c: { for: 'b', text: "Enfin. Tu :", choices: [
-        { label: "Jouis très fort", next: 'end3' },
-        { label: "Veux qu’iel te prenne maintenant", next: 'end4' },
-      ]},
-      n6d: { for: 'b', text: "L’attente est douloureuse. Tu :", choices: [
-        { label: "Craques et supplier", next: 'end4' },
-        { label: "Tiens encore", next: 'end1' },
-      ]},
-      endSkip: { for: 'both', isEnding: true, text: "Fin — Vous gardez ça pour un autre soir. 🔒" },
-      end1: { for: 'both', isEnding: true, text: "Fin — Elle jouit les yeux bandés, complètement abandonnée. Tu la prends ensuite. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Elle n’a plus aucune retenue. Tu la baises comme tu veux. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Elle jouit en suppliant. Tu la remplis. 🔥" },
-      end4: { for: 'both', isEnding: true, text: "Fin — Tu la prends enfin. Elle est déjà détruite de plaisir. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Les supplications dans le noir rendent tout plus intense. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Abandon total. Le bandeau ne tombe qu'à la fin. 🔥" },
     }
   },
   {
-    id: 'cambrioleur-sexy-hard',
-    title: 'L\'intrus·e du soir',
+    id: 'qui-mene-hard',
+    title: 'Qui mène ce soir',
     category: 'Hard',
-    emoji: '🕶️',
+    emoji: '👑',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu descends et trouves ton/ta partenaire déguisé·e en cambrioleur/euse. Tu :", choices: [
-        { label: "« Qu’est-ce que tu fous ici ? »", next: 'n2' },
-        { label: "Tu la plaques immédiatement contre le mur", next: 'n2' },
+      n1: { for: 'a', text: "Tu poses la règle : « Ce soir, c'est moi qui décide. » Tu :", choices: [
+        { label: "Demandes un mot de sécurité", next: 'n2' },
+        { label: "Commences déjà à donner un ordre", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Tu restes dans le personnage. Tu dis :", choices: [
-        { label: "« Je suis venu·e te voler… et te baiser »", next: 'n3' },
-        { label: "Tu tries de « t’échapper »", next: 'n3alt' },
+      n2: { for: 'b', text: "Tu acceptes le jeu. Tu :", choices: [
+        { label: "Dis « oui » clairement", next: 'n3' },
+        { label: "Attend les instructions en silence", next: 'n3' },
       ]},
-      n3: { for: 'a', text: "Tu souris. Tu :", choices: [
-        { label: "Lui baisses le pantalon d’un geste", next: 'n4' },
-        { label: "La retournes et la prends contre le mur", next: 'n4' },
+      n3: { for: 'a', text: "Premier ordre :", choices: [
+        { label: "« Enlève tout. Lentement. »", next: 'n4' },
+        { label: "« À genoux. »", next: 'n4' },
       ]},
-      n3alt: { for: 'a', text: "Tu la rattrapes et la plaques. Tu :", choices: [
-        { label: "« Tu n’iras nulle part »", next: 'n4' },
+      n4: { for: 'b', text: "Tu obéis. La suite :", choices: [
+        { label: "Tu restes dans le rôle jusqu'au bout", next: 'end1', pts: 22, who: 'a' },
+        { label: "Tu demandes la permission pour chaque geste", next: 'end2', pts: 22, who: 'a' },
       ]},
-      n4: { for: 'b', text: "Tu es coincée. Tu :", choices: [
-        { label: "Te laisses faire complètement", next: 'n5a' },
-        { label: "Résistes un peu (pour le jeu)", next: 'n5b' },
-      ]},
-      n5a: { for: 'a', text: "Tu la sens prête. Tu :", choices: [
-        { label: "La pénètres d’un coup sec", next: 'end1' },
-        { label: "Lui enfonces tes doigts d’abord", next: 'end2' },
-      ]},
-      n5b: { for: 'a', text: "Elle résiste un peu. Tu :", choices: [
-        { label: "La domines encore plus", next: 'end2' },
-        { label: "Lui mords l’épaule en la prenant", next: 'end3' },
-      ]},
-      end1: { for: 'both', isEnding: true, text: "Fin — Tu la baises contre le mur jusqu’à ce qu’elle jouisse en criant. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Tu la fais jouir d’abord avec ta main, puis tu la prends très fort. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Le jeu de rôle devient pure possession. Elle n’a plus le contrôle. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Une soirée entière sous contrôle. Les deux y trouvent leur compte. 🔒" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Chaque permission accordée monte la tension d'un cran. 🔥" },
     }
   },
   {
-    id: 'massage-tactile-hard',
-    title: 'Le massage qui dérape',
+    id: 'reveil-hard',
+    title: 'Réveil coquin',
     category: 'Hard',
-    emoji: '💆',
+    emoji: '⏰',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu commences le massage… mais tes mains descendent déjà trop bas. Tu dis :", choices: [
-        { label: "« Détends-toi… je m’occupe de tout »", next: 'n2' },
-        { label: "Tu glisses directement entre ses jambes", next: 'n2' },
+      n1: { for: 'a', text: "L'autre dort encore. Tu :", choices: [
+        { label: "Glisses sous la couette", next: 'n2' },
+        { label: "Embrasses le long du corps en descendant", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Tu sens ses doigts. Tu :", choices: [
-        { label: "Écartes les cuisses", next: 'n3' },
-        { label: "« Tu es censé·e masser… » (en souriant)", next: 'n3alt' },
+      n2: { for: 'b', text: "Tu te réveilles déjà à moitié. Tu :", choices: [
+        { label: "Écartes les jambes en silence", next: 'n3' },
+        { label: "Murmures « continue… »", next: 'n3' },
       ]},
-      n3: { for: 'a', text: "Tu continues. Tu :", choices: [
-        { label: "Lui enfonces deux doigts lentement", next: 'n4a' },
-        { label: "La retournes et la prends", next: 'n4b' },
+      n3: { for: 'a', text: "Tu ne t'arrêtes pas. Tu :", choices: [
+        { label: "Vas jusqu'à l'orgasme avec ta bouche", next: 'end1', pts: 20, who: 'b' },
+        { label: "Le/la prends ensuite, encore à moitié endormi·e", next: 'end2', pts: 20, who: 'b' },
       ]},
-      n3alt: { for: 'a', text: "Tu réponds en riant :", choices: [
-        { label: "« Je masse… autrement »", next: 'n4a' },
-      ]},
-      n4a: { for: 'b', text: "Tu gémiss. Tu :", choices: [
-        { label: "Baises sa main", next: 'n5a' },
-        { label: "Supplier qu’iel te prenne", next: 'n5b' },
-      ]},
-      n4b: { for: 'b', text: "Tu es à quatre pattes. Tu :", choices: [
-        { label: "Pousses des hanches en arrière", next: 'n5a' },
-        { label: "Demandes plus fort", next: 'n5b' },
-      ]},
-      n5a: { for: 'a', text: "Tu la sens très proche. Tu :", choices: [
-        { label: "La fais jouir sur tes doigts", next: 'end1' },
-        { label: "La prends maintenant", next: 'end2' },
-      ]},
-      n5b: { for: 'a', text: "Elle supplie. Tu :", choices: [
-        { label: "Lui donnes exactement ce qu’elle veut", next: 'end2' },
-        { label: "La prends encore plus fort", next: 'end3' },
-      ]},
-      end1: { for: 'both', isEnding: true, text: "Fin — Elle jouit sur ta main, trempée. Tu la montes juste après. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Tu la baises jusqu’à ce qu’elle jouisse une deuxième fois. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Plus aucune retenue. Tu la prends comme tu veux. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Meilleur réveil possible. La journée peut attendre. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Réveil brutal… dans le meilleur sens du terme. 🔥" },
     }
   },
   {
-    id: 'menage-applique-hard',
-    title: 'Le grand ménage',
+    id: 'interdit-toucher-hard',
+    title: 'Interdiction de toucher',
     category: 'Hard',
-    emoji: '🧹',
+    emoji: '🚫',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu arrives en tenue de ménage… très légère. Tu dis :", choices: [
-        { label: "« Je viens faire le ménage… à fond »", next: 'n2' },
-        { label: "Tu te mets à genoux avec le plumeau", next: 'n2' },
+      n1: { for: 'a', text: "Tu poses la règle : « Ce soir, tu n'as pas le droit de me toucher. » Tu :", choices: [
+        { label: "Commences à le/la caresser quand même", next: 'n2' },
+        { label: "Te mets à genoux devant iel", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Tu souris. Tu :", choices: [
-        { label: "« À genoux alors »", next: 'n3' },
-        { label: "Tu la plaques sur le canapé", next: 'n3alt' },
+      n2: { for: 'b', text: "Les mains te brûlent de bouger. Tu :", choices: [
+        { label: "Serrres les draps / le canapé", next: 'n3' },
+        { label: "Demandes la permission de toucher", next: 'n3' },
       ]},
-      n3: { for: 'a', text: "Tu es à genoux. Tu :", choices: [
-        { label: "Lui ouvres la bouche", next: 'n4' },
-        { label: "Attends ses ordres", next: 'n4' },
+      n3: { for: 'a', text: "Tu refuses encore un moment. Puis :", choices: [
+        { label: "Tu autorises enfin… une seule main", next: 'end1', pts: 18, who: 'b' },
+        { label: "Tu gardes l'interdiction jusqu'à la fin", next: 'end2', pts: 18, who: 'b' },
       ]},
-      n3alt: { for: 'a', text: "Tu es plaquée. Tu :", choices: [
-        { label: "Écartes les jambes", next: 'n4' },
-      ]},
-      n4: { for: 'b', text: "Tu la regardes. Tu :", choices: [
-        { label: "Lui fourres ta queue dans la bouche", next: 'n5a' },
-        { label: "La retournes et la prends", next: 'n5b' },
-      ]},
-      n5a: { for: 'a', text: "Ta bouche est pleine. Tu :", choices: [
-        { label: "Tout prendre", next: 'end1' },
-        { label: "Baves et regardes en l’air", next: 'end2' },
-      ]},
-      n5b: { for: 'a', text: "Tu es prise. Tu :", choices: [
-        { label: "Gémis très fort", next: 'end2' },
-        { label: "Supplier encore", next: 'end3' },
-      ]},
-      end1: { for: 'both', isEnding: true, text: "Fin — Tu lui descends la gorge jusqu’au bout. Elle avale. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Tu la baises jusqu’à ce qu’elle jouisse en criant. 🔥" },
-      end3: { for: 'both', isEnding: true, text: "Fin — Le « ménage » se termine en baise très sale. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Cette seule main autorisée vaut toutes les autres. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Frustration délicieuse. Iel n'a touché que par le regard. 🔥" },
     }
   },
   {
-    id: 'envie-a-trois-hard',
-    title: 'Un fantasme à confier',
+    id: 'deuxieme-round-hard',
+    title: 'Deuxième round',
     category: 'Hard',
-    emoji: '💬',
+    emoji: '🔁',
     start: 'n1',
     nodes: {
-      n1: { for: 'a', text: "Tu dis : « J’ai un fantasme… je veux te voir te faire baiser par quelqu’un d’autre. » Tu ajoutes :", choices: [
-        { label: "« Juste l’idée… pour l’instant »", next: 'n2' },
-        { label: "« Je veux te regarder jouir avec un autre »", next: 'n2' },
+      n1: { for: 'a', text: "Vous venez de finir. Personne n'a vraiment envie de s'arrêter. Tu :", choices: [
+        { label: "Dis « encore »", next: 'n2' },
+        { label: "Recommences à toucher sans demander", next: 'n2' },
       ]},
-      n2: { for: 'b', text: "Tu es surprise… et excitée. Tu réponds :", choices: [
-        { label: "« Raconte-moi en détail »", next: 'n3' },
-        { label: "« Pas ce soir »", next: 'endSkip' },
+      n2: { for: 'b', text: "Tu es encore sensible. Tu :", choices: [
+        { label: "Accepte tout de suite", next: 'n3' },
+        { label: "Demandes d'y aller plus doucement… au début", next: 'n3' },
       ]},
-      n3: { for: 'a', text: "Tu continues :", choices: [
-        { label: "« Je veux te voir le sucer pendant que je te regarde »", next: 'n4' },
-        { label: "« Je veux qu’il te prenne pendant que je te baise la bouche »", next: 'n4' },
+      n3: { for: 'a', text: "Le deuxième round :", choices: [
+        { label: "Est plus lent, plus profond", next: 'end1', pts: 18, who: 'b' },
+        { label: "Est encore plus intense que le premier", next: 'end2', pts: 18, who: 'b' },
       ]},
-      n4: { for: 'b', text: "Tu es trempée rien qu’à l’idée. Tu :", choices: [
-        { label: "Avoues que ça t’excite aussi", next: 'n5a' },
-        { label: "Demandes des détails encore plus sales", next: 'n5b' },
-      ]},
-      n5a: { for: 'a', text: "Tu souris. Tu :", choices: [
-        { label: "La touches en continuant de parler", next: 'end1' },
-        { label: "La baises en lui racontant le fantasme", next: 'end2' },
-      ]},
-      n5b: { for: 'a', text: "Tu deviens encore plus cru. Tu :", choices: [
-        { label: "Lui décris exactement comment tu veux la voir jouir", next: 'end1' },
-        { label: "La prends très fort en lui parlant du troisième", next: 'end2' },
-      ]},
-      endSkip: { for: 'both', isEnding: true, text: "Fin — Le sujet reste ouvert. Vous y reviendrez. 💬" },
-      end1: { for: 'both', isEnding: true, text: "Fin — Elle jouit rien qu’avec les mots et ta main. 🔥" },
-      end2: { for: 'both', isEnding: true, text: "Fin — Tu la baises en lui décrivant le fantasme jusqu’à ce qu’elle jouisse très fort. 🔥" },
+      end1: { for: 'both', isEnding: true, text: "Fin — Plus lent, plus présent. Meilleur que le premier. 🔥" },
+      end2: { for: 'both', isEnding: true, text: "Fin — Aucune limite. Le deuxième efface le premier. 🔥" },
     }
   },
 ];
@@ -3054,11 +3095,13 @@ let storyFilter = 'Toutes';
 function renderStoryFilters(all){
   const wrap = document.getElementById('story-filters');
   if(!wrap) return;
-  const categories = ['Toutes', ...new Set(all.map(s => s.category || 'Histoire'))];
+  const order = ['Toutes', 'Soft', 'Medium', 'Hard'];
+  const others = [...new Set(all.map(s => s.category || 'Histoire'))].filter(c => !order.includes(c));
+  const categories = order.filter(c => c === 'Toutes' || all.some(s => s.category === c)).concat(others);
   wrap.innerHTML = '';
   categories.forEach(cat => {
     const b = document.createElement('button');
-    b.textContent = cat;
+    b.textContent = cat === 'Soft' ? '💕 Soft' : cat === 'Medium' ? '😏 Medium' : cat === 'Hard' ? '🔥 Hard' : cat;
     b.className = storyFilter === cat ? 'picked' : '';
     b.onclick = () => { storyFilter = cat; renderStoryLibrary(); };
     wrap.appendChild(b);
