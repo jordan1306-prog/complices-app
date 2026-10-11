@@ -1158,6 +1158,25 @@
   <button class="btn btn-ghost" id="soiree-close-btn" style="width:100%; max-width:380px; margin-top:12px;">Fermer le mode soirée</button>
 </div>
 
+
+<div id="reward-config-panel">
+  <div class="reward-config-card">
+    <h2 id="reward-config-title" style="margin:0 0 4px; font-size:20px; color:var(--gold-soft); text-align:center;"></h2>
+    <div class="sub" id="reward-config-base" style="text-align:center; margin-bottom:12px;"></div>
+    <div id="reward-config-options"></div>
+    <div class="config-total" id="reward-config-total">0 pts</div>
+    <div class="sub" id="reward-config-balance" style="text-align:center; margin-bottom:12px;"></div>
+    <div class="assign" id="reward-config-who" style="margin-bottom:10px;"></div>
+    <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Délai pour le réaliser</div>
+    <div class="row" style="margin-bottom:10px; display:flex; gap:8px;">
+      <input type="number" id="reward-config-hours" placeholder="heures" value="2" min="0" style="flex:1; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:9px; color:var(--cream); font-family:Manrope,sans-serif;">
+      <input type="number" id="reward-config-mins" placeholder="min" value="0" min="0" style="flex:1; background:var(--card); border:0.5px solid var(--line); border-radius:8px; padding:9px; color:var(--cream); font-family:Manrope,sans-serif;">
+    </div>
+    <button class="btn btn-gold" id="reward-config-confirm" style="width:100%; margin-bottom:8px;">Acheter</button>
+    <button class="btn btn-ghost" id="reward-config-cancel" style="width:100%;">Annuler</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -3697,6 +3716,8 @@ let rewardConfigSelected = new Set();
 function openRewardConfig(id){
   const r = state.rewards.find(x => x.id === id);
   if(!r) return;
+  const panel = document.getElementById('reward-config-panel');
+  if(!panel){ showToast('Panneau boutique indisponible'); return; }
   rewardConfigId = id;
   rewardConfigSelected = new Set();
   rewardConfigWho = myRole || 'a';
@@ -3819,7 +3840,12 @@ function redeemReward(id, who){
 function renderPurchases(){
   const owedList = document.getElementById('purchases-owed-list');
   const boughtList = document.getElementById('purchases-bought-list');
-  if(!owedList || !boughtList || !myRole) return;
+  if(!owedList || !boughtList) return;
+  if(!myRole){
+    owedList.innerHTML = '<div class="empty">Choisis d\'abord qui tu es (onglet Jouer) pour voir les achats.</div>';
+    boughtList.innerHTML = '';
+    return;
+  }
 
   const owed = state.purchases.filter(p => p.owedBy === myRole);
   owedList.innerHTML = '';
@@ -4117,6 +4143,17 @@ document.getElementById('reward-config-cancel')?.addEventListener('click', () =>
   document.getElementById('reward-config-panel').classList.remove('active');
 });
 document.getElementById('reward-config-confirm')?.addEventListener('click', confirmRewardPurchase);
+
+// reward-config-panel-delegation
+document.addEventListener('click', e => {
+  if(e.target.closest('#reward-config-cancel')){
+    document.getElementById('reward-config-panel')?.classList.remove('active');
+  }
+  if(e.target.closest('#reward-config-confirm')){
+    confirmRewardPurchase();
+  }
+});
+
 
 document.getElementById('add-reward-btn').addEventListener('click', () => {
   const nameInput = document.getElementById('new-reward-name');
