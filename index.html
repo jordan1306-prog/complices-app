@@ -1268,19 +1268,11 @@ function daysFromNow(n){
   return d.toISOString().slice(0,10);
 }
 
-const defaultState = () => ({
-  names: { a: 'Elle', b: 'Lui' },
-  scores: { a: 0, b: 0 },
-  pointAdjustments: [],
-  mysteryPing: { a: false, b: false },
-  defis: [
-    { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a', deadline: daysFromNow(1) },
-    { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b', deadline: daysFromNow(3) },
-    { id: cryptoId(), text: "Offrir un massage des épaules de 10 minutes", pts: 15, for: 'a', deadline: daysFromNow(3) },
-    { id: cryptoId(), text: "Préparer une danse sensuelle surprise", pts: 20, for: 'b', deadline: daysFromNow(5) },
-    { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a', deadline: daysFromNow(2) },
-  ],
-  rewards: [
+
+const REWARDS_CATALOG_VERSION = 3;
+
+function buildDefaultRewards(){
+  return [
     { id: cryptoId(), text: "Fellation jusqu'à l'orgasme", pts: 50, emoji: "👄",
       options: [
         { id: "gorge", text: "Gorge profonde", pts: 15 },
@@ -1301,11 +1293,11 @@ const defaultState = () => ({
         { id: "nu", text: "Les deux entièrement nus", pts: 10 },
         { id: "fin", text: "Finit en sexe", pts: 20 },
       ]},
-    { id: cryptoId(), text: "Je choisis la position", pts: 45, emoji: "🛏️",
+    { id: cryptoId(), text: "Je choisis la position", pts: 45, emoji: "🛏️", type: "position",
       options: [
-        { id: "rythme", text: "+ je contrôle le rythme", pts: 15 },
-        { id: "duree", text: "+ minimum 15 minutes", pts: 15 },
-        { id: "fin", text: "+ je décide comment ça finit", pts: 15 },
+        { id: "rythme", text: "Je contrôle le rythme", pts: 15 },
+        { id: "duree", text: "Minimum 15 minutes", pts: 15 },
+        { id: "fin", text: "Je décide comment ça finit", pts: 15 },
       ]},
     { id: cryptoId(), text: "Strip-tease privé", pts: 45, emoji: "👗",
       options: [
@@ -1316,12 +1308,12 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Tu m'obéis 15 min", pts: 55, emoji: "👑",
       options: [
         { id: "30", text: "Passer à 30 min", pts: 20 },
-        { id: "mot", text: "Mot de sécurité seulement (rien d'autre refusable)", pts: 15 },
+        { id: "mot", text: "Mot de sécurité seulement", pts: 15 },
         { id: "photo", text: "Je peux te prendre en photo", pts: 15 },
       ]},
     { id: cryptoId(), text: "Un orgasme à ma façon", pts: 60, emoji: "💥",
       options: [
-        { id: "maintenant", text: "Tout de suite (pas plus tard)", pts: 15 },
+        { id: "maintenant", text: "Tout de suite", pts: 15 },
         { id: "methode", text: "Je choisis bouche / doigts / sexe", pts: 10 },
         { id: "encore", text: "Et un 2e juste après", pts: 25 },
       ]},
@@ -1340,7 +1332,7 @@ const defaultState = () => ({
     { id: cryptoId(), text: "69 complet", pts: 50, emoji: "🔄",
       options: [
         { id: "dessus", text: "Je choisis qui est au-dessus", pts: 5 },
-        { id: "orgasme", text: "Jusqu'à l'orgasme d'au moins un·e", pts: 15 },
+        { id: "orgasme", text: "Jusqu'à orgasme d'au moins un·e", pts: 15 },
         { id: "suite", text: "Enchaîne en pénétration après", pts: 15 },
       ]},
     { id: cryptoId(), text: "2e round ce soir", pts: 70, emoji: "🔁",
@@ -1355,7 +1347,24 @@ const defaultState = () => ({
         { id: "lieu", text: "Je choisis où dans la maison", pts: 10 },
         { id: "finnuit", text: "Jusqu'à la fin de la nuit", pts: 25 },
       ]},
+  ];
+}
+
+const defaultState = () => ({
+  names: { a: 'Elle', b: 'Lui' },
+  scores: { a: 0, b: 0 },
+  pointAdjustments: [],
+  mysteryPing: { a: false, b: false },
+  defis: [
+    { id: cryptoId(), text: "Envoyer un message coquin dans la journée", pts: 10, for: 'a', deadline: daysFromNow(1) },
+    { id: cryptoId(), text: "Préparer un bain avec bougies pour l'autre", pts: 20, for: 'b', deadline: daysFromNow(3) },
+    { id: cryptoId(), text: "Offrir un massage des épaules de 10 minutes", pts: 15, for: 'a', deadline: daysFromNow(3) },
+    { id: cryptoId(), text: "Préparer une danse sensuelle surprise", pts: 20, for: 'b', deadline: daysFromNow(5) },
+    { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a', deadline: daysFromNow(2) },
   ],
+  rewards: buildDefaultRewards(),
+  rewardsCatalogVersion: REWARDS_CATALOG_VERSION,
+
   mysteryBoxA: [
     { id: cryptoId(), text: "Préliminaires longs rien que pour elle", level: "soft" },
     { id: cryptoId(), text: "Massage à l'huile jusqu'à ce qu'elle craque", level: "soft" },
@@ -1630,6 +1639,11 @@ function normalizeState(s){
   if(s.story === undefined) s.story = null;
   if(!s.customScenarios) s.customScenarios = [];
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
+  // Migrer la boutique vers le catalogue avec options
+  if(!s.rewardsCatalogVersion || s.rewardsCatalogVersion < REWARDS_CATALOG_VERSION){
+    s.rewards = buildDefaultRewards();
+    s.rewardsCatalogVersion = REWARDS_CATALOG_VERSION;
+  }
   return s;
 }
 
@@ -3844,6 +3858,7 @@ function renderRewards(){
 let rewardConfigId = null;
 let rewardConfigWho = 'a';
 let rewardConfigSelected = new Set();
+let rewardConfigPosition = null;
 
 function openRewardConfig(id){
   const r = state.rewards.find(x => x.id === id);
@@ -3859,7 +3874,36 @@ function openRewardConfig(id){
 
   const optsWrap = document.getElementById('reward-config-options');
   optsWrap.innerHTML = '';
+  rewardConfigPosition = null;
+
+  // Sélecteur de position si type position
+  if(r.type === 'position' && typeof POSITIONS_GUIDE !== 'undefined'){
+    const title = document.createElement('div');
+    title.className = 'sub';
+    title.style.cssText = 'margin-bottom:8px; font-weight:600; color:var(--gold-soft);';
+    title.textContent = 'Choisis la position :';
+    optsWrap.appendChild(title);
+    const posWrap = document.createElement('div');
+    posWrap.id = 'reward-position-list';
+    posWrap.style.cssText = 'max-height:180px; overflow-y:auto; margin-bottom:12px;';
+    POSITIONS_GUIDE.forEach(p => {
+      const row = document.createElement('label');
+      row.className = 'opt-row';
+      row.innerHTML = `<input type="radio" name="reward-pos" value="${escapeHtml(p.name)}"><span>${escapeHtml(p.name)}</span>`;
+      row.querySelector('input').addEventListener('change', () => {
+        rewardConfigPosition = p.name;
+      });
+      posWrap.appendChild(row);
+    });
+    optsWrap.appendChild(posWrap);
+  }
+
   if(r.options && r.options.length){
+    const optTitle = document.createElement('div');
+    optTitle.className = 'sub';
+    optTitle.style.cssText = 'margin:8px 0; font-weight:600; color:var(--gold-soft);';
+    optTitle.textContent = 'Options (+ pts) :';
+    optsWrap.appendChild(optTitle);
     r.options.forEach(opt => {
       const row = document.createElement('label');
       row.className = 'opt-row';
@@ -3876,8 +3920,12 @@ function openRewardConfig(id){
       });
       optsWrap.appendChild(row);
     });
-  } else {
-    optsWrap.innerHTML = '<div class="sub" style="text-align:center;">Pas d\'options — prix fixe</div>';
+  } else if(r.type !== 'position'){
+    const empty = document.createElement('div');
+    empty.className = 'sub';
+    empty.style.textAlign = 'center';
+    empty.textContent = 'Pas d\'options — prix fixe';
+    optsWrap.appendChild(empty);
   }
 
   const whoWrap = document.getElementById('reward-config-who');
@@ -3941,8 +3989,15 @@ function confirmRewardPurchase(){
     showToast('Indique un délai (heures ou minutes)');
     return;
   }
+  if(r.type === 'position' && !rewardConfigPosition){
+    showToast('Choisis une position avant d\'acheter');
+    return;
+  }
   const selectedOpts = (r.options || []).filter(o => rewardConfigSelected.has(o.id));
   let label = r.text;
+  if(rewardConfigPosition){
+    label += ' → ' + rewardConfigPosition;
+  }
   if(selectedOpts.length){
     label += ' (' + selectedOpts.map(o => o.text).join(', ') + ')';
   }
