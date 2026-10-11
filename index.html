@@ -487,12 +487,19 @@
   }
 
   body.chat-fullscreen{ overflow:hidden; }
-  body.chat-fullscreen .signout,
-  body.chat-fullscreen #bottom-nav{ display:none !important; }
+  body.chat-fullscreen .signout{ display:none !important; }
+  body.chat-fullscreen #bottom-nav{ display:flex !important; z-index:70; }
+  body.chat-fullscreen #sub-nav{
+    display:flex !important; position:fixed; top:0; left:0; right:0; z-index:72;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    background:rgba(18,10,14,0.95); backdrop-filter:blur(8px);
+    margin:0; border-radius:0;
+  }
   body.chat-fullscreen #tab-messages{
-    position:fixed; inset:0; z-index:60;
+    position:fixed; left:0; right:0; bottom:0; z-index:60;
+    top: calc(52px + env(safe-area-inset-top));
     display:flex; flex-direction:column;
-    padding: calc(14px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom));
+    padding: 10px 14px calc(70px + env(safe-area-inset-bottom));
     margin:0;
   }
   body.chat-fullscreen #tab-messages .chat-box{
@@ -864,6 +871,7 @@
   <div class="home-section-title">Accès rapide</div>
   <div class="home-quick-row">
     <button type="button" id="play-now-btn"><span class="hq-icon">🎯</span><span>Défis</span></button>
+    <button type="button" id="quick-histoires-btn"><span class="hq-icon">📖</span><span>Histoires</span></button>
     <button type="button" id="quick-boutique-btn"><span class="hq-icon">🎁</span><span>Boutique</span></button>
     <button type="button" id="quick-messages-btn"><span class="hq-icon">💬</span><span>Chat</span></button>
   </div>
@@ -2890,6 +2898,7 @@ function renderTodayDefiBox(){
 }
 
 document.getElementById('play-now-btn')?.addEventListener('click', () => goToTab('defis'));
+document.getElementById('quick-histoires-btn')?.addEventListener('click', () => goToTab('histoires'));
 document.getElementById('quick-messages-btn')?.addEventListener('click', () => goToTab('messages'));
 document.getElementById('quick-boutique-btn')?.addEventListener('click', () => goToTab('boutique'));
 
@@ -4461,15 +4470,15 @@ document.getElementById('notif-send-defi-btn').addEventListener('click', () => {
 });
 
 const TAB_GROUPS = {
-  defis: 'jouer', secret: 'jouer',
+  defis: 'jouer', secret: 'jouer', histoires: 'jouer',
   boutique: 'recompenses', achats: 'recompenses',
-  messages: 'ensemble', histoires: 'ensemble',
+  messages: 'ensemble',
   'profil-accueil': 'profil', calendrier: 'profil', historique: 'profil',
 };
 const GROUP_TABS = {
-  jouer: ['defis', 'secret'],
+  jouer: ['defis', 'secret', 'histoires'],
   recompenses: ['boutique', 'achats'],
-  ensemble: ['messages', 'histoires'],
+  ensemble: ['messages'],
   profil: ['profil-accueil', 'calendrier', 'historique'],
 };
 
@@ -4577,7 +4586,7 @@ function renderHomeDashboard(){
 
 
 function selectGroup(groupName, preferredTab){
-  document.body.classList.toggle('chat-fullscreen', groupName === 'ensemble' && (!preferredTab || preferredTab === 'messages'));
+  document.body.classList.toggle('chat-fullscreen', groupName === 'ensemble');
   if(groupName === 'profil' && document.getElementById('profil-sub-main')){
     showProfilView('profil-sub-main');
   }
