@@ -611,6 +611,13 @@
   }
   .pos-card .pos-desc{ font-size:13px; color:var(--cream); line-height:1.45; }
 
+
+  .pos-card .pos-svg{
+    width:100%; max-width:200px; height:90px; margin:8px auto 6px;
+    display:block; background:rgba(28,17,22,0.5); border-radius:10px;
+  }
+  .pos-card .pos-svg svg{ width:100%; height:100%; }
+
 </style>
 </head>
 <body>
@@ -3256,26 +3263,46 @@ document.getElementById('save-story-btn').addEventListener('click', () => {
 
 
 const POSITIONS_GUIDE = [
-  { name: "Le missionnaire", tag: "classique", desc: "Partenaire allongé·e sur le dos, l'autre au-dessus face à face. Idéal pour les baisers et le contact visuel." },
-  { name: "Le missionnaire surélevé", tag: "classique", desc: "Comme le missionnaire, mais avec un coussin sous les hanches de celui/celle en dessous pour un angle plus profond." },
-  { name: "L'andromaque (cowgirl)", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon face à lui/elle. Celle/celui du dessus contrôle le rythme." },
-  { name: "Reverse cowgirl", tag: "classique", desc: "Comme l'andromaque, mais tourné·e dos au partenaire. Angle différent, vue plaisante pour l'un·e des deux." },
-  { name: "La levrette (doggy)", tag: "classique", desc: "À quatre pattes, partenaire derrière. Pénétration profonde, mains libres pour caresser." },
-  { name: "La levrette debout", tag: "intense", desc: "Plié·e en avant (lit, mur, meuble), partenaire derrière. Plus dynamique, très intense." },
-  { name: "La cuillère", tag: "douce", desc: "Tous les deux allongés sur le côté, l'un derrière l'autre. Doux, intime, parfait pour y aller lentement." },
-  { name: "Le 69", tag: "classique", desc: "Tête-bêche : chacun·e a la bouche au niveau du sexe de l'autre. Plaisir simultané oral." },
-  { name: "Le lotus", tag: "douce", desc: "Assis face à face, jambes enlacées. Très proche, rythmes lents, beaucoup de câlins possibles." },
-  { name: "Face à face assis", tag: "douce", desc: "Sur une chaise ou le bord du lit : un·e assis·e, l'autre sur ses genoux face à face. Contact max." },
-  { name: "La chaise", tag: "classique", desc: "Un·e assis·e sur une chaise solide, l'autre à califourchon. Bon appui, rythme facile à contrôler." },
-  { name: "L'étau", tag: "intense", desc: "Partenaire allongé·e, jambes relevées et serrées (ou sur les épaules). Sensation plus serrée et profonde." },
-  { name: "Le papillon", tag: "classique", desc: "Allongé·e au bord du lit, bassin au bord, partenaire debout ou à genoux entre les jambes. Angle excellent." },
-  { name: "La brouette", tag: "intense", desc: "Partenaire en appui sur les mains (ou avant-bras), l'autre soulève les jambes. Demande de l'équilibre et de la force." },
-  { name: "Contre le mur", tag: "intense", desc: "Debout, dos au mur ou face au mur. Porté·e ou une jambe relevée. Passionné, spontané." },
-  { name: "Cuisses croisées", tag: "douce", desc: "Allongé·e sur le dos, une jambe entre celles du partenaire. Frottements + pénétration possible, rythme lent." },
-  { name: "L'amazone latérale", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon mais tourné·e de côté. Moins de fatigue, angle intéressant." },
-  { name: "Pliée en avant assise", tag: "intense", desc: "Assis·e au bord du lit, buste penché en avant, partenaire derrière à genoux. Profondeur + accès aux mains." },
-  { name: "Les ciseaux", tag: "douce", desc: "Allongés sur le côté face à face, jambes entrelacées. Frottements intimes, pénétration possible, très connecté." },
-  { name: "Genoux au sol, buste relevé", tag: "classique", desc: "À genoux face à un dossier/lit, buste relevé, partenaire derrière. Variante de levrette plus droite." },
+  { name: "Le missionnaire", tag: "classique", desc: "Partenaire allongé·e sur le dos, l'autre au-dessus face à face. Idéal pour les baisers et le contact visuel.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="58" rx="40" ry="6" fill="rgba(245,236,231,0.08)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="48" cy="22" r="5"/><path d="M48 27v14M42 32h12M48 41l-8 12M48 41l8 12"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="72" cy="18" r="5"/><path d="M72 23v12M66 28h12M72 35l-6 14M72 35l6 14"/></g></svg>` },
+  { name: "Le missionnaire surélevé", tag: "classique", desc: "Comme le missionnaire, mais avec un coussin sous les hanches de celui/celle en dessous pour un angle plus profond.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="35" y="48" width="30" height="8" rx="2" fill="rgba(201,162,77,0.35)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="48" cy="20" r="5"/><path d="M48 25v12M42 30h12M48 37l-8 10M48 37l10 8"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="72" cy="16" r="5"/><path d="M72 21v12M66 26h12M72 33l-6 14M72 33l6 14"/></g></svg>` },
+  { name: "L'andromaque (cowgirl)", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon face à lui/elle. Celle/celui du dessus contrôle le rythme.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="55" cy="48" r="5"/><path d="M40 55h40M55 43v-6"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="55" cy="14" r="5"/><path d="M55 19v16M48 28h14M55 35l-10 8M55 35l10 8"/></g></svg>` },
+  { name: "Reverse cowgirl", tag: "classique", desc: "Comme l'andromaque, mais tourné·e dos au partenaire. Angle différent, vue plaisante pour l'un·e des deux.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="60" cy="50" r="5"/><path d="M45 56h30M60 45v-4"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="78" cy="16" r="5"/><path d="M72 22l-8 14M64 36h-8M64 36l-6 12M64 36l8 10"/></g></svg>` },
+  { name: "La levrette (doggy)", tag: "classique", desc: "À quatre pattes, partenaire derrière. Pénétration profonde, mains libres pour caresser.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="35" cy="28" r="5"/><path d="M40 32l20 4M40 32l-6 18M60 36l8 16M60 36l12-4"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="88" cy="22" r="5"/><path d="M82 28l-14 8M82 28l4 20M68 36l-4 16"/></g></svg>` },
+  { name: "La levrette debout", tag: "intense", desc: "Plié·e en avant (lit, mur, meuble), partenaire derrière. Plus dynamique, très intense.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="10" width="6" height="50" rx="1" fill="rgba(245,236,231,0.15)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="40" cy="22" r="5"/><path d="M45 26l18 6M45 26l-8 22M63 32l5 20"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="92" cy="18" r="5"/><path d="M86 24l-16 10M86 24l2 22M70 34l-2 18"/></g></svg>` },
+  { name: "La cuillère", tag: "douce", desc: "Tous les deux allongés sur le côté, l'un derrière l'autre. Doux, intime, parfait pour y aller lentement.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="30" cy="32" r="5"/><path d="M35 35h28M35 35l-4 16M63 35l4 16"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="42" cy="24" r="5"/><path d="M47 28h28M47 28l-2 14M75 28l2 14"/></g></svg>` },
+  { name: "Le 69", tag: "classique", desc: "Tête-bêche : chacun·e a la bouche au niveau du sexe de l'autre. Plaisir simultané oral.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="35" cy="22" r="5"/><path d="M40 26l20 8M40 26l-2 18M60 34l8 12"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="85" cy="48" r="5"/><path d="M80 44l-20-8M80 44l2-18M60 36l-8-12"/></g></svg>` },
+  { name: "Le lotus", tag: "douce", desc: "Assis face à face, jambes enlacées. Très proche, rythmes lents, beaucoup de câlins possibles.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="48" cy="18" r="5"/><path d="M48 23v18M40 32h8M48 41l-12 8M48 41l4 10"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="72" cy="18" r="5"/><path d="M72 23v18M72 32h8M72 41l12 8M72 41l-4 10"/></g></svg>` },
+  { name: "Face à face assis", tag: "douce", desc: "Sur une chaise ou le bord du lit : un·e assis·e, l'autre sur ses genoux face à face. Contact max.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="48" width="40" height="6" rx="1" fill="rgba(245,236,231,0.12)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="55" cy="20" r="5"/><path d="M55 25v18M48 32h14M55 43l-8 8M55 43l8 8"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="72" cy="16" r="5"/><path d="M68 22l-8 14M60 36h-4"/></g></svg>` },
+  { name: "La chaise", tag: "classique", desc: "Un·e assis·e sur une chaise solide, l'autre à califourchon. Bon appui, rythme facile à contrôler.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><path d="M38 50h36v4H38zM42 54v10M70 54v10M38 50v-12h6" stroke="rgba(245,236,231,0.25)" stroke-width="2" fill="none"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="58" cy="22" r="5"/><path d="M58 27v14M52 34h12"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="58" cy="12" r="4"/><path d="M58 16v8M52 22h12"/></g></svg>` },
+  { name: "L'étau", tag: "intense", desc: "Partenaire allongé·e, jambes relevées et serrées (ou sur les épaules). Sensation plus serrée et profonde.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="40" cy="40" r="5"/><path d="M45 38h20M45 38l-6 14M65 38l8-18M65 38l12-14"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="78" cy="18" r="5"/><path d="M72 24l-10 12M72 24l4 20"/></g></svg>` },
+  { name: "Le papillon", tag: "classique", desc: "Allongé·e au bord du lit, bassin au bord, partenaire debout ou à genoux entre les jambes. Angle excellent.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="30" width="50" height="8" rx="1" fill="rgba(245,236,231,0.12)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="30" cy="22" r="5"/><path d="M35 26h20M55 28l10 6M55 28l10-4"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="88" cy="20" r="5"/><path d="M82 26l-14 6M82 26v22"/></g></svg>` },
+  { name: "La brouette", tag: "intense", desc: "Partenaire en appui sur les mains (ou avant-bras), l'autre soulève les jambes. Demande de l'équilibre et de la force.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="28" cy="42" r="5"/><path d="M33 40h24M33 40l-4 14M57 40l8-8"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="90" cy="20" r="5"/><path d="M84 26l-16 10M84 26v24M68 36l-4 8"/></g></svg>` },
+  { name: "Contre le mur", tag: "intense", desc: "Debout, dos au mur ou face au mur. Porté·e ou une jambe relevée. Passionné, spontané.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="6" height="54" rx="1" fill="rgba(245,236,231,0.15)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="32" cy="16" r="5"/><path d="M32 21v22M32 43l-6 14M32 43l8 14M32 28h10"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="52" cy="14" r="5"/><path d="M52 19v24M52 43l6 14M46 30h-8"/></g></svg>` },
+  { name: "Cuisses croisées", tag: "douce", desc: "Allongé·e sur le dos, une jambe entre celles du partenaire. Frottements + pénétration possible, rythme lent.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="35" cy="28" r="5"/><path d="M40 32h30M40 32l-4 18M70 32l8 16M55 32l5 18"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="75" cy="22" r="5"/><path d="M70 28l-15 8M70 28l4 20"/></g></svg>` },
+  { name: "L'amazone latérale", tag: "classique", desc: "Partenaire allongé, l'autre à califourchon mais tourné·e de côté. Moins de fatigue, angle intéressant.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="50" cy="48" r="5"/><path d="M35 54h40M50 43v-4"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="68" cy="16" r="5"/><path d="M62 22l-8 16M54 38h-6M54 38l-4 12M54 38l10 8"/></g></svg>` },
+  { name: "Pliée en avant assise", tag: "intense", desc: "Assis·e au bord du lit, buste penché en avant, partenaire derrière à genoux. Profondeur + accès aux mains.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="40" width="45" height="8" rx="1" fill="rgba(245,236,231,0.12)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="30" cy="22" r="5"/><path d="M35 26l18 12M53 38v8M53 38l12 2"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="88" cy="24" r="5"/><path d="M82 30l-16 10M82 30v22"/></g></svg>` },
+  { name: "Les ciseaux", tag: "douce", desc: "Allongés sur le côté face à face, jambes entrelacées. Frottements intimes, pénétration possible, très connecté.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="35" cy="26" r="5"/><path d="M40 30h25M40 30l-2 18M65 30l10 14M55 30l2 18"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="85" cy="26" r="5"/><path d="M80 30h-20M80 30l2 18M60 30l-8 14"/></g></svg>` },
+  { name: "Genoux au sol, buste relevé", tag: "classique", desc: "À genoux face à un dossier/lit, buste relevé, partenaire derrière. Variante de levrette plus droite.",
+    svg: `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="12" width="8" height="46" rx="1" fill="rgba(245,236,231,0.12)"/><g stroke="#e8b8bf" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="42" cy="16" r="5"/><path d="M42 21v22M42 43l-8 12M42 43l8 12M36 30h-8"/></g><g stroke="#ea8890" stroke-width="2.5" fill="none" stroke-linecap="round"><circle cx="68" cy="18" r="5"/><path d="M62 24l-12 10M62 24v24M50 34l-2 16"/></g></svg>` },
 ];
 
 let positionsFilter = 'all';
@@ -3291,6 +3318,7 @@ function renderPositionsGuide(){
     <div class="pos-card">
       <div class="pos-name">${escapeHtml(p.name)}</div>
       <div class="pos-tag">${tagLabel[p.tag] || p.tag}</div>
+      <div class="pos-svg">${p.svg || ''}</div>
       <div class="pos-desc">${escapeHtml(p.desc)}</div>
     </div>
   `).join('');
