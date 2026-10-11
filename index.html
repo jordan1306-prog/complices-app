@@ -1177,29 +1177,36 @@
 <div id="soiree-mode">
   <div class="soiree-card" style="max-height:85vh; overflow-y:auto;">
     <h2>🔥 Mode Soirée</h2>
-    <div class="sub" style="margin-bottom:10px;">Pour jouer collés l'un à l'autre</div>
+    <div class="sub" style="margin-bottom:10px;">Pas de téléphone. Juste vos corps.</div>
 
     <div id="soiree-defi" style="margin-bottom:12px;"></div>
 
-    <div style="display:flex; gap:8px; margin-bottom:10px;">
-      <button class="btn btn-gold" id="soiree-roll-btn" style="flex:1;">🎲 Dés</button>
-      <button class="btn btn-rose" id="soiree-random-act-btn" style="flex:1;">💋 Acte au hasard</button>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+      <button class="btn btn-gold" id="soiree-roll-btn">🎲 Dés coquins</button>
+      <button class="btn btn-rose" id="soiree-random-act-btn">💋 Acte hot</button>
+      <button class="btn btn-ghost" id="soiree-position-btn">🛏️ Position</button>
+      <button class="btn btn-ghost" id="soiree-order-btn">👑 Ordre</button>
     </div>
     <div id="soiree-dice-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
     <div id="soiree-act-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
 
     <div class="soiree-timer" id="soiree-timer">—</div>
-    <div class="sub" id="soiree-timer-label">Choisis un round</div>
+    <div class="sub" id="soiree-timer-label">Lance un round</div>
 
     <div style="display:flex; gap:6px; margin:10px 0; flex-wrap:wrap; justify-content:center;">
+      <button class="btn btn-ghost" id="soiree-t3" style="font-size:12px; padding:8px 12px;">⏱ 3 min</button>
       <button class="btn btn-ghost" id="soiree-t5" style="font-size:12px; padding:8px 12px;">⏱ 5 min</button>
       <button class="btn btn-ghost" id="soiree-t7" style="font-size:12px; padding:8px 12px;">⏱ 7 min</button>
       <button class="btn btn-ghost" id="soiree-t10" style="font-size:12px; padding:8px 12px;">⏱ 10 min</button>
-      <button class="btn btn-ghost" id="soiree-t15" style="font-size:12px; padding:8px 12px;">⏱ 15 min</button>
     </div>
 
     <div style="border-top:0.5px solid var(--line); margin:12px 0 8px; padding-top:10px;">
-      <div class="sub" style="margin-bottom:6px;">Actions rapides</div>
+      <div class="sub" style="margin-bottom:6px;">Ambiance du round</div>
+      <div class="assign" id="soiree-heat" style="margin-bottom:10px;">
+        <button data-heat="warm" class="picked">😏 Tiède</button>
+        <button data-heat="hot">🔥 Chaud</button>
+        <button data-heat="hard">🌶️ Hard</button>
+      </div>
       <div style="display:flex; flex-direction:column; gap:6px;">
         <button class="btn btn-ghost" id="soiree-swap-btn" style="width:100%; font-size:13px;">🔄 Changer qui mène</button>
         <button class="btn btn-ghost" id="soiree-complete-btn" style="width:100%; font-size:13px;">✅ Valider mon défi en cours</button>
@@ -5302,38 +5309,95 @@ let soireeTimerInterval = null;
 let soireeTimerEnd = null;
 let soireeLeader = null; // 'a' or 'b'
 
-const SOIREE_ACTS = [
-  "Embrasse le cou pendant 1 minute",
-  "Enlève un vêtement à l'autre",
-  "Embrasse uniquement le corps (pas la bouche) 2 min",
-  "Fais un massage des cuisses",
-  "Chuchote quelque chose de sale à l'oreille",
-  "Embrasse le ventre en descendant lentement",
-  "Laisse l'autre te guider les mains",
-  "Fais durer un baiser 30 secondes",
-  "Utilise seulement ta langue pendant 2 minutes",
-  "Change de position maintenant",
-  "Arrête tout 20 secondes… puis reprends plus fort",
-  "Regarde-le/la dans les yeux en le/la touchant",
-  "Fais-le/la supplier avant de continuer",
-  "Embrasse l'intérieur des cuisses",
-  "Prends le contrôle pendant 3 minutes",
-  "Laisse l'autre faire ce qu'il/elle veut pendant 3 min",
+const SOIREE_ACTS = {
+  warm: [
+    "Embrasse le cou en descendant vers la poitrine, 1 minute",
+    "Enlève un vêtement à l'autre — avec la bouche si possible",
+    "Masse l'intérieur des cuisses sans monter plus haut",
+    "Chuchote exactement ce que tu veux lui faire",
+    "Baiser de 30 secondes, langues autorisées",
+    "Fais-le/la gémir juste avec tes doigts sur la peau",
+    "Embrasse le ventre en descendant… arrête-toi juste avant",
+    "Regarde-le/la dans les yeux en glissant une main sous les vêtements",
+  ],
+  hot: [
+    "Utilise seulement ta langue entre les jambes pendant 2 minutes",
+    "Fais-le/la supplier avant de continuer",
+    "Prends le contrôle : l'autre n'a pas le droit de te toucher 3 min",
+    "Change de position maintenant — et reste-y jusqu'au prochain round",
+    "Arrête tout 15 secondes… puis reprends plus fort",
+    "Doigts ou bouche : fais monter la pression sans aller jusqu'à l'orgasme",
+    "Plaque-le/la et embrasse fort, corps contre corps",
+    "Enlève le bas de l'autre et continue avec ta bouche",
+    "Fais un 69 pendant ce round",
+    "Parle sale pendant que tu le/la touches",
+    "Une main dans les cheveux, rythme que tu imposes",
+    "Lèche / suce jusqu'à ce que l'autre demande merci",
+  ],
+  hard: [
+    "À genoux. Bouche seulement. Jusqu'à ce que l'autre dise stop ou jouisse",
+    "Poignets retenus (foulard/ceinture) pendant tout le round",
+    "Yeux bandés + tu reçois sans toucher",
+    "Prends-le/la contre le mur ou le bord du lit",
+    "Interdiction de jouir avant la fin du timer",
+    "L'autre choisit : gorge / doigts / rythme — tu obéis",
+    "Deux doigts + langue en même temps, sans relâcher",
+    "Levrette. Tu donnes le rythme. Pas de douceur inutile",
+    "Fais jouir l'autre avant la fin du round — comme tu veux",
+    "Domine : 3 ordres sexuels à exécuter pendant ce round",
+    "Entre. Ne te retire pas avant la fin du timer",
+    "Avaler / recevoir jusqu'au bout — ce round n'a qu'un objectif",
+  ],
+};
+
+const SOIREE_ORDERS = [
+  "À genoux. Maintenant.",
+  "Enlève ça. Lentement.",
+  "Tourne-toi.",
+  "Écarte les jambes.",
+  "Mains derrière le dos.",
+  "Ne touche pas. Regarde seulement.",
+  "Plus fort.",
+  "Plus lent. Ressens.",
+  "Dis-moi ce que tu veux — clairement.",
+  "Embrasse plus bas.",
+  "Ouvre la bouche.",
+  "Reste comme ça jusqu'à ce que je dise.",
+  "Supplier. Un vrai mot.",
+  "Viens ici.",
 ];
+
+const SOIREE_POSITIONS = [
+  "Missionnaire — face à face, profond",
+  "Levrette — rythme que tu imposes",
+  "Andromaque — l'autre contrôle",
+  "Cuillère — lent et collé",
+  "Contre le mur — debout",
+  "69 — en même temps",
+  "Au bord du lit — jambes ouvertes",
+  "Assis face à face",
+  "Reverse cowgirl",
+  "Une jambe sur l'épaule",
+];
+
+let soireeHeat = 'hot';
 
 function openSoireeMode(){
   const el = document.getElementById('soiree-mode');
   if(!el) return;
   el.classList.add('active');
   soireeLeader = myRole || 'a';
+  soireeHeat = 'hot';
+  document.querySelectorAll('#soiree-heat button').forEach(b => b.classList.toggle('picked', b.dataset.heat === 'hot'));
   renderSoireeDefi();
-  document.getElementById('soiree-dice-result').style.display = 'none';
-  const actEl = document.getElementById('soiree-act-result');
-  if(actEl) actEl.style.display = 'none';
+  ['soiree-dice-result','soiree-act-result'].forEach(id => {
+    const n = document.getElementById(id);
+    if(n) n.style.display = 'none';
+  });
 }
 
 function closeSoireeMode(){
-  document.getElementById('soiree-mode').classList.remove('active');
+  document.getElementById('soiree-mode')?.classList.remove('active');
   if(soireeTimerInterval){ clearInterval(soireeTimerInterval); soireeTimerInterval = null; }
 }
 
@@ -5341,7 +5405,7 @@ function renderSoireeDefi(){
   const box = document.getElementById('soiree-defi');
   if(!box || !state) return;
   if(!myRole){
-    box.innerHTML = '<div class="sub">Choisis d\'abord qui tu es (onglet Jouer)</div>';
+    box.innerHTML = '<div class="sub">Choisis d\\'abord qui tu es</div>';
     return;
   }
   const accepted = state.defis.filter(d => d.for === myRole && d.status === 'accepted');
@@ -5349,8 +5413,8 @@ function renderSoireeDefi(){
   let html = '';
   if(accepted.length){
     const d = accepted[0];
-    html += `<div style="background:rgba(201,51,63,0.15); border:0.5px solid var(--gold); border-radius:12px; padding:12px; margin-bottom:8px;">
-      <div style="font-size:12px; color:var(--gold-soft); margin-bottom:4px;">🎯 Ton défi en cours</div>
+    html += `<div style="background:rgba(201,51,63,0.18); border:0.5px solid var(--gold); border-radius:12px; padding:12px; margin-bottom:8px;">
+      <div style="font-size:12px; color:var(--gold-soft); margin-bottom:4px;">🎯 Défi en cours</div>
       <div style="font-size:15px; font-weight:600;">${escapeHtml(d.text)}</div>
       <div style="font-size:12px; color:var(--muted); margin-top:4px;">+${d.pts} pts</div>
     </div>`;
@@ -5362,10 +5426,10 @@ function renderSoireeDefi(){
       <button class="btn btn-gold" id="soiree-accept-btn" style="width:100%; margin-top:8px; font-size:13px;">✅ Accepter maintenant</button>
     </div>`;
   } else {
-    html += `<div class="sub" style="margin-bottom:8px;">Pas de défi en cours — utilise les dés ou un acte au hasard</div>`;
+    html += `<div class="sub" style="margin-bottom:8px;">Pas de défi — laisse les dés et les actes guider la soirée</div>`;
   }
   const leaderName = state.names[soireeLeader] || '…';
-  html += `<div style="font-size:12px; color:var(--gold-soft);">👑 C'est <b>${escapeHtml(leaderName)}</b> qui mène ce round</div>`;
+  html += `<div style="font-size:13px; color:var(--gold-soft);">👑 <b>${escapeHtml(leaderName)}</b> mène ce round</div>`;
   box.innerHTML = html;
   const accBtn = document.getElementById('soiree-accept-btn');
   if(accBtn && pending.length){
@@ -5378,17 +5442,19 @@ function startSoireeTimer(minutes){
   soireeTimerEnd = Date.now() + minutes * 60000;
   const label = document.getElementById('soiree-timer-label');
   const timerEl = document.getElementById('soiree-timer');
-  label.textContent = 'Round en cours — ' + minutes + ' min';
+  label.textContent = 'Round ' + soireeHeat + ' — ' + minutes + ' min';
   soireeTimerInterval = setInterval(() => {
     const remaining = soireeTimerEnd - Date.now();
     if(remaining <= 0){
       clearInterval(soireeTimerInterval);
       soireeTimerInterval = null;
       timerEl.textContent = '00:00';
-      label.textContent = 'Round terminé 🔥 — lance le suivant';
-      if('Notification' in window && Notification.permission === 'granted'){
-        try { new Notification('Complices 🔥', { body: 'Round terminé !' }); } catch(e){}
-      }
+      label.textContent = 'Round terminé 🔥 — encore ?';
+      try {
+        if('Notification' in window && Notification.permission === 'granted'){
+          new Notification('Complices 🔥', { body: 'Round terminé. Prêt·e pour la suite ?' });
+        }
+      } catch(e){}
       return;
     }
     const m = Math.floor(remaining / 60000);
@@ -5397,16 +5463,35 @@ function startSoireeTimer(minutes){
   }, 250);
 }
 
-const SOIREE_DICE_FALLBACK_1 = ['Embrasse', 'Lèche', 'Masse', 'Mordille', 'Caresse', 'Suce'];
-const SOIREE_DICE_FALLBACK_2 = ['le cou', 'les cuisses', 'la bouche', 'le ventre', 'partout', 'plus bas'];
+const SOIREE_DICE_FALLBACK_1 = ['Suce', 'Lèche', 'Pénètre', 'Doigte', 'Embrasse', 'Mords'];
+const SOIREE_DICE_FALLBACK_2 = ['la bouche', 'entre les jambes', 'les seins / la poitrine', 'le cou', 'plus fort', 'très lentement'];
 
 document.getElementById('soiree-btn')?.addEventListener('click', openSoireeMode);
 document.getElementById('soiree-close-btn')?.addEventListener('click', closeSoireeMode);
-['soiree-t5','soiree-t7','soiree-t10','soiree-t15'].forEach(id => {
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.addEventListener('click', () => startSoireeTimer(parseInt(id.replace('soiree-t',''), 10)));
+
+['soiree-t3','soiree-t5','soiree-t7','soiree-t10'].forEach(id => {
+  document.getElementById(id)?.addEventListener('click', () => {
+    startSoireeTimer(parseInt(id.replace('soiree-t',''), 10));
+  });
 });
+
+document.getElementById('soiree-heat')?.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-heat]');
+  if(!btn) return;
+  soireeHeat = btn.dataset.heat;
+  document.querySelectorAll('#soiree-heat button').forEach(b => b.classList.toggle('picked', b === btn));
+  showToast(soireeHeat === 'hard' ? '🌶️ Mode hard' : soireeHeat === 'hot' ? '🔥 Mode chaud' : '😏 Mode tiède');
+});
+
+function showSoireeResult(text){
+  const actEl = document.getElementById('soiree-act-result');
+  if(actEl){
+    actEl.textContent = text;
+    actEl.style.display = 'block';
+  }
+  const diceEl = document.getElementById('soiree-dice-result');
+  if(diceEl) diceEl.style.display = 'none';
+}
 
 document.getElementById('soiree-roll-btn')?.addEventListener('click', () => {
   let d1 = (state?.dice?.d1 || []).filter(f => f && f.trim());
@@ -5423,11 +5508,20 @@ document.getElementById('soiree-roll-btn')?.addEventListener('click', () => {
 });
 
 document.getElementById('soiree-random-act-btn')?.addEventListener('click', () => {
-  const act = SOIREE_ACTS[Math.floor(Math.random() * SOIREE_ACTS.length)];
-  const actEl = document.getElementById('soiree-act-result');
-  actEl.textContent = '💋 ' + act;
-  actEl.style.display = 'block';
-  document.getElementById('soiree-dice-result').style.display = 'none';
+  const pool = SOIREE_ACTS[soireeHeat] || SOIREE_ACTS.hot;
+  const act = pool[Math.floor(Math.random() * pool.length)];
+  showSoireeResult('💋 ' + act);
+});
+
+document.getElementById('soiree-position-btn')?.addEventListener('click', () => {
+  const p = SOIREE_POSITIONS[Math.floor(Math.random() * SOIREE_POSITIONS.length)];
+  showSoireeResult('🛏️ ' + p);
+});
+
+document.getElementById('soiree-order-btn')?.addEventListener('click', () => {
+  const leader = state?.names?.[soireeLeader] || 'Celui/celle qui mène';
+  const o = SOIREE_ORDERS[Math.floor(Math.random() * SOIREE_ORDERS.length)];
+  showSoireeResult('👑 ' + leader + ' : « ' + o + ' »');
 });
 
 document.getElementById('soiree-swap-btn')?.addEventListener('click', () => {
@@ -5443,7 +5537,7 @@ document.getElementById('soiree-complete-btn')?.addEventListener('click', () => 
     showToast('Aucun défi en cours à valider');
     return;
   }
-  if(!confirm('Valider ce défi : ' + accepted[0].text + ' ?')) return;
+  if(!confirm('Valider : ' + accepted[0].text + ' ?')) return;
   completeDefi(accepted[0].id);
   renderSoireeDefi();
 });
