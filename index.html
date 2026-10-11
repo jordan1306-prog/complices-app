@@ -618,6 +618,48 @@
   }
   .pos-card .pos-svg svg{ width:100%; height:100%; }
 
+
+  #rewards-list{
+    display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:4px;
+  }
+  @media(max-width:420px){ #rewards-list{ grid-template-columns: 1fr; } }
+  .reward-card{
+    background: var(--card); border:0.5px solid var(--line); border-radius:14px;
+    padding:12px; display:flex; flex-direction:column; gap:6px;
+    box-shadow: var(--shadow); backdrop-filter: blur(4px);
+  }
+  .reward-card .r-emoji{ font-size:22px; line-height:1; }
+  .reward-card .r-title{ font-size:13.5px; font-weight:600; color:var(--cream); line-height:1.3; }
+  .reward-card .r-pts{ font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:700; color:var(--gold); }
+  .reward-card .r-opts{ font-size:10.5px; color:var(--muted); line-height:1.35; }
+  .reward-card .r-buy{
+    margin-top:auto; width:100%; background:linear-gradient(120deg,var(--gold),var(--rose-deep));
+    border:none; border-radius:10px; color:#fdf1f0; font-weight:600; font-size:12px;
+    padding:8px; cursor:pointer; font-family:'Manrope',sans-serif;
+  }
+  .reward-card .r-buy:active{ transform:scale(0.97); }
+  .reward-card .r-actions{ display:flex; gap:4px; }
+  .reward-card .r-actions button{ flex:1; }
+  #reward-config-panel{
+    position:fixed; inset:0; background:rgba(10,5,7,0.88); z-index:30;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  #reward-config-panel.active{ display:flex; }
+  .reward-config-card{
+    background:var(--card); border:0.5px solid var(--line); border-radius:18px;
+    padding:22px 18px; width:100%; max-width:360px; max-height:85vh; overflow-y:auto;
+  }
+  .opt-row{
+    display:flex; align-items:center; gap:10px; padding:10px 0;
+    border-bottom:0.5px solid var(--line); font-size:13px; cursor:pointer;
+  }
+  .opt-row input{ width:18px; height:18px; accent-color:var(--gold); }
+  .opt-row .opt-pts{ margin-left:auto; color:var(--gold-soft); font-weight:600; white-space:nowrap; }
+  .config-total{
+    font-family:'Cormorant Garamond',serif; font-size:26px; color:var(--gold);
+    text-align:center; margin:12px 0 4px; font-weight:700;
+  }
+
 </style>
 </head>
 <body>
@@ -1219,16 +1261,80 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Écrire un petit mot doux caché quelque part", pts: 8, for: 'a', deadline: daysFromNow(2) },
   ],
   rewards: [
-    { id: cryptoId(), text: "Massage sensuel complet (20 min)", pts: 40 },
-    { id: cryptoId(), text: "Je choisis les préliminaires", pts: 50 },
-    { id: cryptoId(), text: "Je choisis la position + le rythme", pts: 55 },
-    { id: cryptoId(), text: "Strip-tease privé jusqu'au bout", pts: 50 },
-    { id: cryptoId(), text: "Tu m'obéis pendant 15 minutes", pts: 60 },
-    { id: cryptoId(), text: "Un orgasme, maintenant — à ma façon", pts: 70 },
-    { id: cryptoId(), text: "Tu ne touches pas, tu reçois seulement", pts: 65 },
-    { id: cryptoId(), text: "Soirée où c'est moi qui décide de tout", pts: 90 },
-    { id: cryptoId(), text: "Pipe / cunnilingus jusqu'à l'orgasme", pts: 55 },
-    { id: cryptoId(), text: "On recommence une 2e fois ce soir", pts: 80 },
+    { id: cryptoId(), text: "Fellation jusqu'à l'orgasme", pts: 50, emoji: "👄",
+      options: [
+        { id: "gorge", text: "Gorge profonde", pts: 15 },
+        { id: "mains", text: "Main qui tripote en même temps", pts: 10 },
+        { id: "yeux", text: "En te regardant dans les yeux", pts: 10 },
+        { id: "avaler", text: "Avaler", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "Cunnilingus jusqu'à l'orgasme", pts: 50, emoji: "👅",
+      options: [
+        { id: "complet", text: "Léchage complet (rien d'oublié)", pts: 15 },
+        { id: "doigt", text: "Avec les doigts en même temps", pts: 15 },
+        { id: "double", text: "Jusqu'au 2e orgasme", pts: 25 },
+        { id: "cuisses", text: "Cuisses sur la tête", pts: 10 },
+      ]},
+    { id: cryptoId(), text: "Massage sensuel 20 min", pts: 40, emoji: "💆",
+      options: [
+        { id: "huile", text: "À l'huile", pts: 10 },
+        { id: "nu", text: "Les deux entièrement nus", pts: 10 },
+        { id: "fin", text: "Finit en sexe", pts: 20 },
+      ]},
+    { id: cryptoId(), text: "Je choisis la position", pts: 45, emoji: "🛏️",
+      options: [
+        { id: "rythme", text: "+ je contrôle le rythme", pts: 15 },
+        { id: "duree", text: "+ minimum 15 minutes", pts: 15 },
+        { id: "fin", text: "+ je décide comment ça finit", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "Strip-tease privé", pts: 45, emoji: "👗",
+      options: [
+        { id: "musique", text: "Avec ta musique", pts: 5 },
+        { id: "touche", text: "Droit de toucher pendant", pts: 15 },
+        { id: "suite", text: "Enchaîne directement après", pts: 20 },
+      ]},
+    { id: cryptoId(), text: "Tu m'obéis 15 min", pts: 55, emoji: "👑",
+      options: [
+        { id: "30", text: "Passer à 30 min", pts: 20 },
+        { id: "mot", text: "Mot de sécurité seulement (rien d'autre refusable)", pts: 15 },
+        { id: "photo", text: "Je peux te prendre en photo", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "Un orgasme à ma façon", pts: 60, emoji: "💥",
+      options: [
+        { id: "maintenant", text: "Tout de suite (pas plus tard)", pts: 15 },
+        { id: "methode", text: "Je choisis bouche / doigts / sexe", pts: 10 },
+        { id: "encore", text: "Et un 2e juste après", pts: 25 },
+      ]},
+    { id: cryptoId(), text: "Tu reçois sans toucher", pts: 55, emoji: "🚫",
+      options: [
+        { id: "yeuxb", text: "Yeux bandés en plus", pts: 15 },
+        { id: "attache", text: "Poignets retenus", pts: 20 },
+        { id: "tease", text: "Teasing long avant", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "Sexe contre le mur", pts: 50, emoji: "🧱",
+      options: [
+        { id: "porte", text: "Dès l'entrée / contre la porte", pts: 10 },
+        { id: "leve", text: "Jambe relevée / porté·e", pts: 15 },
+        { id: "fort", text: "Rythme soutenu", pts: 10 },
+      ]},
+    { id: cryptoId(), text: "69 complet", pts: 50, emoji: "🔄",
+      options: [
+        { id: "dessus", text: "Je choisis qui est au-dessus", pts: 5 },
+        { id: "orgasme", text: "Jusqu'à l'orgasme d'au moins un·e", pts: 15 },
+        { id: "suite", text: "Enchaîne en pénétration après", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "2e round ce soir", pts: 70, emoji: "🔁",
+      options: [
+        { id: "pause", text: "Moins de 20 min de pause", pts: 15 },
+        { id: "position", text: "Nouvelle position obligatoire", pts: 10 },
+        { id: "lent", text: "2e round très lent et long", pts: 15 },
+      ]},
+    { id: cryptoId(), text: "Soirée : c'est moi qui décide", pts: 90, emoji: "🎮",
+      options: [
+        { id: "tenue", text: "Je choisis ta tenue (ou rien)", pts: 15 },
+        { id: "lieu", text: "Je choisis où dans la maison", pts: 10 },
+        { id: "finnuit", text: "Jusqu'à la fin de la nuit", pts: 25 },
+      ]},
   ],
   mysteryBoxA: [
     { id: cryptoId(), text: "Préliminaires longs rien que pour elle", level: "soft" },
@@ -3345,117 +3451,178 @@ document.getElementById('edit-guide-link-btn')?.addEventListener('click', () => 
 function renderRewards(){
   const list = document.getElementById('rewards-list');
   list.innerHTML = '';
-  if(state.rewards.length === 0){
-    list.innerHTML = '<div class="empty">Aucune récompense dans la boutique.</div>';
+  if(!state.rewards || state.rewards.length === 0){
+    list.innerHTML = '<div class="empty" style="grid-column:1/-1;">Aucune récompense dans la boutique.</div>';
     return;
   }
   state.rewards.forEach(r => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'reward-card';
+    const optCount = (r.options && r.options.length) ? r.options.length : 0;
+    const optHint = optCount
+      ? `<div class="r-opts">+ ${optCount} option${optCount > 1 ? 's' : ''} possible${optCount > 1 ? 's' : ''}</div>`
+      : '';
     card.innerHTML = `
-      <div class="info">
-        <div class="t">${escapeHtml(r.text)}</div>
-        <div class="m">${r.pts} points</div>
-      </div>
+      <div class="r-emoji">${r.emoji || '🎁'}</div>
+      <div class="r-title">${escapeHtml(r.text)}</div>
+      <div class="r-pts">dès ${r.pts} pts</div>
+      ${optHint}
     `;
-    const btnWrap = document.createElement('div');
-    btnWrap.style.display = 'flex';
-    btnWrap.style.flexDirection = 'column';
-    btnWrap.style.gap = '4px';
+    const buyBtn = document.createElement('button');
+    buyBtn.className = 'r-buy';
+    buyBtn.textContent = 'Choisir ›';
+    buyBtn.onclick = () => openRewardConfig(r.id);
+    card.appendChild(buyBtn);
 
-    ['a','b'].forEach(k => {
-      const buyBtn = document.createElement('button');
-      buyBtn.className = 'btn btn-rose';
-      const remaining = state.scores[k] - r.pts;
-      buyBtn.innerHTML = state.names[k] + (state.scores[k] >= r.pts
-        ? `<div class="balance-preview ok">→ ${remaining} pts</div>`
-        : `<div class="balance-preview ko">manque ${r.pts - state.scores[k]}</div>`);
-      buyBtn.style.opacity = state.scores[k] < r.pts ? '0.45' : '1';
-      buyBtn.onclick = () => redeemReward(r.id, k);
-      btnWrap.appendChild(buyBtn);
-    });
+    const actions = document.createElement('div');
+    actions.className = 'r-actions';
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-ghost';
+    editBtn.style.fontSize = '11px';
+    editBtn.style.padding = '4px';
     editBtn.textContent = '✎';
-    editBtn.title = 'Modifier';
     editBtn.onclick = () => editReward(r.id);
-    btnWrap.appendChild(editBtn);
-
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
+    delBtn.style.fontSize = '11px';
+    delBtn.style.padding = '4px';
     delBtn.textContent = '✕';
     delBtn.onclick = () => {
       if(!confirm('Supprimer cette récompense ?')) return;
       state.rewards = state.rewards.filter(x => x.id !== r.id);
       persist(); render();
     };
-    btnWrap.appendChild(delBtn);
-
-    card.appendChild(btnWrap);
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    card.appendChild(actions);
     list.appendChild(card);
   });
 }
 
-function editReward(id){
+let rewardConfigId = null;
+let rewardConfigWho = 'a';
+let rewardConfigSelected = new Set();
+
+function openRewardConfig(id){
   const r = state.rewards.find(x => x.id === id);
   if(!r) return;
-  const newText = prompt('Modifier le nom de la récompense :', r.text);
-  if(newText === null) return;
-  const newPtsRaw = prompt('Modifier le coût en points :', r.pts);
-  if(newPtsRaw === null) return;
-  const newPts = parseInt(newPtsRaw, 10);
-  if(!newText.trim() || !newPts || newPts <= 0){
-    showToast('Valeurs invalides, rien de changé');
-    return;
+  rewardConfigId = id;
+  rewardConfigSelected = new Set();
+  rewardConfigWho = myRole || 'a';
+
+  document.getElementById('reward-config-title').textContent = (r.emoji || '🎁') + ' ' + r.text;
+  document.getElementById('reward-config-base').textContent = 'Base : ' + r.pts + ' pts';
+
+  const optsWrap = document.getElementById('reward-config-options');
+  optsWrap.innerHTML = '';
+  if(r.options && r.options.length){
+    r.options.forEach(opt => {
+      const row = document.createElement('label');
+      row.className = 'opt-row';
+      row.innerHTML = `
+        <input type="checkbox" data-opt="${escapeHtml(opt.id)}">
+        <span>${escapeHtml(opt.text)}</span>
+        <span class="opt-pts">+${opt.pts}</span>
+      `;
+      const input = row.querySelector('input');
+      input.addEventListener('change', () => {
+        if(input.checked) rewardConfigSelected.add(opt.id);
+        else rewardConfigSelected.delete(opt.id);
+        updateRewardConfigTotal();
+      });
+      optsWrap.appendChild(row);
+    });
+  } else {
+    optsWrap.innerHTML = '<div class="sub" style="text-align:center;">Pas d\'options — prix fixe</div>';
   }
-  r.text = newText.trim();
-  r.pts = newPts;
-  persist(); render();
-  showToast('Récompense modifiée');
+
+  const whoWrap = document.getElementById('reward-config-who');
+  whoWrap.innerHTML = '';
+  ['a','b'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = state.names[k] + ' achète';
+    b.className = rewardConfigWho === k ? 'picked' : '';
+    b.onclick = () => {
+      rewardConfigWho = k;
+      whoWrap.querySelectorAll('button').forEach(x => x.classList.remove('picked'));
+      b.classList.add('picked');
+      updateRewardConfigTotal();
+    };
+    whoWrap.appendChild(b);
+  });
+
+  document.getElementById('reward-config-hours').value = '2';
+  document.getElementById('reward-config-mins').value = '0';
+  updateRewardConfigTotal();
+  document.getElementById('reward-config-panel').classList.add('active');
 }
 
-function redeemReward(id, who){
-  const r = state.rewards.find(x => x.id === id);
+function getRewardConfigTotal(){
+  const r = state.rewards.find(x => x.id === rewardConfigId);
+  if(!r) return 0;
+  let total = r.pts;
+  (r.options || []).forEach(opt => {
+    if(rewardConfigSelected.has(opt.id)) total += opt.pts;
+  });
+  return total;
+}
+
+function updateRewardConfigTotal(){
+  const total = getRewardConfigTotal();
+  document.getElementById('reward-config-total').textContent = total + ' pts';
+  const bal = state.scores[rewardConfigWho] || 0;
+  const el = document.getElementById('reward-config-balance');
+  if(bal >= total){
+    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' pts → reste ' + (bal - total);
+    el.style.color = 'var(--gold-soft)';
+  } else {
+    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' pts — manque ' + (total - bal);
+    el.style.color = 'var(--danger)';
+  }
+}
+
+function confirmRewardPurchase(){
+  const r = state.rewards.find(x => x.id === rewardConfigId);
   if(!r) return;
-  if(state.scores[who] < r.pts){
+  const total = getRewardConfigTotal();
+  const who = rewardConfigWho;
+  if(state.scores[who] < total){
     showToast('Pas assez de points pour ' + state.names[who]);
     return;
   }
-  const owedBy = who === 'a' ? 'b' : 'a';
-  const hoursInput = prompt('Dans combien d\'HEURES ' + state.names[owedBy] + ' doit le faire ? (ex : 1, ou 0 si juste des minutes)', '1');
-  if(hoursInput === null) return;
-  const hours = parseFloat(hoursInput);
-  if(isNaN(hours) || hours < 0){
-    showToast('Entre un nombre d\'heures valide');
-    return;
-  }
-  const minutesInput = prompt('Et combien de MINUTES en plus ? (ex : 30, ou 0)', '0');
-  if(minutesInput === null) return;
-  const minutes = parseFloat(minutesInput);
-  if(isNaN(minutes) || minutes < 0){
-    showToast('Entre un nombre de minutes valide');
-    return;
-  }
+  const hours = parseFloat(document.getElementById('reward-config-hours').value) || 0;
+  const minutes = parseFloat(document.getElementById('reward-config-mins').value) || 0;
   const totalMs = hours * 3600000 + minutes * 60000;
   if(totalMs <= 0){
-    showToast('La durée doit être supérieure à 0');
+    showToast('Indique un délai (heures ou minutes)');
     return;
   }
-  state.scores[who] -= r.pts;
-  addHistory({ type:'reward', who, label: r.text, pts: -r.pts });
-  const purchase = {
+  const selectedOpts = (r.options || []).filter(o => rewardConfigSelected.has(o.id));
+  let label = r.text;
+  if(selectedOpts.length){
+    label += ' (' + selectedOpts.map(o => o.text).join(', ') + ')';
+  }
+  const owedBy = who === 'a' ? 'b' : 'a';
+  state.scores[who] -= total;
+  addHistory({ type:'reward', who, label, pts: -total });
+  state.purchases.push({
     id: cryptoId(),
-    text: r.text,
+    text: label,
     boughtBy: who,
     owedBy,
     deadline: Date.now() + totalMs,
     status: 'pending'
-  };
-  state.purchases.push(purchase);
+  });
   persist(); render();
-  showToast(state.names[who] + ' échange ' + r.pts + ' points');
+  document.getElementById('reward-config-panel').classList.remove('active');
+  showToast(state.names[who] + ' — ' + total + ' pts');
   celebrate('🎁');
-  sendPushToPartner('🎁 Nouvel achat', state.names[who] + ' attend : ' + r.text.slice(0, 80));
+  sendPushToPartner('🎁 Nouvel achat', state.names[who] + ' attend : ' + label.slice(0, 80));
+}
+
+function redeemReward(id, who){
+  // compat ancienne API → ouvre le configurateur
+  openRewardConfig(id);
 }
 
 function renderPurchases(){
@@ -3754,6 +3921,11 @@ document.getElementById('draw-soft-btn')?.addEventListener('click', () => drawMy
 document.getElementById('draw-medium-btn')?.addEventListener('click', () => drawMysteryLevel('medium'));
 document.getElementById('draw-hard-btn')?.addEventListener('click', () => drawMysteryLevel('hard'));
 
+
+document.getElementById('reward-config-cancel')?.addEventListener('click', () => {
+  document.getElementById('reward-config-panel').classList.remove('active');
+});
+document.getElementById('reward-config-confirm')?.addEventListener('click', confirmRewardPurchase);
 
 document.getElementById('add-reward-btn').addEventListener('click', () => {
   const nameInput = document.getElementById('new-reward-name');
