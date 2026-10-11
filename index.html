@@ -5405,7 +5405,7 @@ function renderSoireeDefi(){
   const box = document.getElementById('soiree-defi');
   if(!box || !state) return;
   if(!myRole){
-    box.innerHTML = '<div class="sub">Choisis d\\'abord qui tu es</div>';
+    box.innerHTML = '<div class="sub">Choisis d\'abord qui tu es</div>';
     return;
   }
   const accepted = state.defis.filter(d => d.for === myRole && d.status === 'accepted');
