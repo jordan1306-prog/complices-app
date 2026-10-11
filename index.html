@@ -613,7 +613,7 @@
 
 
   .pos-card .pos-svg{
-    width:100%; max-width:280px; height:140px; margin:10px auto 8px;
+    width:100%; max-width:100%; height:160px; margin:10px auto 8px;
     display:block; background:rgba(28,17,22,0.55); border-radius:12px;
     border:0.5px solid rgba(245,236,231,0.1);
   }
@@ -3389,235 +3389,367 @@ document.getElementById('save-story-btn').addEventListener('click', () => {
 
 
 const POSITIONS_GUIDE = [
-  { name: "Le missionnaire", tag: "classique", desc: "Partenaire allongé·e sur le dos, l'autre allongé·e par-dessus, face à face. Jambes ouvertes, contact max, baisers faciles.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="70" width="120" height="8" rx="2" fill="rgba(245,236,231,0.12)"/>
-      <!-- bottom person lying -->
-      <ellipse cx="70" cy="62" rx="38" ry="12" fill="#e8b8bf"/>
-      <circle cx="38" cy="58" r="9" fill="#e8b8bf"/>
-      <ellipse cx="95" cy="68" rx="10" ry="6" fill="#e8b8bf"/>
-      <ellipse cx="110" cy="70" rx="10" ry="5" fill="#e8b8bf"/>
-      <!-- top person -->
-      <ellipse cx="78" cy="42" rx="32" ry="11" fill="#c94356"/>
-      <circle cx="48" cy="36" r="9" fill="#c94356"/>
-      <ellipse cx="100" cy="48" rx="9" ry="7" fill="#c94356"/>
-      <ellipse cx="112" cy="52" rx="8" ry="6" fill="#c94356"/>
+  { name: "Le missionnaire", tag: "classique",
+    desc: "Allongé·e sur le dos, jambes ouvertes. L'autre est allongé·e par-dessus, face à face.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="95" x2="180" y2="95" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <!-- bottom: lying on back -->
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="45" cy="72" r="8"/>
+        <path d="M53 72h55"/>
+        <path d="M108 72c8 0 18 4 28 18"/>
+        <path d="M108 72c10 2 22 8 30 20"/>
+        <path d="M70 72v-8"/>
+      </g>
+      <!-- top: on top facing -->
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="55" cy="42" r="8"/>
+        <path d="M55 50v28"/>
+        <path d="M55 60h20"/>
+        <path d="M55 78c12 2 28 6 40 14"/>
+        <path d="M55 78c8 8 16 14 22 16"/>
+      </g>
     </svg>` },
-  { name: "Le missionnaire surélevé", tag: "classique", desc: "Comme le missionnaire, avec un coussin sous les hanches du partenaire en dessous pour un angle plus profond.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="55" y="68" width="40" height="12" rx="3" fill="rgba(201,162,77,0.45)"/>
-      <ellipse cx="75" cy="58" rx="36" ry="11" fill="#e8b8bf"/>
-      <circle cx="42" cy="52" r="9" fill="#e8b8bf"/>
-      <ellipse cx="105" cy="62" rx="12" ry="8" fill="#e8b8bf"/>
-      <ellipse cx="82" cy="38" rx="30" ry="11" fill="#c94356"/>
-      <circle cx="52" cy="30" r="9" fill="#c94356"/>
-      <ellipse cx="108" cy="44" rx="10" ry="8" fill="#c94356"/>
+  { name: "Le missionnaire surélevé", tag: "classique",
+    desc: "Comme le missionnaire, avec un coussin sous les hanches pour un angle plus profond.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="90" y="82" width="36" height="14" rx="3" fill="rgba(201,162,77,0.35)" stroke="none"/>
+      <line x1="20" y1="98" x2="180" y2="98" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="48" cy="68" r="8"/>
+        <path d="M56 68h50"/>
+        <path d="M106 68c10-8 20-18 22-28"/>
+        <path d="M106 68c12 0 24 6 34 16"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="58" cy="38" r="8"/>
+        <path d="M58 46v26"/>
+        <path d="M58 56h18"/>
+        <path d="M58 72c14 0 30 8 42 16"/>
+      </g>
     </svg>` },
-  { name: "L'andromaque (cowgirl)", tag: "classique", desc: "Partenaire allongé sur le dos. L'autre est à califourchon par-dessus, face à lui/elle, et contrôle le mouvement.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="25" y="72" width="110" height="7" rx="2" fill="rgba(245,236,231,0.1)"/>
-      <!-- lying person -->
-      <ellipse cx="80" cy="68" rx="40" ry="10" fill="#e8b8bf"/>
-      <circle cx="42" cy="64" r="8" fill="#e8b8bf"/>
-      <!-- person on top straddling -->
-      <circle cx="80" cy="22" r="9" fill="#c94356"/>
-      <ellipse cx="80" cy="42" rx="14" ry="18" fill="#c94356"/>
-      <ellipse cx="62" cy="58" rx="8" ry="12" fill="#c94356"/>
-      <ellipse cx="98" cy="58" rx="8" ry="12" fill="#c94356"/>
+  { name: "L'andromaque (cowgirl)", tag: "classique",
+    desc: "Partenaire allongé sur le dos. L'autre est assis·e à califourchon par-dessus, face à lui/elle.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <!-- lying -->
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="88" r="7"/>
+        <path d="M47 88h70"/>
+        <path d="M117 88c10 0 20 4 28 10"/>
+      </g>
+      <!-- straddling upright -->
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="100" cy="28" r="8"/>
+        <path d="M100 36v32"/>
+        <path d="M100 50h-16M100 50h16"/>
+        <path d="M100 68c-14 4-22 16-24 28"/>
+        <path d="M100 68c14 4 22 16 24 28"/>
+      </g>
     </svg>` },
-  { name: "Reverse cowgirl", tag: "classique", desc: "Comme l'andromaque, mais la personne du dessus est tournée dos au partenaire (regard vers les pieds).",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="80" cy="70" rx="40" ry="10" fill="#e8b8bf"/>
-      <circle cx="42" cy="66" r="8" fill="#e8b8bf"/>
-      <!-- on top facing away (head toward feet of bottom) -->
-      <circle cx="105" cy="24" r="9" fill="#c94356"/>
-      <ellipse cx="90" cy="44" rx="14" ry="16" fill="#c94356"/>
-      <ellipse cx="72" cy="58" rx="8" ry="11" fill="#c94356"/>
-      <ellipse cx="95" cy="60" rx="8" ry="10" fill="#c94356"/>
+  { name: "Reverse cowgirl", tag: "classique",
+    desc: "Comme l'andromaque, mais tourné·e dos au partenaire (regard vers ses pieds).",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="88" r="7"/>
+        <path d="M47 88h70"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="125" cy="30" r="8"/>
+        <path d="M118 36c-8 10-14 22-16 32"/>
+        <path d="M102 68c-12 6-18 18-20 28"/>
+        <path d="M102 68c8 8 14 18 16 28"/>
+        <path d="M110 48h12"/>
+      </g>
     </svg>` },
-  { name: "La levrette (doggy)", tag: "classique", desc: "À quatre pattes (mains et genoux au sol). Le partenaire est derrière, genoux au sol, et pénètre par l'arrière.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- person on all fours -->
-      <circle cx="40" cy="38" r="8" fill="#e8b8bf"/>
-      <ellipse cx="60" cy="48" rx="22" ry="10" fill="#e8b8bf" transform="rotate(-15 60 48)"/>
-      <ellipse cx="48" cy="68" rx="6" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="78" cy="70" rx="7" ry="9" fill="#e8b8bf"/>
-      <ellipse cx="85" cy="52" rx="9" ry="8" fill="#e8b8bf"/>
-      <!-- person behind -->
-      <circle cx="120" cy="28" r="8" fill="#c94356"/>
-      <ellipse cx="110" cy="48" rx="12" ry="16" fill="#c94356"/>
-      <ellipse cx="105" cy="72" rx="7" ry="10" fill="#c94356"/>
-      <ellipse cx="122" cy="72" rx="7" ry="10" fill="#c94356"/>
+  { name: "La levrette (doggy)", tag: "classique",
+    desc: "À quatre pattes (mains + genoux). Partenaire à genoux derrière.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <!-- on all fours facing left -->
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="48" cy="48" r="8"/>
+        <path d="M56 52c12 4 28 8 40 8"/>
+        <path d="M56 52l-10 40"/>
+        <path d="M96 60l8 36"/>
+        <path d="M96 60l18-4"/>
+      </g>
+      <!-- kneeling behind -->
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="150" cy="40" r="8"/>
+        <path d="M150 48v30"/>
+        <path d="M150 58h-14"/>
+        <path d="M150 78c-6 6-10 14-10 20"/>
+        <path d="M150 78c6 6 10 14 12 20"/>
+        <path d="M136 62c-8 0-14 2-18 4"/>
+      </g>
     </svg>` },
-  { name: "La levrette debout", tag: "intense", desc: "Plié·e en avant, mains appuyées sur un mur ou un meuble. Partenaire debout derrière.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="8" y="10" width="10" height="80" rx="2" fill="rgba(245,236,231,0.18)"/>
-      <!-- bent over person -->
-      <circle cx="48" cy="30" r="8" fill="#e8b8bf"/>
-      <ellipse cx="70" cy="42" rx="24" ry="9" fill="#e8b8bf" transform="rotate(20 70 42)"/>
-      <ellipse cx="95" cy="55" rx="8" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="88" cy="72" rx="7" ry="12" fill="#e8b8bf"/>
-      <ellipse cx="102" cy="72" rx="7" ry="12" fill="#e8b8bf"/>
-      <!-- standing behind -->
-      <circle cx="125" cy="22" r="8" fill="#c94356"/>
-      <ellipse cx="120" cy="48" rx="11" ry="18" fill="#c94356"/>
-      <ellipse cx="112" cy="78" rx="6" ry="11" fill="#c94356"/>
-      <ellipse cx="130" cy="78" rx="6" ry="11" fill="#c94356"/>
+  { name: "La levrette debout", tag: "intense",
+    desc: "Plié·e en avant, mains sur un mur/meuble. Partenaire debout derrière.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="12" y="15" width="10" height="85" rx="2" fill="rgba(245,236,231,0.15)" stroke="none"/>
+      <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="55" cy="38" r="8"/>
+        <path d="M63 42c16 8 32 16 42 22"/>
+        <path d="M105 64l-4 32"/>
+        <path d="M105 64l16 30"/>
+        <path d="M63 42l-20 8"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="155" cy="30" r="8"/>
+        <path d="M155 38v40"/>
+        <path d="M155 55h-16"/>
+        <path d="M155 78c-6 6-10 14-10 20"/>
+        <path d="M155 78c6 8 10 14 12 20"/>
+        <path d="M139 58c-10 4-18 8-24 10"/>
+      </g>
     </svg>` },
-  { name: "La cuillère", tag: "douce", desc: "Tous les deux allongés sur le côté, dans le même sens. Un corps collé dans le dos de l'autre.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- front person -->
-      <circle cx="35" cy="40" r="8" fill="#e8b8bf"/>
-      <ellipse cx="65" cy="48" rx="28" ry="11" fill="#e8b8bf"/>
-      <ellipse cx="95" cy="55" rx="10" ry="8" fill="#e8b8bf"/>
-      <!-- back person spooning -->
-      <circle cx="42" cy="28" r="8" fill="#c94356"/>
-      <ellipse cx="72" cy="36" rx="28" ry="10" fill="#c94356"/>
-      <ellipse cx="102" cy="42" rx="10" ry="7" fill="#c94356"/>
+  { name: "La cuillère", tag: "douce",
+    desc: "Allongés sur le côté, dans le même sens. Un corps collé dans le dos de l'autre.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="95" x2="180" y2="95" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="58" r="8"/>
+        <path d="M48 60h55"/>
+        <path d="M103 60c12 4 24 12 32 24"/>
+        <path d="M103 60c8 8 14 18 18 28"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="48" cy="42" r="8"/>
+        <path d="M56 44h55"/>
+        <path d="M111 44c12 2 22 10 30 20"/>
+        <path d="M111 44c6 6 12 16 16 26"/>
+      </g>
     </svg>` },
-  { name: "Le 69", tag: "classique", desc: "Tête-bêche : chacun·e a la tête au niveau du bassin de l'autre. Plaisir oral en même temps.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- person left, head left -->
-      <circle cx="30" cy="30" r="8" fill="#e8b8bf"/>
-      <ellipse cx="55" cy="40" rx="22" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="80" cy="48" rx="10" ry="8" fill="#e8b8bf"/>
-      <!-- person right inverted, head right -->
-      <circle cx="130" cy="70" r="8" fill="#c94356"/>
-      <ellipse cx="105" cy="58" rx="22" ry="10" fill="#c94356"/>
-      <ellipse cx="80" cy="50" rx="10" ry="8" fill="#c94356"/>
+  { name: "Le 69", tag: "classique",
+    desc: "Tête-bêche : la tête de chacun·e est au niveau du bassin de l'autre.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="35" r="8"/>
+        <path d="M48 38c16 6 36 14 52 22"/>
+        <path d="M100 60c8 6 14 16 16 26"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="160" cy="85" r="8"/>
+        <path d="M152 82c-16-6-36-14-52-22"/>
+        <path d="M100 60c-8-6-14-16-16-26"/>
+      </g>
     </svg>` },
-  { name: "Le lotus", tag: "douce", desc: "Assis face à face. Jambes enlacées autour de l'autre. Très proche, rythme lent, beaucoup de contact.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="58" cy="22" r="9" fill="#e8b8bf"/>
-      <ellipse cx="58" cy="48" rx="14" ry="20" fill="#e8b8bf"/>
-      <ellipse cx="40" cy="70" rx="10" ry="8" fill="#e8b8bf"/>
-      <ellipse cx="75" cy="72" rx="10" ry="7" fill="#e8b8bf"/>
-      <circle cx="102" cy="22" r="9" fill="#c94356"/>
-      <ellipse cx="102" cy="48" rx="14" ry="20" fill="#c94356"/>
-      <ellipse cx="85" cy="70" rx="10" ry="8" fill="#c94356"/>
-      <ellipse cx="120" cy="72" rx="10" ry="7" fill="#c94356"/>
+  { name: "Le lotus", tag: "douce",
+    desc: "Assis face à face, jambes enlacées autour de l'autre. Très proche.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="40" y1="100" x2="160" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="78" cy="28" r="8"/>
+        <path d="M78 36v34"/>
+        <path d="M78 50h-14"/>
+        <path d="M78 70c-16 4-26 14-28 26"/>
+        <path d="M78 70c10 8 18 16 22 20"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="112" cy="28" r="8"/>
+        <path d="M112 36v34"/>
+        <path d="M112 50h14"/>
+        <path d="M112 70c16 4 26 14 28 26"/>
+        <path d="M112 70c-10 8-18 16-22 20"/>
+      </g>
     </svg>` },
-  { name: "Face à face assis", tag: "douce", desc: "Un·e assis·e (chaise ou bord du lit), l'autre sur ses genoux face à face, jambes autour.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="45" y="72" width="50" height="10" rx="2" fill="rgba(245,236,231,0.15)"/>
-      <circle cx="70" cy="28" r="9" fill="#e8b8bf"/>
-      <ellipse cx="70" cy="52" rx="16" ry="18" fill="#e8b8bf"/>
-      <ellipse cx="55" cy="72" rx="8" ry="6" fill="#e8b8bf"/>
-      <ellipse cx="88" cy="72" rx="8" ry="6" fill="#e8b8bf"/>
-      <circle cx="95" cy="22" r="8" fill="#c94356"/>
-      <ellipse cx="88" cy="45" rx="12" ry="14" fill="#c94356"/>
-      <ellipse cx="78" cy="62" rx="7" ry="9" fill="#c94356"/>
+  { name: "Face à face assis", tag: "douce",
+    desc: "Un·e assis·e, l'autre sur les genoux face à face.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="60" y="88" width="50" height="10" rx="2" fill="rgba(245,236,231,0.12)" stroke="none"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="85" cy="36" r="8"/>
+        <path d="M85 44v30"/>
+        <path d="M85 58h-12M85 58h12"/>
+        <path d="M85 74c-10 6-14 14-14 20"/>
+        <path d="M85 74c10 6 14 14 14 20"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="110" cy="30" r="7"/>
+        <path d="M105 36c-6 10-12 20-16 28"/>
+        <path d="M89 64c-4 8-6 16-6 22"/>
+      </g>
     </svg>` },
-  { name: "La chaise", tag: "classique", desc: "Assis solidement sur une chaise. L'autre est à califourchon sur les genoux, face à face ou dos tourné.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 60h50v8H50zM55 68v18M95 68v18M50 60V40h8" stroke="rgba(245,236,231,0.3)" stroke-width="3" fill="none"/>
-      <circle cx="78" cy="30" r="8" fill="#e8b8bf"/>
-      <ellipse cx="78" cy="50" rx="14" ry="14" fill="#e8b8bf"/>
-      <circle cx="78" cy="16" r="7" fill="#c94356"/>
-      <ellipse cx="78" cy="36" rx="11" ry="12" fill="#c94356"/>
+  { name: "La chaise", tag: "classique",
+    desc: "Assis sur une chaise. L'autre à califourchon sur les genoux.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M70 70h50v8H70zM75 78v22M115 78v22M70 70V48h8" stroke="rgba(245,236,231,0.35)" stroke-width="2.5"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="95" cy="38" r="8"/>
+        <path d="M95 46v22"/>
+        <path d="M95 56h-12M95 56h12"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="95" cy="20" r="7"/>
+        <path d="M95 27v16"/>
+        <path d="M95 36h-10M95 36h10"/>
+      </g>
     </svg>` },
-  { name: "L'étau", tag: "intense", desc: "Allongé·e sur le dos, jambes relevées (sur les épaules ou serrées contre la poitrine). Sensation plus serrée.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="70" cy="65" rx="36" ry="11" fill="#e8b8bf"/>
-      <circle cx="38" cy="60" r="8" fill="#e8b8bf"/>
-      <!-- legs up -->
-      <ellipse cx="95" cy="40" rx="8" ry="18" fill="#e8b8bf" transform="rotate(-30 95 40)"/>
-      <ellipse cx="110" cy="35" rx="7" ry="16" fill="#e8b8bf" transform="rotate(-10 110 35)"/>
-      <circle cx="100" cy="22" r="8" fill="#c94356"/>
-      <ellipse cx="95" cy="48" rx="12" ry="16" fill="#c94356"/>
+  { name: "L'étau", tag: "intense",
+    desc: "Sur le dos, jambes relevées vers la poitrine ou sur les épaules du partenaire.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="98" x2="160" y2="98" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="78" r="8"/>
+        <path d="M48 78h50"/>
+        <path d="M98 78c6-16 10-32 10-42"/>
+        <path d="M98 78c14-12 24-28 28-40"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="130" cy="28" r="8"/>
+        <path d="M130 36v36"/>
+        <path d="M130 50h-16"/>
+        <path d="M130 72c-12 2-24 6-32 8"/>
+      </g>
     </svg>` },
-  { name: "Le papillon", tag: "classique", desc: "Allongé·e au bord du lit, bassin au bord, jambes ouvertes. Partenaire debout ou à genoux entre les jambes.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="10" y="40" width="70" height="14" rx="2" fill="rgba(245,236,231,0.15)"/>
-      <circle cx="30" cy="32" r="8" fill="#e8b8bf"/>
-      <ellipse cx="55" cy="42" rx="22" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="78" cy="38" rx="10" ry="7" fill="#e8b8bf" transform="rotate(-40 78 38)"/>
-      <ellipse cx="80" cy="50" rx="10" ry="7" fill="#e8b8bf" transform="rotate(40 80 50)"/>
-      <circle cx="115" cy="28" r="8" fill="#c94356"/>
-      <ellipse cx="110" cy="52" rx="12" ry="18" fill="#c94356"/>
-      <ellipse cx="105" cy="80" rx="6" ry="10" fill="#c94356"/>
-      <ellipse cx="120" cy="80" rx="6" ry="10" fill="#c94356"/>
+  { name: "Le papillon", tag: "classique",
+    desc: "Allongé·e au bord du lit, bassin au bord. Partenaire debout ou à genoux entre les jambes.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="15" y="55" width="80" height="12" rx="2" fill="rgba(245,236,231,0.12)" stroke="none"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="35" cy="48" r="8"/>
+        <path d="M43 50h40"/>
+        <path d="M83 52c10-12 18-16 28-18"/>
+        <path d="M83 52c12 8 20 14 28 16"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="155" cy="30" r="8"/>
+        <path d="M155 38v40"/>
+        <path d="M155 55h-14"/>
+        <path d="M155 78c-6 6-10 14-10 20"/>
+        <path d="M155 78c6 8 10 14 12 20"/>
+      </g>
     </svg>` },
-  { name: "La brouette", tag: "intense", desc: "En appui sur les mains (ou avant-bras), corps horizontal. Le partenaire soulève et tient les jambes.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="30" cy="55" r="8" fill="#e8b8bf"/>
-      <ellipse cx="55" cy="50" rx="24" ry="9" fill="#e8b8bf"/>
-      <ellipse cx="28" cy="72" rx="5" ry="9" fill="#e8b8bf"/>
-      <ellipse cx="40" cy="74" rx="5" ry="8" fill="#e8b8bf"/>
-      <!-- legs held up by partner -->
-      <ellipse cx="85" cy="42" rx="8" ry="14" fill="#e8b8bf" transform="rotate(50 85 42)"/>
-      <circle cx="120" cy="25" r="8" fill="#c94356"/>
-      <ellipse cx="115" cy="50" rx="12" ry="18" fill="#c94356"/>
-      <ellipse cx="108" cy="78" rx="6" ry="10" fill="#c94356"/>
-      <ellipse cx="125" cy="78" rx="6" ry="10" fill="#c94356"/>
+  { name: "La brouette", tag: "intense",
+    desc: "En appui sur les mains, corps horizontal. Le partenaire tient et soulève les jambes.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="35" cy="70" r="7"/>
+        <path d="M42 70h50"/>
+        <path d="M35 77v20"/>
+        <path d="M48 77v18"/>
+        <path d="M92 70c10-4 20-12 28-22"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="155" cy="28" r="8"/>
+        <path d="M155 36v42"/>
+        <path d="M155 55h-12"/>
+        <path d="M155 78c-6 6-10 14-10 20"/>
+        <path d="M155 78c6 8 10 14 12 20"/>
+        <path d="M143 58c-8-4-16-8-22-12"/>
+      </g>
     </svg>` },
-  { name: "Contre le mur", tag: "intense", desc: "Debout contre un mur. Une jambe relevée ou porté·e. Partenaire face à face, corps collés.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="8" y="8" width="12" height="84" rx="2" fill="rgba(245,236,231,0.18)"/>
-      <circle cx="45" cy="20" r="8" fill="#e8b8bf"/>
-      <ellipse cx="45" cy="48" rx="12" ry="20" fill="#e8b8bf"/>
-      <ellipse cx="40" cy="80" rx="6" ry="12" fill="#e8b8bf"/>
-      <ellipse cx="58" cy="55" rx="7" ry="14" fill="#e8b8bf" transform="rotate(-40 58 55)"/>
-      <circle cx="72" cy="18" r="8" fill="#c94356"/>
-      <ellipse cx="70" cy="46" rx="12" ry="20" fill="#c94356"/>
-      <ellipse cx="64" cy="80" rx="6" ry="12" fill="#c94356"/>
-      <ellipse cx="80" cy="80" rx="6" ry="12" fill="#c94356"/>
+  { name: "Contre le mur", tag: "intense",
+    desc: "Debout contre un mur, face à face. Une jambe relevée ou porté·e.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="14" y="10" width="12" height="95" rx="2" fill="rgba(245,236,231,0.15)" stroke="none"/>
+      <line x1="30" y1="105" x2="160" y2="105" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="50" cy="28" r="8"/>
+        <path d="M50 36v42"/>
+        <path d="M50 52h14"/>
+        <path d="M50 78c-4 8-6 16-6 24"/>
+        <path d="M50 78c12-4 22-4 28 4"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="85" cy="26" r="8"/>
+        <path d="M85 34v44"/>
+        <path d="M85 52h-14"/>
+        <path d="M85 78c-6 8-8 16-8 24"/>
+        <path d="M85 78c6 8 10 16 12 24"/>
+      </g>
     </svg>` },
-  { name: "Cuisses croisées", tag: "douce", desc: "Allongé·e sur le dos. Le partenaire s'allonge avec une jambe entre les tiennes. Frottements + pénétration possible.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="70" cy="60" rx="38" ry="12" fill="#e8b8bf"/>
-      <circle cx="35" cy="54" r="8" fill="#e8b8bf"/>
-      <ellipse cx="100" cy="68" rx="12" ry="8" fill="#e8b8bf"/>
-      <ellipse cx="115" cy="70" rx="10" ry="7" fill="#e8b8bf"/>
-      <circle cx="95" cy="30" r="8" fill="#c94356"/>
-      <ellipse cx="90" cy="50" rx="14" ry="14" fill="#c94356"/>
-      <ellipse cx="75" cy="68" rx="8" ry="10" fill="#c94356"/>
-      <ellipse cx="105" cy="70" rx="8" ry="9" fill="#c94356"/>
+  { name: "Cuisses croisées", tag: "douce",
+    desc: "Sur le dos. Le partenaire s'allonge avec une jambe entre les tiennes.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="98" x2="180" y2="98" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="70" r="8"/>
+        <path d="M48 72h55"/>
+        <path d="M103 72c10 4 20 12 28 22"/>
+        <path d="M103 72c6 10 10 18 12 24"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="130" cy="40" r="8"/>
+        <path d="M122 46c-12 8-24 16-34 22"/>
+        <path d="M88 68c-4 8-6 16-6 24"/>
+        <path d="M88 68c10 6 18 14 22 22"/>
+      </g>
     </svg>` },
-  { name: "L'amazone latérale", tag: "classique", desc: "Partenaire allongé. L'autre est à califourchon mais tourné·e de côté (pas face à face).",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="80" cy="72" rx="40" ry="10" fill="#e8b8bf"/>
-      <circle cx="42" cy="68" r="8" fill="#e8b8bf"/>
-      <circle cx="100" cy="22" r="8" fill="#c94356"/>
-      <ellipse cx="90" cy="42" rx="12" ry="16" fill="#c94356"/>
-      <ellipse cx="78" cy="60" rx="8" ry="10" fill="#c94356"/>
-      <ellipse cx="98" cy="62" rx="8" ry="10" fill="#c94356"/>
+  { name: "L'amazone latérale", tag: "classique",
+    desc: "Partenaire allongé. L'autre à califourchon, tourné·e sur le côté.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="88" r="7"/>
+        <path d="M47 88h75"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="120" cy="30" r="8"/>
+        <path d="M114 38c-6 12-10 24-12 34"/>
+        <path d="M102 72c-10 6-16 16-18 24"/>
+        <path d="M102 72c8 8 12 16 14 24"/>
+      </g>
     </svg>` },
-  { name: "Pliée en avant assise", tag: "intense", desc: "Assis·e au bord du lit, buste penché en avant. Partenaire à genoux derrière.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="15" y="55" width="70" height="12" rx="2" fill="rgba(245,236,231,0.15)"/>
-      <circle cx="35" cy="28" r="8" fill="#e8b8bf"/>
-      <ellipse cx="55" cy="42" rx="22" ry="9" fill="#e8b8bf" transform="rotate(25 55 42)"/>
-      <ellipse cx="75" cy="55" rx="9" ry="8" fill="#e8b8bf"/>
-      <ellipse cx="70" cy="72" rx="7" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="85" cy="72" rx="7" ry="10" fill="#e8b8bf"/>
-      <circle cx="120" cy="30" r="8" fill="#c94356"/>
-      <ellipse cx="112" cy="52" rx="12" ry="16" fill="#c94356"/>
-      <ellipse cx="105" cy="78" rx="6" ry="10" fill="#c94356"/>
-      <ellipse cx="122" cy="78" rx="6" ry="10" fill="#c94356"/>
+  { name: "Pliée en avant assise", tag: "intense",
+    desc: "Assis·e au bord du lit, buste penché en avant. Partenaire à genoux derrière.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="20" y="70" width="70" height="12" rx="2" fill="rgba(245,236,231,0.12)" stroke="none"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="36" r="8"/>
+        <path d="M48 40c14 10 28 20 38 28"/>
+        <path d="M86 68c-4 6-6 12-6 18"/>
+        <path d="M86 68c8 6 12 14 14 20"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="150" cy="36" r="8"/>
+        <path d="M150 44v32"/>
+        <path d="M150 58h-14"/>
+        <path d="M150 76c-6 6-10 14-10 22"/>
+        <path d="M150 76c6 8 10 14 12 22"/>
+        <path d="M136 60c-10 4-18 8-24 10"/>
+      </g>
     </svg>` },
-  { name: "Les ciseaux", tag: "douce", desc: "Allongés sur le côté face à face, jambes entrelacées comme des ciseaux. Très connecté, rythme lent.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="35" cy="35" r="8" fill="#e8b8bf"/>
-      <ellipse cx="60" cy="48" rx="24" ry="11" fill="#e8b8bf"/>
-      <ellipse cx="90" cy="55" rx="12" ry="8" fill="#e8b8bf"/>
-      <ellipse cx="100" cy="68" rx="10" ry="7" fill="#e8b8bf"/>
-      <circle cx="125" cy="35" r="8" fill="#c94356"/>
-      <ellipse cx="100" cy="48" rx="24" ry="11" fill="#c94356"/>
-      <ellipse cx="70" cy="55" rx="12" ry="8" fill="#c94356"/>
-      <ellipse cx="60" cy="68" rx="10" ry="7" fill="#c94356"/>
+  { name: "Les ciseaux", tag: "douce",
+    desc: "Allongés sur le côté face à face, jambes entrelacées.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="20" y1="98" x2="180" y2="98" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="40" cy="50" r="8"/>
+        <path d="M48 52h45"/>
+        <path d="M93 52c10 8 18 20 22 32"/>
+        <path d="M93 52c4 12 6 24 6 34"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="160" cy="50" r="8"/>
+        <path d="M152 52h-45"/>
+        <path d="M107 52c-10 8-18 20-22 32"/>
+        <path d="M107 52c-4 12-6 24-6 34"/>
+      </g>
     </svg>` },
-  { name: "Genoux au sol, buste relevé", tag: "classique", desc: "À genoux, buste droit ou légèrement penché, appui possible sur un dossier. Partenaire derrière à genoux.",
-    svg: `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="10" y="15" width="10" height="70" rx="2" fill="rgba(245,236,231,0.15)"/>
-      <circle cx="48" cy="22" r="8" fill="#e8b8bf"/>
-      <ellipse cx="50" cy="48" rx="12" ry="18" fill="#e8b8bf"/>
-      <ellipse cx="42" cy="78" rx="7" ry="10" fill="#e8b8bf"/>
-      <ellipse cx="60" cy="78" rx="7" ry="10" fill="#e8b8bf"/>
-      <circle cx="88" cy="22" r="8" fill="#c94356"/>
-      <ellipse cx="85" cy="48" rx="12" ry="18" fill="#c94356"/>
-      <ellipse cx="78" cy="78" rx="7" ry="10" fill="#c94356"/>
-      <ellipse cx="95" cy="78" rx="7" ry="10" fill="#c94356"/>
+  { name: "Genoux au sol, buste relevé", tag: "classique",
+    desc: "À genoux, buste droit. Partenaire derrière, aussi à genoux.",
+    svg: `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="14" y="15" width="10" height="90" rx="2" fill="rgba(245,236,231,0.12)" stroke="none"/>
+      <line x1="30" y1="105" x2="170" y2="105" stroke="rgba(245,236,231,0.2)" stroke-width="2"/>
+      <g stroke="#f0c4c8" stroke-width="2.4">
+        <circle cx="60" cy="30" r="8"/>
+        <path d="M60 38v36"/>
+        <path d="M60 55h-12"/>
+        <path d="M60 74c-8 8-12 18-12 28"/>
+        <path d="M60 74c8 8 12 18 14 28"/>
+      </g>
+      <g stroke="#e05570" stroke-width="2.4">
+        <circle cx="105" cy="30" r="8"/>
+        <path d="M105 38v36"/>
+        <path d="M105 55h-14"/>
+        <path d="M105 74c-8 8-12 18-12 28"/>
+        <path d="M105 74c8 8 12 18 14 28"/>
+      </g>
     </svg>` },
 ];
 
