@@ -661,6 +661,44 @@
     text-align:center; margin:12px 0 4px; font-weight:700;
   }
 
+
+  .role-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(201,51,63,0.18); border:0.5px solid var(--line);
+    border-radius:20px; padding:5px 12px; font-size:12px; color:var(--gold-soft);
+    margin:8px auto 0; cursor:pointer;
+  }
+  .role-chip b{ color:var(--cream); }
+  .home-section-title{
+    font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--muted); margin:16px 0 8px; text-align:left;
+  }
+  .home-card{
+    background:var(--card); border:0.5px solid var(--line); border-radius:14px;
+    padding:14px; margin-bottom:8px; text-align:left; cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  .home-card .hc-label{ font-size:11px; color:var(--gold-soft); margin-bottom:4px; }
+  .home-card .hc-text{ font-size:14px; font-weight:600; color:var(--cream); line-height:1.35; }
+  .home-card .hc-meta{ font-size:12px; color:var(--muted); margin-top:4px; }
+  .home-card.empty-home{ text-align:center; color:var(--muted); font-size:13px; cursor:default; }
+  .home-soiree-btn{
+    width:100%; margin-top:12px; padding:16px; border:none; border-radius:16px;
+    background:linear-gradient(135deg, var(--rose-deep), var(--gold));
+    color:#fdf1f0; font-family:Manrope,sans-serif; font-weight:700; font-size:16px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+    box-shadow:0 8px 24px rgba(201,51,63,0.35);
+  }
+  .home-soiree-btn:active{ transform:scale(0.98); }
+  .home-quick-row{ display:flex; gap:8px; margin-top:12px; }
+  .home-quick-row button{
+    flex:1; background:var(--card); border:0.5px solid var(--line); border-radius:12px;
+    padding:12px 8px; color:var(--cream); font-size:12px; font-family:Manrope,sans-serif;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .home-quick-row button span.hq-icon{ font-size:20px; }
+  #home-todo, #home-waiting{ text-align:left; }
+
 </style>
 </head>
 <body>
@@ -773,8 +811,8 @@
   <header>
     <h1>Complices</h1>
     <div class="header-divider"><span>♡</span></div>
-    <div class="header-tagline">Plus qu'un jeu, une histoire</div>
-    <p id="daily-message">Défis, envies et petites promesses — à deux.</p>
+    <div class="header-tagline">Défis · Points · Complicité</div>
+    <p id="daily-message">Ce que vous avez à faire, ensemble.</p>
     <button class="pill-btn" id="days-together-btn" style="margin:12px auto 0;">
       <span id="days-together-icon">📅</span>
       <span id="days-together-label">Ajouter la date de votre rencontre</span>
@@ -811,30 +849,35 @@
   <div class="badge-row" id="badges-row"></div>
   <div id="streak-display" style="text-align:center; font-size:13px; color:var(--gold-soft); margin:14px 0 4px;"></div>
 
-  <div id="today-defi-box" style="display:none; margin-top:10px;"></div>
+  <div id="role-chip-wrap" style="text-align:center;"></div>
 
-  
-  <button class="pill-btn" id="soiree-btn" style="margin-top:8px;">
-    <span>🌙</span><span>Mode Soirée</span><span class="pill-arrow">›</span>
+  <button class="home-soiree-btn" id="soiree-btn">
+    <span>🔥</span><span>Ce soir — Mode Soirée</span>
   </button>
 
-  <button class="pill-btn pill-btn-cta" id="play-now-btn" style="margin-top:16px;">
-    <span>▶</span><span>Jouer maintenant</span><span class="pill-arrow">›</span>
-  </button>
-  <div style="display:flex; gap:8px; margin-bottom:6px;">
-    <button class="pill-btn" id="quick-messages-btn" style="flex:1;"><span>💬</span><span>Messages</span><span class="pill-arrow">›</span></button>
-    <button class="pill-btn" id="quick-boutique-btn" style="flex:1;"><span>🎁</span><span>Récompenses</span><span class="pill-arrow">›</span></button>
+  <div class="home-section-title">À faire maintenant</div>
+  <div id="home-todo"></div>
+
+  <div class="home-section-title">En attente</div>
+  <div id="home-waiting"></div>
+
+  <div class="home-section-title">Accès rapide</div>
+  <div class="home-quick-row">
+    <button type="button" id="play-now-btn"><span class="hq-icon">🎯</span><span>Défis</span></button>
+    <button type="button" id="quick-boutique-btn"><span class="hq-icon">🎁</span><span>Boutique</span></button>
+    <button type="button" id="quick-messages-btn"><span class="hq-icon">💬</span><span>Chat</span></button>
   </div>
+  <div id="today-defi-box" style="display:none; margin-top:10px;"></div>
   </div>
 
   <nav id="sub-nav" style="display:none;">
     <button class="tab-btn" data-tab="defis">Défis</button>
-    <button class="tab-btn" data-tab="boutique">Boutique</button>
-    <button class="tab-btn" data-tab="achats">Achats</button>
+    <button class="tab-btn" data-tab="secret">Fantasmes</button>
+    <button class="tab-btn" data-tab="boutique">Catalogue</button>
+    <button class="tab-btn" data-tab="achats">À réaliser</button>
+    <button class="tab-btn" data-tab="messages">Chat</button>
     <button class="tab-btn" data-tab="histoires">Histoires</button>
     <button class="tab-btn" data-tab="profil-accueil">Profil</button>
-    <button class="tab-btn" data-tab="secret">Fantasmes</button>
-    <button class="tab-btn" data-tab="messages">Messages</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
     <button class="tab-btn" data-tab="historique">Historique</button>
   </nav>
@@ -1112,13 +1155,13 @@
 
 <div id="bottom-nav">
   <button class="bottom-nav-btn active" data-group="accueil"><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
-  <button class="bottom-nav-btn" data-group="jouer"><span class="bn-icon">🎮</span><span class="bn-label">Jouer</span></button>
-  <button class="bottom-nav-btn" data-group="messages" style="position:relative;">
-    <span class="bn-icon">💬</span><span class="bn-label">Messages</span>
+  <button class="bottom-nav-btn" data-group="jouer"><span class="bn-icon">🎯</span><span class="bn-label">À faire</span></button>
+  <button class="bottom-nav-btn" data-group="recompenses"><span class="bn-icon">🎁</span><span class="bn-label">Boutique</span></button>
+  <button class="bottom-nav-btn" data-group="ensemble" style="position:relative;">
+    <span class="bn-icon">💕</span><span class="bn-label">À deux</span>
     <span id="messages-badge" class="bn-badge" style="display:none;">0</span>
   </button>
-  <button class="bottom-nav-btn" data-group="recompenses"><span class="bn-icon">🎁</span><span class="bn-label">Récompenses</span></button>
-  <button class="bottom-nav-btn" data-group="profil"><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
+  <button class="bottom-nav-btn" data-group="profil"><span class="bn-icon">⋯</span><span class="bn-label">Plus</span></button>
 </div>
 </div>
 
@@ -1764,6 +1807,8 @@ function render(){
   renderNegotiations();
   renderPurchases();
   renderNotifications();
+  try{ renderHomeDashboard(); }catch(e){}
+
   renderGuideLink();
   renderDaysTogether();
   renderTodayDefiBox();
@@ -2844,9 +2889,9 @@ function renderTodayDefiBox(){
   box.querySelector('.card').onclick = () => goToTab('defis');
 }
 
-document.getElementById('play-now-btn').addEventListener('click', () => goToTab('defis'));
-document.getElementById('quick-messages-btn').addEventListener('click', () => goToTab('messages'));
-document.getElementById('quick-boutique-btn').addEventListener('click', () => goToTab('boutique'));
+document.getElementById('play-now-btn')?.addEventListener('click', () => goToTab('defis'));
+document.getElementById('quick-messages-btn')?.addEventListener('click', () => goToTab('messages'));
+document.getElementById('quick-boutique-btn')?.addEventListener('click', () => goToTab('boutique'));
 
 const STORY_LIBRARY = [
   // ========== SOFT ==========
@@ -4416,20 +4461,123 @@ document.getElementById('notif-send-defi-btn').addEventListener('click', () => {
 });
 
 const TAB_GROUPS = {
-  defis: 'jouer', histoires: 'jouer',
+  defis: 'jouer', secret: 'jouer',
   boutique: 'recompenses', achats: 'recompenses',
-  messages: 'messages',
-  'profil-accueil': 'profil', secret: 'profil', calendrier: 'profil', historique: 'profil',
+  messages: 'ensemble', histoires: 'ensemble',
+  'profil-accueil': 'profil', calendrier: 'profil', historique: 'profil',
 };
 const GROUP_TABS = {
-  jouer: ['defis', 'histoires'],
+  jouer: ['defis', 'secret'],
   recompenses: ['boutique', 'achats'],
-  messages: ['messages'],
-  profil: ['profil-accueil', 'secret', 'calendrier', 'historique'],
+  ensemble: ['messages', 'histoires'],
+  profil: ['profil-accueil', 'calendrier', 'historique'],
 };
 
+
+function renderHomeDashboard(){
+  // Role chip
+  const chipWrap = document.getElementById('role-chip-wrap');
+  if(chipWrap){
+    if(myRole && state){
+      chipWrap.innerHTML = `<div class="role-chip" id="role-chip-btn">Tu joues : <b>${escapeHtml(state.names[myRole])}</b> · changer</div>`;
+      const chip = document.getElementById('role-chip-btn');
+      if(chip) chip.onclick = () => {
+        if(confirm('Changer de rôle sur cet appareil ?')){
+          localStorage.removeItem('complices-role');
+          myRole = null;
+          render();
+          goToTab('defis');
+        }
+      };
+    } else {
+      chipWrap.innerHTML = `<div class="role-chip" id="role-chip-btn" style="border-color:var(--rose);">⚠️ Choisis qui tu es pour commencer</div>`;
+      const chip = document.getElementById('role-chip-btn');
+      if(chip) chip.onclick = () => goToTab('defis');
+    }
+  }
+
+  const todo = document.getElementById('home-todo');
+  const waiting = document.getElementById('home-waiting');
+  if(!todo || !waiting || !state) return;
+
+  const todoItems = [];
+  const waitItems = [];
+
+  if(myRole){
+    // Défis à accepter
+    state.defis.filter(d => d.for === myRole && d.status !== 'accepted').forEach(d => {
+      todoItems.push({
+        label: 'Défi à accepter',
+        text: d.text,
+        meta: '+' + d.pts + ' pts',
+        tab: 'defis'
+      });
+    });
+    // Défis acceptés en cours
+    state.defis.filter(d => d.for === myRole && d.status === 'accepted').forEach(d => {
+      const rem = d.acceptDeadline ? d.acceptDeadline - Date.now() : 0;
+      todoItems.push({
+        label: 'Défi en cours',
+        text: d.text,
+        meta: rem > 0 ? '⏳ ' + formatCountdown(rem) : 'À terminer',
+        tab: 'defis'
+      });
+    });
+    // Achats à réaliser
+    state.purchases.filter(p => p.owedBy === myRole && p.status === 'pending').forEach(p => {
+      const rem = p.deadline - Date.now();
+      todoItems.push({
+        label: 'Achat à réaliser',
+        text: p.text,
+        meta: rem > 0 ? '⏳ ' + formatCountdown(rem) : 'Délai dépassé',
+        tab: 'achats'
+      });
+    });
+    // Achats à valider (faits par l'autre)
+    state.purchases.filter(p => p.boughtBy === myRole && p.status === 'done').forEach(p => {
+      waitItems.push({
+        label: 'À valider',
+        text: p.text,
+        meta: 'Réalisé par ' + state.names[p.owedBy],
+        tab: 'achats'
+      });
+    });
+    // Indices défis partenaire
+    const partner = myRole === 'a' ? 'b' : 'a';
+    state.defis.filter(d => d.for === partner && d.status === 'accepted' && d.hintForPartner).forEach(d => {
+      waitItems.push({
+        label: 'Indice',
+        text: (d.hint || 'Défi accepté') + (d.hintDetail ? ' — ' + d.hintDetail : ''),
+        meta: state.names[partner] + ' a un défi en cours',
+        tab: 'defis'
+      });
+    });
+  }
+
+  function fill(el, items, emptyMsg){
+    if(!items.length){
+      el.innerHTML = `<div class="home-card empty-home">${emptyMsg}</div>`;
+      return;
+    }
+    el.innerHTML = items.slice(0, 5).map(it => `
+      <div class="home-card" data-go="${it.tab}">
+        <div class="hc-label">${escapeHtml(it.label)}</div>
+        <div class="hc-text">${escapeHtml(it.text)}</div>
+        <div class="hc-meta">${escapeHtml(it.meta)}</div>
+      </div>
+    `).join('');
+    el.querySelectorAll('.home-card[data-go]').forEach(card => {
+      card.onclick = () => goToTab(card.dataset.go);
+    });
+  }
+
+  fill(todo, todoItems, myRole ? 'Rien à faire pour l\'instant ✨' : 'Choisis qui tu es pour voir tes actions');
+  fill(waiting, waitItems, 'Rien en attente');
+}
+
+
 function selectGroup(groupName, preferredTab){
-  document.body.classList.toggle('chat-fullscreen', groupName === 'messages');
+  document.body.classList.toggle('chat-fullscreen', groupName === 'ensemble' && (!preferredTab || preferredTab === 'messages'));
   if(groupName === 'profil' && document.getElementById('profil-sub-main')){
     showProfilView('profil-sub-main');
   }
@@ -4441,6 +4589,7 @@ function selectGroup(groupName, preferredTab){
     if(subNav) subNav.style.display = 'none';
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    renderHomeDashboard();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
@@ -4452,8 +4601,11 @@ function selectGroup(groupName, preferredTab){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === targetTab));
   document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + targetTab));
   if(targetTab === 'messages'){
+    document.body.classList.add('chat-fullscreen');
     markMessagesAsRead();
     scrollChatToBottom();
+  } else {
+    document.body.classList.remove('chat-fullscreen');
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
