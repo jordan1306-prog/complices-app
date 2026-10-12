@@ -774,7 +774,7 @@
         <input type="text" id="new-pool-defi-text" placeholder="Texte du défi..." maxlength="200">
       </div>
       <div class="row">
-        <input type="number" id="new-pool-defi-pts" placeholder="Points (ex : 15)" min="1">
+        <input type="number" id="new-pool-defi-pts" placeholder="Flammes (ex : 15)" min="1">
       </div>
       <button class="btn btn-gold" id="add-pool-defi-btn" style="width:100%;">Ajouter à la réserve</button>
     </div>
@@ -818,7 +818,7 @@
   <header>
     <h1>Complices</h1>
     <div class="header-divider"><span>♡</span></div>
-    <div class="header-tagline">Défis · Points · Complicité</div>
+    <div class="header-tagline">Défis · Flammes · Complicité</div>
     <p id="daily-message">Ce que vous avez à faire, ensemble.</p>
     <button class="pill-btn" id="days-together-btn" style="margin:12px auto 0;">
       <span id="days-together-icon">📅</span>
@@ -838,7 +838,7 @@
       <input class="name" id="name-a" value="Elle" maxlength="16" title="Touche pour changer">
       <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-a">0</div>
-      <div class="score-label">points</div>
+      <div class="score-label">flammes 🔥</div>
     </div>
     <div class="player">
       <div class="avatar-wrap" data-role="b">
@@ -848,7 +848,7 @@
       <input class="name" id="name-b" value="Lui" maxlength="16" title="Touche pour changer">
       <div class="player-divider"><span>♡</span></div>
       <div class="score" id="score-b">0</div>
-      <div class="score-label">points</div>
+      <div class="score-label">flammes 🔥</div>
     </div>
   </div>
   <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
@@ -905,7 +905,7 @@
     <div class="add-form" id="defi-form-wrap" style="display:none;">
       <div class="row">
         <input type="text" id="new-defi-name" placeholder="Nom du défi (ex : massage surprise)">
-        <input type="number" id="new-defi-pts" placeholder="pts" value="10" min="1">
+        <input type="number" id="new-defi-pts" placeholder="🔥" value="10" min="1">
       </div>
       <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Pour qui ce défi est-il proposé ?</div>
       <div class="assign" id="new-defi-assign"></div>
@@ -919,7 +919,7 @@
     <div class="game-box">
       <div class="game-box-icon">🎁</div>
       <h3>Boîte à fantasmes</h3>
-      <div class="sub">Pioche un fantasme surprise dans la liste secrète de ton/ta partenaire — 50 pts, 48h pour le réaliser.</div>
+      <div class="sub">Pioche un fantasme surprise dans la liste secrète de ton/ta partenaire — 50 🔥, 48h pour le réaliser.</div>
       <button class="pill-btn pill-btn-cta" id="draw-mystery-btn" style="margin-top:14px;">
         <span>🎲</span><span>Piocher un fantasme</span>
       </button>
@@ -993,9 +993,9 @@
     <div class="add-form">
       <div class="row">
         <input type="text" id="new-reward-name" placeholder="Nom de la récompense (ex : massage 20 min)">
-        <input type="number" id="new-reward-pts" placeholder="pts" value="50" min="1">
+        <input type="number" id="new-reward-pts" placeholder="🔥" value="50" min="1">
       </div>
-      <div class="err" id="reward-err">Donne un nom et un coût en points.</div>
+      <div class="err" id="reward-err">Donne un nom et un coût en flammes.</div>
       <button class="btn btn-gold" id="add-reward-btn" style="margin-top:2px; width:100%;">Ajouter à la boutique</button>
     </div>
     <div id="rewards-list"></div>
@@ -1017,7 +1017,7 @@
 
   <section id="tab-achats">
     <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">À faire pour ton/ta complice</h3>
-    <div class="sub" style="margin-bottom:12px;">Acheté avec ses points — impossible de refuser, sous peine de perdre 50 pts si l'échéance passe.</div>
+    <div class="sub" style="margin-bottom:12px;">Acheté avec ses flammes — impossible de refuser, sous peine de perdre 50 🔥 si l'échéance passe.</div>
     <div id="purchases-owed-list"></div>
 
     <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:20px 0 4px;">Tes achats en cours</h3>
@@ -1045,15 +1045,15 @@
   <section id="tab-profil-accueil">
     <div id="profil-sub-main">
       <div id="profil-overview"></div>
-      <button class="pill-btn" id="profil-adjust-btn" style="margin-top:10px;"><span>⚖️</span><span>Ajuster les points</span><span class="pill-arrow">›</span></button>
+      <button class="pill-btn" id="profil-adjust-btn" style="margin-top:10px;"><span>⚖️</span><span>Ajuster les flammes</span><span class="pill-arrow">›</span></button>
       <button class="pill-btn" id="profil-stats-btn" style="margin-top:10px;"><span>📊</span><span>Statistiques</span><span class="pill-arrow">›</span></button>
     </div>
 
     <div id="profil-sub-adjust" style="display:none;">
       <button class="btn btn-ghost" id="back-from-adjust" style="margin-bottom:14px;">← Retour</button>
       <div class="secret-box">
-        <h3>⚖️ Ajuster les points</h3>
-        <div class="sub">Nécessite la validation de ton/ta partenaire — impossible de s'ajouter des points seul·e.</div>
+        <h3>⚖️ Ajuster les flammes</h3>
+        <div class="sub">Nécessite la validation de ton/ta partenaire — impossible de s'ajouter des flammes seul·e.</div>
         <div id="point-adjust-pending"></div>
         <div class="assign" id="adjust-who-picker">
           <button data-who="a" class="picked">Pour Elle</button>
@@ -1225,7 +1225,7 @@
     <h2 id="reward-config-title" style="margin:0 0 4px; font-size:20px; color:var(--gold-soft); text-align:center;"></h2>
     <div class="sub" id="reward-config-base" style="text-align:center; margin-bottom:12px;"></div>
     <div id="reward-config-options"></div>
-    <div class="config-total" id="reward-config-total">0 pts</div>
+    <div class="config-total" id="reward-config-total">0 🔥</div>
     <div class="sub" id="reward-config-balance" style="text-align:center; margin-bottom:12px;"></div>
     <div class="assign" id="reward-config-who" style="margin-bottom:10px;"></div>
     <div style="font-size:12px; color:var(--gold-soft); margin-bottom:8px; font-weight:600;">⏱ Délai pour le réaliser</div>
@@ -1785,7 +1785,7 @@ function addHistory(entry){
 function undoHistoryEntry(id){
   const entry = state.history.find(h => h.id === id);
   if(!entry) return;
-  if(!confirm('Annuler cette entrée et corriger les points ?')) return;
+  if(!confirm('Annuler cette entrée et corriger les flammes ?')) return;
   state.scores[entry.who] -= entry.pts;
   state.history = state.history.filter(h => h.id !== id);
   persist(); render();
@@ -2004,7 +2004,7 @@ function renderDefis(){
       ? '<div class="defi-tag defi-tag-progress">⏳ En cours</div>'
       : '<div class="defi-tag defi-tag-new">🆕 En attente de ta réponse</div>';
     const negoHtml = d.negotiation
-      ? `<div class="defi-deadline" style="color:var(--gold-soft);">🤝 Ta contre-offre de ${d.negotiation.pts} pts est en attente de réponse</div>`
+      ? `<div class="defi-deadline" style="color:var(--gold-soft);">🤝 Ta contre-offre de ${d.negotiation.pts} 🔥 est en attente de réponse</div>`
       : '';
     card.innerHTML = `
       <div class="info">
@@ -2069,13 +2069,13 @@ function renderDefis(){
       delBtn.className = 'btn btn-danger';
       delBtn.textContent = '🚫 Abandonner';
       delBtn.onclick = () => {
-        if(!confirm('Abandonner ce défi ? Les points seront crédités à ton/ta partenaire.')) return;
+        if(!confirm('Abandonner ce défi ? Les flammes seront créditées à ton/ta partenaire.')) return;
         const other = d.for === 'a' ? 'b' : 'a';
         state.scores[other] += d.pts;
         addHistory({ type:'defi', who: other, label: d.text + ' (abandonné)', pts: d.pts, status:'expired', missedBy: d.for });
         state.defis = state.defis.filter(x => x.id !== d.id);
         persist(); render();
-        showToast('Défi abandonné — points transférés à ' + state.names[other]);
+        showToast('Défi abandonné — flammes transférées à ' + state.names[other]);
       };
       btnWrap.appendChild(delBtn);
     }
@@ -2090,7 +2090,7 @@ function editDefi(id){
   if(!d) return;
   const newText = prompt('Modifier le texte du défi :', d.text);
   if(newText === null) return;
-  const newPtsRaw = prompt('Modifier les points :', d.pts);
+  const newPtsRaw = prompt('Modifier les flammes :', d.pts);
   if(newPtsRaw === null) return;
   const newPts = parseInt(newPtsRaw, 10);
   if(!newText.trim() || !newPts || newPts <= 0){
@@ -2106,7 +2106,7 @@ function editDefi(id){
 // Indices subtils — donnent une ambiance sans spoiler
 function getHintForDefi(d){
   const t = (d.text || '').toLowerCase();
-  const pts = d.pts || 0;
+  const 🔥 = d.pts || 0;
 
   // Ambiance plutôt que acte précis
   if(/pipe|fellation|sucer|bouche|gorge|avaler|cunnilingus|lécher|langue|69/.test(t))
@@ -2137,9 +2137,9 @@ function getHintForDefi(d){
     return { short: '🔥 Intensité', detail: 'Ce ne sera pas qu’un petit moment.' };
   if(/baise|baiser|pénétr|prendre|prends|position/.test(t))
     return { short: '🛏️ Corps à corps', detail: 'Les corps vont se rapprocher. Beaucoup.' };
-  if(/message|texto|écrit|mot doux/.test(t) && pts <= 15)
+  if(/message|texto|écrit|mot doux/.test(t) && 🔥 <= 15)
     return { short: '💬 Mots', detail: 'Quelques mots devraient suffire à faire monter la température.' };
-  if(/câlin|bisou|embrasse|main dans la main/.test(t) && pts <= 12)
+  if(/câlin|bisou|embrasse|main dans la main/.test(t) && 🔥 <= 12)
     return { short: '🤍 Douceur', detail: 'Rien de fou… juste de la tendresse.' };
 
   // Fallback selon intensité (points)
@@ -2168,19 +2168,19 @@ function acceptDefi(id){
 function refuseDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
-  if(!confirm('Refuser ce défi ? Les points seront crédités à ton/ta partenaire.')) return;
+  if(!confirm('Refuser ce défi ? Les flammes seront créditées à ton/ta partenaire.')) return;
   const other = d.for === 'a' ? 'b' : 'a';
   state.scores[other] += d.pts;
   addHistory({ type:'defi', who: other, label: d.text + ' (refusé)', pts: d.pts, status:'expired', missedBy: d.for });
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
-  showToast('Défi refusé — points transférés à ' + state.names[other]);
+  showToast('Défi refusé — flammes transférées à ' + state.names[other]);
 }
 
 function proposeNegotiation(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
-  const input = prompt('Proposer un autre nombre de points pour ce défi (actuellement ' + d.pts + ') :', d.pts);
+  const input = prompt('Proposer un autre nombre de flammes pour ce défi (actuellement ' + d.pts + ') :', d.pts);
   if(input === null) return;
   const val = parseInt(input, 10);
   if(!val || val <= 0){
@@ -2190,7 +2190,7 @@ function proposeNegotiation(id){
   d.negotiation = { pts: val, by: myRole, ts: Date.now() };
   persist(); render();
   showToast('Contre-offre envoyée, en attente de réponse 🤝');
-  sendPushToPartner('🤝 Contre-offre', val + ' pts proposés pour : ' + d.text.slice(0, 80));
+  sendPushToPartner('🤝 Contre-offre', val + ' 🔥 proposés pour : ' + d.text.slice(0, 80));
 }
 
 function renderNegotiations(){
@@ -2204,7 +2204,7 @@ function renderNegotiations(){
     card.innerHTML = `
       <div class="info">
         <div class="t">🤝 Contre-offre reçue</div>
-        <div class="m">${escapeHtml(state.names[d.negotiation.by])} propose ${d.negotiation.pts} pts au lieu de ${d.pts} pts pour un défi</div>
+        <div class="m">${escapeHtml(state.names[d.negotiation.by])} propose ${d.negotiation.pts} 🔥 au lieu de ${d.pts} 🔥 pour un défi</div>
       </div>
     `;
     const btnWrap = document.createElement('div');
@@ -2231,9 +2231,9 @@ function resolveNegotiation(id, accept){
   if(!d || !d.negotiation) return;
   if(accept){
     d.pts = d.negotiation.pts;
-    showToast('Contre-offre acceptée : ' + d.pts + ' pts');
+    showToast('Contre-offre acceptée : ' + d.pts + ' 🔥');
   } else {
-    showToast('Contre-offre refusée, points inchangés');
+    showToast('Contre-offre refusée, flammes inchangées');
   }
   d.negotiation = null;
   persist(); render();
@@ -2257,9 +2257,9 @@ function celebrate(emoji){
 function postponeDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d || d.status !== 'accepted') return;
-  if(!confirm('Reporter ce défi de 24h ? Tu perdras 5 points.')) return;
+  if(!confirm('Reporter ce défi de 24h ? Tu perdras 5 🔥.')) return;
   if(state.scores[d.for] < 5){
-    showToast('Pas assez de points pour reporter (5 pts requis)');
+    showToast('Pas assez de flammes pour reporter (5 🔥 requis)');
     return;
   }
   state.scores[d.for] -= 5;
@@ -2267,7 +2267,7 @@ function postponeDefi(id){
   d.reminded = false;
   addHistory({ type:'defi', who: d.for, label: d.text + ' (reporté +24h)', pts: -5 });
   persist(); render();
-  showToast('Défi reporté de 24h (−5 pts)');
+  showToast('Défi reporté de 24h (−5 🔥)');
   sendPushToPartner('⏱ Défi reporté', state.names[d.for] + ' a reporté un défi de 24h');
 }
 
@@ -2280,7 +2280,7 @@ function completeDefi(id){
   persist(); render();
   showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
   celebrate('🎉');
-  sendPushToPartner('🎉 Défi réussi', d.text.slice(0, 80) + ' (+' + d.pts + ' pts)');
+  sendPushToPartner('🎉 Défi réussi', d.text.slice(0, 80) + ' (+' + d.pts + ' 🔥)');
 }
 
 function checkExpiredDefis(){
@@ -2310,7 +2310,7 @@ function checkExpiredDefis(){
   if(anyExpired){
     state.defis = stillGoing;
     persist();
-    showToast('Un défi non relevé a transféré ses points 🕰️');
+    showToast('Un défi non relevé a transféré ses flammes 🕰️');
   }
 }
 
@@ -2559,7 +2559,7 @@ function renderPointAdjustments(){
     const sign = a.amount > 0 ? '+' : '';
     const title = document.createElement('div');
     title.style.fontWeight = '700';
-    title.textContent = sign + a.amount + ' pts pour ' + state.names[a.who];
+    title.textContent = sign + a.amount + ' 🔥 pour ' + state.names[a.who];
     card.appendChild(title);
     if(a.reason){
       const reasonEl = document.createElement('div');
@@ -2608,7 +2608,7 @@ function validatePointAdjustment(id){
   state.pointAdjustments = state.pointAdjustments.filter(x => x.id !== id);
   persist(); render();
   showToast('Ajustement validé ✅');
-  sendPushToPartner('✅ Ajustement validé', (a.amount > 0 ? '+' : '') + a.amount + ' pts pour ' + state.names[a.who]);
+  sendPushToPartner('✅ Ajustement validé', (a.amount > 0 ? '+' : '') + a.amount + ' 🔥 pour ' + state.names[a.who]);
 }
 
 function refusePointAdjustment(id){
@@ -2617,7 +2617,7 @@ function refusePointAdjustment(id){
   state.pointAdjustments = state.pointAdjustments.filter(x => x.id !== id);
   persist(); render();
   showToast('Ajustement refusé');
-  sendPushToPartner('❌ Ajustement refusé', 'Ta proposition de ' + (a.amount > 0 ? '+' : '') + a.amount + ' pts a été refusée');
+  sendPushToPartner('❌ Ajustement refusé', 'Ta proposition de ' + (a.amount > 0 ? '+' : '') + a.amount + ' 🔥 a été refusée');
 }
 
 function cancelPointAdjustment(id){
@@ -2739,7 +2739,7 @@ document.getElementById('propose-adjust-btn').addEventListener('click', () => {
   reasonInput.value = '';
   showToast('Proposition envoyée, en attente de validation ✋');
   const sign = amount > 0 ? '+' : '';
-  sendPushToPartner('⚖️ Ajustement de points proposé', sign + amount + ' pts pour ' + state.names[adjustWho] + (reason ? ' — ' + reason : ''));
+  sendPushToPartner('⚖️ Ajustement de flammes proposé', sign + amount + ' 🔥 pour ' + state.names[adjustWho] + (reason ? ' — ' + reason : ''));
 });
 
 document.querySelectorAll('#new-counter-mode button').forEach(btn => {
@@ -2800,7 +2800,7 @@ function renderProfilOverview(){
       </div>
     </div>
     ${streak > 0 ? `<div style="text-align:center; color:var(--gold-soft); font-size:13px; margin-bottom:16px;">🔥 ${streak} jour${streak > 1 ? 's' : ''} de série en cours</div>` : ''}
-    <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:16px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">🎯 ${totalPts} points cumulés à deux depuis le début</div>
+    <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:16px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">🎯 ${totalPts} flammes cumulées à deux depuis le début</div>
     <button class="pill-btn" id="profil-settings-btn"><span>⚙️</span><span>Paramètres</span><span class="pill-arrow">›</span></button>
     <button class="pill-btn" id="profil-change-role-btn"><span>🔄</span><span>Changer de profil (${escapeHtml(myName)})</span><span class="pill-arrow">›</span></button>
   `;
@@ -2899,7 +2899,7 @@ function renderTodayDefiBox(){
       <div class="info">
         <div class="defi-tag defi-tag-new">✨ Défi du jour</div>
         <div class="t">${escapeHtml(d.text)}</div>
-        <div class="m">+${d.pts} pts</div>
+        <div class="m">+${d.pts} 🔥</div>
       </div>
       <div style="color:var(--gold); font-size:20px;">›</div>
     </div>
@@ -3555,7 +3555,7 @@ function renderRewards(){
     card.innerHTML = `
       <div class="r-emoji">${r.emoji || '🎁'}</div>
       <div class="r-title">${escapeHtml(r.text)}</div>
-      <div class="r-pts">dès ${r.pts} pts</div>
+      <div class="r-pts">dès ${r.pts} 🔥</div>
       ${optHint}
     `;
     const buyBtn = document.createElement('button');
@@ -3604,7 +3604,7 @@ function openRewardConfig(id){
   rewardConfigWho = myRole || 'a';
 
   document.getElementById('reward-config-title').textContent = (r.emoji || '🎁') + ' ' + r.text;
-  document.getElementById('reward-config-base').textContent = 'Base : ' + r.pts + ' pts';
+  document.getElementById('reward-config-base').textContent = 'Base : ' + r.pts + ' 🔥';
 
   const optsWrap = document.getElementById('reward-config-options');
   optsWrap.innerHTML = '';
@@ -3636,7 +3636,7 @@ function openRewardConfig(id){
     const optTitle = document.createElement('div');
     optTitle.className = 'sub';
     optTitle.style.cssText = 'margin:8px 0; font-weight:600; color:var(--gold-soft);';
-    optTitle.textContent = 'Options (+ pts) :';
+    optTitle.textContent = 'Options (+ 🔥) :';
     optsWrap.appendChild(optTitle);
     r.options.forEach(opt => {
       const row = document.createElement('label');
@@ -3695,14 +3695,14 @@ function getRewardConfigTotal(){
 
 function updateRewardConfigTotal(){
   const total = getRewardConfigTotal();
-  document.getElementById('reward-config-total').textContent = total + ' pts';
+  document.getElementById('reward-config-total').textContent = total + ' 🔥';
   const bal = state.scores[rewardConfigWho] || 0;
   const el = document.getElementById('reward-config-balance');
   if(bal >= total){
-    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' pts → reste ' + (bal - total);
+    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' 🔥 → reste ' + (bal - total);
     el.style.color = 'var(--gold-soft)';
   } else {
-    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' pts — manque ' + (total - bal);
+    el.textContent = state.names[rewardConfigWho] + ' : ' + bal + ' 🔥 — manque ' + (total - bal);
     el.style.color = 'var(--danger)';
   }
 }
@@ -3713,7 +3713,7 @@ function confirmRewardPurchase(){
   const total = getRewardConfigTotal();
   const who = rewardConfigWho;
   if(state.scores[who] < total){
-    showToast('Pas assez de points pour ' + state.names[who]);
+    showToast('Pas assez de flammes pour ' + state.names[who]);
     return;
   }
   const hours = parseFloat(document.getElementById('reward-config-hours').value) || 0;
@@ -3748,7 +3748,7 @@ function confirmRewardPurchase(){
   });
   persist(); render();
   document.getElementById('reward-config-panel').classList.remove('active');
-  showToast(state.names[who] + ' — ' + total + ' pts');
+  showToast(state.names[who] + ' — ' + total + ' 🔥');
   celebrate('🎁');
   sendPushToPartner('🎁 Nouvel achat', state.names[who] + ' attend : ' + label.slice(0, 80));
 }
@@ -3839,13 +3839,13 @@ function renderPurchases(){
 function reportPurchaseRefusal(id){
   const p = state.purchases.find(x => x.id === id);
   if(!p) return;
-  if(!confirm(state.names[p.owedBy] + ' refuse vraiment de le faire ? 50 points seront transférés vers toi.')) return;
+  if(!confirm(state.names[p.owedBy] + ' refuse vraiment de le faire ? 50 🔥 seront transférées vers toi.')) return;
   state.scores[p.owedBy] -= 50;
   state.scores[p.boughtBy] += 50;
   addHistory({ type:'purchase', who: p.boughtBy, label: p.text + ' (refus signalé)', pts: 50, status:'expired', missedBy: p.owedBy });
   state.purchases = state.purchases.filter(x => x.id !== p.id);
   persist(); render();
-  showToast('Refus signalé — 50 pts transférés vers toi');
+  showToast('Refus signalé — 50 🔥 transférés vers toi');
 }
 
 function markPurchaseDone(id){
@@ -3885,7 +3885,7 @@ function checkExpiredPurchases(){
   if(changed){
     state.purchases = remaining;
     persist();
-    showToast('Un achat non honoré a coûté 50 pts ⏱️');
+    showToast('Un achat non honoré a coûté 50 🔥 ⏱️');
   }
 }
 
@@ -3967,8 +3967,8 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
   const deadlineInput = document.getElementById('new-defi-deadline');
   const err = document.getElementById('defi-err');
   const text = nameInput.value.trim();
-  const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || pts <= 0){
+  const 🔥 = parseInt(ptsInput.value, 10);
+  if(!text || !pts || 🔥 <= 0){
     err.style.display = 'block';
     return;
   }
@@ -4092,13 +4092,13 @@ document.getElementById('add-reward-btn').addEventListener('click', () => {
   const ptsInput = document.getElementById('new-reward-pts');
   const err = document.getElementById('reward-err');
   const text = nameInput.value.trim();
-  const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || pts <= 0){
+  const 🔥 = parseInt(ptsInput.value, 10);
+  if(!text || !pts || 🔥 <= 0){
     err.style.display = 'block';
     return;
   }
   err.style.display = 'none';
-  state.rewards.push({ id: cryptoId(), text, pts });
+  state.rewards.push({ id: cryptoId(), text, 🔥 });
   nameInput.value = '';
   ptsInput.value = '50';
   persist(); render();
@@ -4443,12 +4443,12 @@ document.getElementById('add-pool-defi-btn').addEventListener('click', () => {
   const textInput = document.getElementById('new-pool-defi-text');
   const ptsInput = document.getElementById('new-pool-defi-pts');
   const text = textInput.value.trim();
-  const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || pts <= 0){
-    showToast('Indique un texte et un nombre de points valide.');
+  const 🔥 = parseInt(ptsInput.value, 10);
+  if(!text || !pts || 🔥 <= 0){
+    showToast('Indique un texte et un nombre de flammes valide.');
     return;
   }
-  state.customDailyPool.push({ text, pts });
+  state.customDailyPool.push({ text, 🔥 });
   persist();
   textInput.value = '';
   ptsInput.value = '';
@@ -4528,7 +4528,7 @@ function renderHomeDashboard(){
       todoItems.push({
         label: 'Défi à accepter',
         text: d.text,
-        meta: '+' + d.pts + ' pts',
+        meta: '+' + d.pts + ' 🔥',
         tab: 'defis'
       });
     });
@@ -5264,11 +5264,11 @@ async function pollForNewDefis(){
       }
     });
     newNegoForMe.forEach(d => {
-      showToast('🤝 ' + state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts pour un défi');
+      showToast('🤝 ' + state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' 🔥 pour un défi');
       if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
         navigator.serviceWorker.ready.then(reg => {
           reg.showNotification('Complices 🤝', {
-            body: state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' pts au lieu de ' + d.pts, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-nego-' + d.id
+            body: state.names[d.negotiation.by] + ' propose ' + d.negotiation.pts + ' 🔥 au lieu de ' + d.pts, icon: './icon-192.png', badge: './icon-192.png', tag: 'complices-nego-' + d.id
           });
         }).catch(()=>{});
       }
@@ -5454,7 +5454,7 @@ function renderSoireeDefi(){
     html += `<div style="background:rgba(201,51,63,0.18); border:0.5px solid var(--gold); border-radius:12px; padding:12px; margin-bottom:8px;">
       <div style="font-size:12px; color:var(--gold-soft); margin-bottom:4px;">🎯 Défi en cours</div>
       <div style="font-size:15px; font-weight:600;">${escapeHtml(d.text)}</div>
-      <div style="font-size:12px; color:var(--muted); margin-top:4px;">+${d.pts} pts</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:4px;">+${d.pts} 🔥</div>
     </div>`;
   } else if(pending.length){
     const d = pending[0];
