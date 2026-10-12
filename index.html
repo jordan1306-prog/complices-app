@@ -2106,7 +2106,7 @@ function editDefi(id){
 // Indices subtils — donnent une ambiance sans spoiler
 function getHintForDefi(d){
   const t = (d.text || '').toLowerCase();
-  const 🔥 = d.pts || 0;
+  const pts = d.pts || 0;
 
   // Ambiance plutôt que acte précis
   if(/pipe|fellation|sucer|bouche|gorge|avaler|cunnilingus|lécher|langue|69/.test(t))
@@ -3967,7 +3967,7 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
   const deadlineInput = document.getElementById('new-defi-deadline');
   const err = document.getElementById('defi-err');
   const text = nameInput.value.trim();
-  const 🔥 = parseInt(ptsInput.value, 10);
+  const pts = parseInt(ptsInput.value, 10);
   if(!text || !pts || 🔥 <= 0){
     err.style.display = 'block';
     return;
@@ -4092,7 +4092,7 @@ document.getElementById('add-reward-btn').addEventListener('click', () => {
   const ptsInput = document.getElementById('new-reward-pts');
   const err = document.getElementById('reward-err');
   const text = nameInput.value.trim();
-  const 🔥 = parseInt(ptsInput.value, 10);
+  const pts = parseInt(ptsInput.value, 10);
   if(!text || !pts || 🔥 <= 0){
     err.style.display = 'block';
     return;
@@ -4443,7 +4443,7 @@ document.getElementById('add-pool-defi-btn').addEventListener('click', () => {
   const textInput = document.getElementById('new-pool-defi-text');
   const ptsInput = document.getElementById('new-pool-defi-pts');
   const text = textInput.value.trim();
-  const 🔥 = parseInt(ptsInput.value, 10);
+  const pts = parseInt(ptsInput.value, 10);
   if(!text || !pts || 🔥 <= 0){
     showToast('Indique un texte et un nombre de flammes valide.');
     return;
