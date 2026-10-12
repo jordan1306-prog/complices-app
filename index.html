@@ -1186,9 +1186,12 @@
       <button class="btn btn-rose" id="soiree-random-act-btn">💋 Acte hot</button>
       <button class="btn btn-ghost" id="soiree-position-btn">🛏️ Position</button>
       <button class="btn btn-ghost" id="soiree-order-btn">👑 Ordre</button>
+      <button class="btn btn-ghost" id="soiree-av-btn">🎭 Action / Vérité</button>
+      <button class="btn btn-rose" id="soiree-duel-btn">⚡ Duel jouissance</button>
     </div>
     <div id="soiree-dice-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
     <div id="soiree-act-result" class="dice-result-card" style="display:none; margin:8px 0;"></div>
+    <div id="soiree-game-panel" style="display:none; margin:10px 0; text-align:left;"></div>
 
     <div class="soiree-timer" id="soiree-timer">—</div>
     <div class="sub" id="soiree-timer-label">Lance un round</div>
@@ -5380,6 +5383,41 @@ const SOIREE_POSITIONS = [
   "Une jambe sur l'épaule",
 ];
 
+
+const SOIREE_AV_ACTIONS = [
+  "Embrasse l'autre 30 secondes la ou tu veux",
+  "Enleve un vetement a l'autre",
+  "Fais un massage sensuel 1 minute",
+  "Chuchote quelque chose de sale a son oreille",
+  "Utilise ta langue sur son cou pendant 1 minute",
+  "Laisse l'autre te toucher 1 minute sans bouger",
+  "Fais-le/la gemir sans toucher entre les jambes",
+  "Embrasse l'interieur des cuisses",
+  "A genoux : 1 minute de bouche seulement",
+  "Poignets retenus 2 minutes (foulard ou menottes)",
+  "Yeux bandes : recois 2 minutes sans toucher",
+  "Change de position et garde-la 3 minutes",
+  "Doigts seulement jusqu'a ce que l'autre dise stop",
+  "Parle sale pendant que tu le/la touches",
+  "Plaque l'autre et prends le controle 2 minutes",
+  "Menottes : l'autre a les poignets lies, tu fais ce que tu veux 3 min",
+];
+
+const SOIREE_AV_TRUTHS = [
+  "Quel est ton fantasme du moment ?",
+  "Qu'est-ce qui te fait jouir le plus vite ?",
+  "Ou aimerais-tu qu'on le fasse (piece / lieu) ?",
+  "Une chose que tu n'as jamais osee demander ?",
+  "Prefere-tu dominer ou obeir ce soir ?",
+  "Quel souvenir sexuel avec moi tu rejoues dans ta tete ?",
+  "Qu'est-ce que je fais qui te rend fou/folle ?",
+  "Tu preferes bouche, doigts ou penetration pour commencer ?",
+  "Un non-negociable au lit ?",
+  "Si tu pouvais m'attacher ce soir, ou et comment ?",
+  "Quelle position tu veux absolument reessayer ?",
+  "Dis un mot coquin que tu veux m'entendre dire",
+];
+
 let soireeHeat = 'hot';
 
 function openSoireeMode(){
@@ -5405,7 +5443,7 @@ function renderSoireeDefi(){
   const box = document.getElementById('soiree-defi');
   if(!box || !state) return;
   if(!myRole){
-    box.innerHTML = '<div class="sub">Choisis d\'abord qui tu es</div>';
+    box.innerHTML = "<div class=\"sub\">Choisis d'abord qui tu es</div>";
     return;
   }
   const accepted = state.defis.filter(d => d.for === myRole && d.status === 'accepted');
@@ -5523,6 +5561,63 @@ document.getElementById('soiree-order-btn')?.addEventListener('click', () => {
   const o = SOIREE_ORDERS[Math.floor(Math.random() * SOIREE_ORDERS.length)];
   showSoireeResult('👑 ' + leader + ' : « ' + o + ' »');
 });
+
+document.getElementById('soiree-av-btn')?.addEventListener('click', () => {
+  const panel = document.getElementById('soiree-game-panel');
+  if(!panel) return;
+  const who = (state && soireeLeader && state.names[soireeLeader]) ? state.names[soireeLeader] : 'Toi';
+  const pick = Math.random() < 0.5 ? 'action' : 'verite';
+  if(pick === 'action'){
+    const a = SOIREE_AV_ACTIONS[Math.floor(Math.random() * SOIREE_AV_ACTIONS.length)];
+    panel.style.display = 'block';
+    panel.innerHTML = '<div class="home-card" style="cursor:default;"><div class="hc-label">Action pour ' + who + '</div><div class="hc-text">' + a + '</div><div class="hc-meta">A realiser maintenant</div></div>';
+    showSoireeResult('Action : ' + a);
+  } else {
+    const t = SOIREE_AV_TRUTHS[Math.floor(Math.random() * SOIREE_AV_TRUTHS.length)];
+    panel.style.display = 'block';
+    panel.innerHTML = '<div class="home-card" style="cursor:default;"><div class="hc-label">Verite pour ' + who + '</div><div class="hc-text">' + t + '</div><div class="hc-meta">Reponds a voix haute</div></div>';
+    showSoireeResult('Verite : ' + t);
+  }
+});
+
+document.getElementById('soiree-duel-btn')?.addEventListener('click', () => {
+  const panel = document.getElementById('soiree-game-panel');
+  if(!panel) return;
+  const na = (state && state.names) ? state.names.a : 'Elle';
+  const nb = (state && state.names) ? state.names.b : 'Lui';
+  panel.style.display = 'block';
+  panel.innerHTML = ''
+    + '<div class="home-card" style="cursor:default; border-color:var(--gold);">'
+    + '<div class="hc-label">Duel jouissance</div>'
+    + '<div class="hc-text">Qui fait jouir l autre en premier ?</div>'
+    + '<div class="hc-meta" style="margin-top:8px; line-height:1.5;">'
+    + 'Regles :<br>'
+    + '• Tout est permis<br>'
+    + '• Menottes / liens autorises<br>'
+    + '• Mot de securite = stop immediat<br>'
+    + '• Premier orgasme = gagne le duel<br>'
+    + '• Le perdant obeit 5 min apres'
+    + '</div>'
+    + '<div style="display:flex; gap:8px; margin-top:12px;">'
+    + '<button class="btn btn-gold" id="duel-win-a" style="flex:1; font-size:12px;">' + na + ' gagne</button>'
+    + '<button class="btn btn-rose" id="duel-win-b" style="flex:1; font-size:12px;">' + nb + ' gagne</button>'
+    + '</div>'
+    + '<button class="btn btn-ghost" id="duel-start-timer" style="width:100%; margin-top:8px; font-size:12px;">Lancer chrono 10 min</button>'
+    + '</div>';
+  showSoireeResult('Duel : premier orgasme gagne. Tout est permis.');
+  document.getElementById('duel-start-timer')?.addEventListener('click', () => startSoireeTimer(10));
+  document.getElementById('duel-win-a')?.addEventListener('click', () => {
+    showSoireeResult(na + ' gagne le duel. ' + nb + ' obeit 5 min.');
+    showToast(na + ' gagne');
+    startSoireeTimer(5);
+  });
+  document.getElementById('duel-win-b')?.addEventListener('click', () => {
+    showSoireeResult(nb + ' gagne le duel. ' + na + ' obeit 5 min.');
+    showToast(nb + ' gagne');
+    startSoireeTimer(5);
+  });
+});
+
 
 document.getElementById('soiree-swap-btn')?.addEventListener('click', () => {
   soireeLeader = soireeLeader === 'a' ? 'b' : 'a';
