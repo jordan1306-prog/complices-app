@@ -2137,9 +2137,9 @@ function getHintForDefi(d){
     return { short: '🔥 Intensité', detail: 'Ce ne sera pas qu’un petit moment.' };
   if(/baise|baiser|pénétr|prendre|prends|position/.test(t))
     return { short: '🛏️ Corps à corps', detail: 'Les corps vont se rapprocher. Beaucoup.' };
-  if(/message|texto|écrit|mot doux/.test(t) && 🔥 <= 15)
+  if(/message|texto|écrit|mot doux/.test(t) && pts <= 15)
     return { short: '💬 Mots', detail: 'Quelques mots devraient suffire à faire monter la température.' };
-  if(/câlin|bisou|embrasse|main dans la main/.test(t) && 🔥 <= 12)
+  if(/câlin|bisou|embrasse|main dans la main/.test(t) && pts <= 12)
     return { short: '🤍 Douceur', detail: 'Rien de fou… juste de la tendresse.' };
 
   // Fallback selon intensité (points)
@@ -2278,7 +2278,7 @@ function completeDefi(id){
   addHistory({ type:'defi', who: d.for, label: d.text, pts: d.pts, status:'completed' });
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
-  showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
+  showToast(state.names[d.for] + ' gagne ' + d.pts + ' 🔥');
   celebrate('🎉');
   sendPushToPartner('🎉 Défi réussi', d.text.slice(0, 80) + ' (+' + d.pts + ' 🔥)');
 }
@@ -3968,7 +3968,7 @@ document.getElementById('add-defi-btn').addEventListener('click', () => {
   const err = document.getElementById('defi-err');
   const text = nameInput.value.trim();
   const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || 🔥 <= 0){
+  if(!text || !pts || pts <= 0){
     err.style.display = 'block';
     return;
   }
@@ -4093,12 +4093,12 @@ document.getElementById('add-reward-btn').addEventListener('click', () => {
   const err = document.getElementById('reward-err');
   const text = nameInput.value.trim();
   const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || 🔥 <= 0){
+  if(!text || !pts || pts <= 0){
     err.style.display = 'block';
     return;
   }
   err.style.display = 'none';
-  state.rewards.push({ id: cryptoId(), text, 🔥 });
+  state.rewards.push({ id: cryptoId(), text, pts });
   nameInput.value = '';
   ptsInput.value = '50';
   persist(); render();
@@ -4444,11 +4444,11 @@ document.getElementById('add-pool-defi-btn').addEventListener('click', () => {
   const ptsInput = document.getElementById('new-pool-defi-pts');
   const text = textInput.value.trim();
   const pts = parseInt(ptsInput.value, 10);
-  if(!text || !pts || 🔥 <= 0){
+  if(!text || !pts || pts <= 0){
     showToast('Indique un texte et un nombre de flammes valide.');
     return;
   }
-  state.customDailyPool.push({ text, 🔥 });
+  state.customDailyPool.push({ text, pts });
   persist();
   textInput.value = '';
   ptsInput.value = '';
@@ -5102,7 +5102,7 @@ function renderCalendar(){
     const expiredCount = monthDefiEvents.filter(h => h.status === 'expired').length;
     const ptsByPerson = { a: 0, b: 0 };
     monthDefiEvents.forEach(h => { if(h.status === 'completed') ptsByPerson[h.who] = (ptsByPerson[h.who] || 0) + h.pts; });
-    recap.innerHTML = `📊 Ce mois : ${completedCount} défi${completedCount !== 1 ? 's' : ''} relevé${completedCount !== 1 ? 's' : ''}, ${expiredCount} manqué${expiredCount !== 1 ? 's' : ''} — ${escapeHtml(state.names.a)} +${ptsByPerson.a || 0} pts, ${escapeHtml(state.names.b)} +${ptsByPerson.b || 0} pts`;
+    recap.innerHTML = `📊 Ce mois : ${completedCount} défi${completedCount !== 1 ? 's' : ''} relevé${completedCount !== 1 ? 's' : ''}, ${expiredCount} manqué${expiredCount !== 1 ? 's' : ''} — ${escapeHtml(state.names.a)} +${ptsByPerson.a || 0} 🔥, ${escapeHtml(state.names.b)} +${ptsByPerson.b || 0} 🔥`;
   }
 
   list.innerHTML = '';
