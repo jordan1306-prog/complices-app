@@ -859,7 +859,7 @@
   <div id="role-chip-wrap" style="text-align:center;"></div>
 
   <button class="home-soiree-btn" id="soiree-btn">
-    <span>🔥</span><span>Ce soir — Mode Soirée</span>
+    <span>pts</span><span>Ce soir — Mode Soirée</span>
   </button>
 
   <div class="home-section-title">À faire maintenant</div>
@@ -933,7 +933,7 @@
         <div class="assign" id="mystery-level-picker">
           <button data-level="soft" class="picked">💕 Soft</button>
           <button data-level="medium">😏 Medium</button>
-          <button data-level="hard">🔥 Hard</button>
+          <button data-level="hard">pts Hard</button>
         </div>
         <button class="btn btn-gold" id="add-mystery-btn" style="width:100%; margin:10px 0;">Ajouter à ma boîte</button>
         <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">Filtrer l'affichage :</div>
@@ -950,7 +950,7 @@
         <div style="display:flex; gap:6px;">
           <button class="btn btn-ghost" id="draw-soft-btn" style="flex:1; font-size:12px;">💕 Soft</button>
           <button class="btn btn-ghost" id="draw-medium-btn" style="flex:1; font-size:12px;">😏 Medium</button>
-          <button class="btn btn-ghost" id="draw-hard-btn" style="flex:1; font-size:12px;">🔥 Hard</button>
+          <button class="btn btn-ghost" id="draw-hard-btn" style="flex:1; font-size:12px;">pts Hard</button>
         </div>
       </div>
     </div>
@@ -1008,7 +1008,7 @@
       <div class="assign" id="positions-filter" style="margin-bottom:12px; flex-wrap:wrap;">
         <button data-pos-filter="all" class="picked">Toutes</button>
         <button data-pos-filter="douce">💕 Douce</button>
-        <button data-pos-filter="classique">🔥 Classique</button>
+        <button data-pos-filter="classique">pts Classique</button>
         <button data-pos-filter="intense">🌶️ Intense</button>
       </div>
       <div id="positions-guide-list"></div>
@@ -1176,7 +1176,7 @@
 
 <div id="soiree-mode">
   <div class="soiree-card" style="max-height:85vh; overflow-y:auto;">
-    <h2>🔥 Mode Soirée</h2>
+    <h2>pts Mode Soirée</h2>
     <div class="sub" style="margin-bottom:10px;">Pas de téléphone. Juste vos corps.</div>
 
     <div id="soiree-defi" style="margin-bottom:12px;"></div>
@@ -1207,7 +1207,7 @@
       <div class="sub" style="margin-bottom:6px;">Ambiance du round</div>
       <div class="assign" id="soiree-heat" style="margin-bottom:10px;">
         <button data-heat="warm" class="picked">😏 Tiède</button>
-        <button data-heat="hot">🔥 Chaud</button>
+        <button data-heat="hot">pts Chaud</button>
         <button data-heat="hard">🌶️ Hard</button>
       </div>
       <div style="display:flex; flex-direction:column; gap:6px;">
@@ -1225,7 +1225,7 @@
     <h2 id="reward-config-title" style="margin:0 0 4px; font-size:20px; color:var(--gold-soft); text-align:center;"></h2>
     <div class="sub" id="reward-config-base" style="text-align:center; margin-bottom:12px;"></div>
     <div id="reward-config-options"></div>
-    <div class="config-total" id="reward-config-total">0 🔥</div>
+    <div class="config-total" id="reward-config-total">0 pts</div>
     <div class="sub" id="reward-config-balance" style="text-align:center; margin-bottom:12px;"></div>
     <div class="assign" id="reward-config-who" style="margin-bottom:10px;"></div>
     <div style="font-size:12px; color:var(--gold-soft); margin-bottom:8px; font-weight:600;">⏱ Délai pour le réaliser</div>
@@ -1450,6 +1450,14 @@ const defaultState = () => ({
     { id: cryptoId(), text: "La faire jouir deux fois de suite", level: "hard" },
     { id: cryptoId(), text: "69 complet", level: "medium" },
     { id: cryptoId(), text: "Journée du oui pour elle", level: "hard" },
+    { id: cryptoId(), text: "Vibro sur elle pendant que tu l'embrasses — jusqu'à l'orgasme", level: "medium" },
+    { id: cryptoId(), text: "Sextoy + langue en même temps sur elle", level: "hard" },
+    { id: cryptoId(), text: "Elle choisit le jouet, tu l'utilises 15 min sans t'arrêter", level: "hard" },
+    { id: cryptoId(), text: "Stimulation arrière avec jouet pendant le sexe (si OK)", level: "hard" },
+    { id: cryptoId(), text: "Jouet télécommandé — tu contrôles pendant 20 min", level: "hard" },
+    { id: cryptoId(), text: "Plaisir anal lent pour elle (doigt ou jouet, à son rythme)", level: "hard" },
+    { id: cryptoId(), text: "Doigt anal pendant que tu la lèches", level: "hard" },
+    { id: cryptoId(), text: "Massage et tease anal seulement — elle ne demande que ça 15 min", level: "medium" },
   ],
   mysteryBoxB: [
     { id: cryptoId(), text: "Préliminaires longs rien que pour lui", level: "soft" },
@@ -1462,6 +1470,14 @@ const defaultState = () => ({
     { id: cryptoId(), text: "Le faire jouir deux fois de suite", level: "hard" },
     { id: cryptoId(), text: "69 complet", level: "medium" },
     { id: cryptoId(), text: "Journée du oui pour lui", level: "hard" },
+    { id: cryptoId(), text: "Anneau / jouet sur lui pendant la fellation", level: "medium" },
+    { id: cryptoId(), text: "Sextoy sur lui + bouche en même temps", level: "hard" },
+    { id: cryptoId(), text: "Il choisit le jouet, tu l'utilises 15 min sans t'arrêter", level: "hard" },
+    { id: cryptoId(), text: "Stimulation arrière avec jouet (si OK pour lui)", level: "hard" },
+    { id: cryptoId(), text: "Jouet pendant que tu le domines 15 min", level: "hard" },
+    { id: cryptoId(), text: "Plaisir anal lent pour lui (doigt ou jouet, à son rythme)", level: "hard" },
+    { id: cryptoId(), text: "Doigt anal pendant que tu le suces", level: "hard" },
+    { id: cryptoId(), text: "Massage et tease anal seulement — il ne demande que ça 15 min", level: "medium" },
   ],
   defiFrequency: 7,
   customDailyPool: [],
@@ -1627,6 +1643,35 @@ const DAILY_POOL = [
   { text: "Fais-le/la jouir avec un jouet pendant que tu le/la regards", pts: 42 },
   { text: "Laisse l'autre décider de tout ce soir (positions, rythme, fin)", pts: 40 },
   { text: "Fais une nuit où l'un des deux ne peut que recevoir", pts: 45 },
+
+
+
+  { text: "Plaisir anal pour elle : doigt ou jouet, lentement, jusqu'à ce qu'elle aime", pts: 40 },
+  { text: "Plaisir anal pour lui : doigt ou jouet, lentement, jusqu'à ce qu'il aime", pts: 40 },
+  { text: "Massage anal externe seulement (elle) — 10 min de tease", pts: 28 },
+  { text: "Massage anal externe seulement (lui) — 10 min de tease", pts: 28 },
+  { text: "Doigt anal pendant le cunnilingus (elle)", pts: 42 },
+  { text: "Doigt anal pendant la fellation (lui)", pts: 42 },
+  { text: "Jouet anal + plaisir classique en même temps (elle)", pts: 45 },
+  { text: "Jouet anal + plaisir classique en même temps (lui)", pts: 45 },
+  { text: "Elle reçoit : préparation lente, lubrifiant, à son rythme", pts: 38 },
+  { text: "Lui reçoit : préparation lente, lubrifiant, à son rythme", pts: 38 },
+  { text: "Plaisir anal mutuel — chacun son tour, 10 min", pts: 48 },
+  { text: "Yeux bandés + stimulation anale douce (celui/celle qui reçoit choisit)", pts: 42 },
+  { text: "Sors un sextoy ce soir et utilise-le sur l'autre jusqu'à l'orgasme", pts: 40 },
+  { text: "Vibro pendant les préliminaires — 10 min minimum", pts: 30 },
+  { text: "Choisis un jouet, l'autre décide où et comment", pts: 35 },
+  { text: "Sextoy + langue en même temps jusqu'à l'orgasme", pts: 45 },
+  { text: "Utilise deux jouets (ou un jouet + tes mains) ce soir", pts: 40 },
+  { text: "Oeuf / jouet vibrant pendant que vous vous embrassez 15 min", pts: 32 },
+  { text: "L'autre a les yeux bandés, tu utilises uniquement un jouet", pts: 42 },
+  { text: "Jouet pendant le sexe — ne l'enlève pas avant la fin", pts: 45 },
+  { text: "Fais jouir l'autre avec un sextoy sans utiliser ta bouche", pts: 38 },
+  { text: "15 min de jouet : tu contrôles le rythme, l'autre ne touche pas", pts: 40 },
+  { text: "Découvre un jouet ensemble ce soir (même un que vous avez déjà)", pts: 28 },
+  { text: "Stimulation avec jouet pendant une fellation ou un cunnilingus", pts: 42 },
+  { text: "Défi histoire intense — il reçoit (suis l'histoire)", pts: 55, storyId: "intense-il", type: "story" },
+  { text: "Défi histoire intense — elle reçoit (suis l'histoire)", pts: 55, storyId: "intense-elle", type: "story" },
 ];
 
 function cryptoId(){ return Math.random().toString(36).slice(2,10); }
@@ -2022,6 +2067,13 @@ function renderDefis(){
     btnWrap.style.gap = '4px';
 
     if(d.status === 'accepted'){
+      if(d.storyId && STORY_PDFS[d.storyId]){
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'btn btn-rose';
+        dlBtn.textContent = '📄 Télécharger l\'histoire';
+        dlBtn.onclick = () => downloadStoryPdf(d.storyId);
+        btnWrap.appendChild(dlBtn);
+      }
       const doneBtn = document.createElement('button');
       doneBtn.className = 'btn btn-gold';
       doneBtn.textContent = '✅ Terminé';
@@ -2104,9 +2156,36 @@ function editDefi(id){
 }
 
 // Indices subtils — donnent une ambiance sans spoiler
+
+const STORY_PDFS = {
+  "intense-il": { name: "histoire_intense_il.pdf", data: "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMiAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL0Jhc2VGb250IC9TeW1ib2wgL05hbWUgL0YzIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNSAwIG9iago8PAovQ29udGVudHMgMTAgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjc1NiA4NDEuODg5OCBdIC9QYXJlbnQgOSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNiAwIG9iago8PAovQ29udGVudHMgMTEgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjc1NiA4NDEuODg5OCBdIC9QYXJlbnQgOSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNyAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDkgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9BdXRob3IgKFwoYW5vbnltb3VzXCkpIC9DcmVhdGlvbkRhdGUgKEQ6MjAyNjEwMTQxNjU1NDYrMDAnMDAnKSAvQ3JlYXRvciAoXCh1bnNwZWNpZmllZFwpKSAvS2V5d29yZHMgKCkgL01vZERhdGUgKEQ6MjAyNjEwMTQxNjU1NDYrMDAnMDAnKSAvUHJvZHVjZXIgKFJlcG9ydExhYiBQREYgTGlicmFyeSAtIFwob3BlbnNvdXJjZVwpKSAKICAvU3ViamVjdCAoXCh1bnNwZWNpZmllZFwpKSAvVGl0bGUgKFwoYW5vbnltb3VzXCkpIC9UcmFwcGVkIC9GYWxzZQo+PgplbmRvYmoKOSAwIG9iago8PAovQ291bnQgMiAvS2lkcyBbIDUgMCBSIDYgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iagoxMCAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAxNDMwCj4+CnN0cmVhbQpHYXRtPDlsbyZJJkFAc0JtKjA1cjFCS2VbaFdpKnVTT20sLWlxMCNTNnBgWGssWENCV2wtSmYiUFQzaCQ7S04qZmFZWlIkR2U7VyZwLUFpRHBgZl1VM3JpTUNuR1wuQjhZT2Y7YWNkXjU6TjUtWzRlSWw4MnA0JCxsYS8hOCdpZFRjWkd1KHNHI0JuLUJpW0teaV1GQCs3MUYhWUw7VC4/KS91WVg3bytbZWd1cko7YFs6OiRXPG9Rb0lhYy1GJiQoWU5ScDVbSkcxbGU5cWYhIkYxcCxeMFkuOzhOPz0tdDgiTy5UOjVKdVVLYHQ3MEFJIWxCNXAnUD0/ZSwnaF8yRjU2cmFWOzc7cD9vP29gRSQsSjhUIykxPWkmTywlPHVGbzRiXUlGVVkjVXEla3NnRCZJJjtEbkZRMFMkJSlJRzlfYUFKYU5IVkkvRiFEMW9XXDhNYUNVbmE3cCJjaiokN2BYV1FNbGpVSD1TKyJjTV0ucS1aaTsvNGhOVktnRVA4TTRoQiRsOFlyImJqZ0ElbDEmbGhpWyEoJ2xta3Q2bjgkb1NaIjk4WDVwJkleXyVSaj85UzQnNjEoMk91UW5oPl8hPnBhOShhIytkXFk9Z08hVVYsPmgxU2QsJkdGZDRHZEAyIVNsNiI5YE8yIVUiQ2kyYmotQCI9LEsnRWNfZ2lVQVY6Sj1VXjcyPkZCYWwxQWtiT2dGamU6IWMlV15uYi0/YixkY1VDWlo4UyUyJjRdN1dkMjpwOW5mTlNmI1dmdD9eT11wIyxiRiFbYj8iRjFKIUFLRW0xPGUpPFNHL1wpTC0oMU1hZkMkMkJXUzhpOyktSVBBP1tLQkVCJEFzLD5DKT9YYHFTMUgwaU1GYiJpSUs0QnJnVCooZitIRW01PHRvOC9ALCU5Zm5rMSwuPFs+KUpjMl8iRnA0J0w8b18+ZGxeKyxtO1JXMTgjL0BEcDpUMDFqP2VBXlVVIihSUyM7ZVFEcTw6Nm85a2YmOzlqJzE7WT1QKVNIIUpPUWpzMGUpK1FcPmtYSU4uZ09CSGBCOmQlZSU5LGUtckM6SUk+LXRrVzQtamdQbWdtQTRGNWdWQENVUFpJa0x1bUtcLEg+LltdPyJQZ11yTWBPPVxDUydpXyc0OVI2bS1QMEY0JTFNbzojcl5fcXJxR0pWQ3VJS01uIVpBcFluZjdHM2AubCgmKnVqZzNRWWA3TyxvTEA6b246a2hjLFxgPkRCUVklc0FvW1kyRyQ2aUIrP3ReOCRnPEBPIWpcRDY5aV9QWjUjZzlIMChfJTNlSDxZcVMuOyc0RSQ0R2E0T0FTY3I2VkFfbVpaYSI0Wm46MGUmTTwsU01xQWpBOW9sPmYvbCZzOjBMY1RgbExJSUBRUTtKaypMXDc5a2QiMWtXLi0hZTdDLTc6XURCQColKEM1LT1qOlppXD5FU1VsUkxQLTpFTSJjMi4zNVVUTjtZVzpHI0lIUi8oZGowNE5AaGE5REQwUXFoMFBpTWVSb1EqYS44W1khcC9LXTpEUDQzMEo6JXIxSkQ+JzclRj1yWiFHRjYvZ3InTVNUckBILm9mLVA4bjFmPW9pO29LM0g4QCVGIWMpLkQ8R3M1ZiFtVnI3TzRxM090KiZqJ0YxZ3RAVj5TUjxeZ0lqbU9GXlBwSXViVXJuK2ltSzBBbVpPJ1RmcWVwOiFRRy83LzpANV91bT5eQyIyPTMoNmImdHBxSWA4OCtPN1xcbU5RZVw9TlUkWjpIQEQnQHM6OzM7OGpvM1FJNWQ4NmZBcFxSLmMiZiItLUUiLXRVNG1bL14yRSNFKGpGNzwpc1NQLDo7IVJSITBDMnNPSWpYZDxAcTpvRkAodVdGdWFpbW9ETGpRb0RLMSIuLGc2Ol47MTRqcnJPdD9iTVd+PmVuZHN0cmVhbQplbmRvYmoKMTEgMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTEwNgo+PgpzdHJlYW0KR2F0biY6UXNLbCZCNCpjTVM+NT4nJCdRTV1VLGJGLGIqTjtVaFc2O05KayJFLXRVUkNiRjc3N3FnRlZUQTs4NitQX3QhcyVHOj0haDYzRmg3UFVMWUQ8bTVHZVdzUEBjJW1bUTRWNWYyTjQuQDFCIlBRWVlrcDU3LFYjZ2lAVDQrV2AyXVFLRm5lIz9aVFBEQSdKV1coPWMnaUowY0gpXHIkRkxcOFNRcCY2cGBHSStVVDFIPVY5JzQ6Yi0ycktrZzckZzQjcGREYDcoaTRNTVtwQGg0M3UoaUw2c21PczRVRildblZIT3RTRmIqKFYmV0AiPUtSY2s5TjM6MiZrVDB1KiEhWnVYPTpwXTZbSVZgJUEob180XyU1cV5Ha1omOkFuMFdeM2h0SChCR2FnQThXUGVdW0RybVBaIUpwbzJIcj5QVyxgZjtNOElKN1ZkJChQKi8kb09WWW11XzZeI1djRCJjOi1qJ2E9b1M9MllpMls3Y1tHQywrOV4+P1JZNi9VTSU+XFlfaFE+XjY+ZEpWIWorWkk6NVxjKyREZlZRSl5oRy9MVEJWLkdPO2RiVyFAPE05cTNrZ2ZgbD40T2I4XVhfO0c4UVU8Jy9gaHVaS01mcmY5QUNZYjVMQyxKJFlMUy4zZ0ovW1daUiNAWDNfU3QkJ04/clBQJ143WzZsKmNvVFlcbkJqVVEpMzc1aWlaNFg9SGNVTF1eTjFyVFRqQ2VpLzNNImpnbl8ocDAuLmI2PVlGTjtTMCRSazJFaFZDPFJUMCNyaXE1XSs7JFkxPCc2Jy5RbjAxTy4nQCtsMXFfNzUwaiRVVUswMWVdI1hNYkwmJCEiVnE5OiljKCQwVUwqUmY1RENXUklGLkVKPyRPbnVuP1twZXJqMWVqc1BXWSVsJFE3aTEoLCMycW9kRTJIYC1vW2RLWSpkYypFPV9ROj5MZTIoSzYxK0FOMjFrXVItanIwYF1dbyw3ZkBpajwtW2IuKj9tRGNJZTokKDRhLWpRUTIlbkptS1hibmlNP11PaSRudDpYUypHO0EtKV4pLE47Q0khLj87K0tNPmtJU21oUU1SakJlPWIkZyJQVVRYY09VWTk+XitkRG1VWms0dGJvciJXZFxYPTAuM25AMjkoZzRRPXFKSHFvVGxuPixHa0U8ZFQpI25QO19AaFF1VUlpUUNBYDxmUENwLlNbXTduJ0txZipMPkNBLT9yXElpKWlhYDxLWWFETChJJEZqJy1wb1AtQEJJbiFxOjlZUUdpb0k/YUlcJDdnTzdxSV9EL2osZm9MNS9JPmJlbkNEV1BKPVshak5SYDE1bWc9TGUsKEEyQypSKy5NZGFUOiFtczZNRkNSK0QnSSRwJixPRiRhWk4lb248O148SzhmPU4zIkcmL0FcMUBEV29iUmhbUV1oYFZrPmRnOU1iRlNZU19oT2tzNFNrP2BIKHEiIjtkVFotcERfZjlyfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxMgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMiAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCjAwMDAwMDAzMzEgMDAwMDAgbiAKMDAwMDAwMDQwOCAwMDAwMCBuIAowMDAwMDAwNjEyIDAwMDAwIG4gCjAwMDAwMDA4MTYgMDAwMDAgbiAKMDAwMDAwMDg4NCAwMDAwMCBuIAowMDAwMDAxMTY0IDAwMDAwIG4gCjAwMDAwMDEyMjkgMDAwMDAgbiAKMDAwMDAwMjc1MSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzwyMzY1ODFjMzFjNzlhZDUwNjczNzVlYWFmOWFjMjY3Nz48MjM2NTgxYzMxYzc5YWQ1MDY3Mzc1ZWFhZjlhYzI2Nzc+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDggMCBSCi9Sb290IDcgMCBSCi9TaXplIDEyCj4+CnN0YXJ0eHJlZgozOTQ5CiUlRU9GCg==" },
+  "intense-elle": { name: "histoire_intense_elle.pdf", data: "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQ29udGVudHMgOSAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA4IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9Db250ZW50cyAxMCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA4IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOCAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjcgMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTAxNDE2NTU0NiswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTAxNDE2NTU0NiswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9Db3VudCAyIC9LaWRzIFsgNCAwIFIgNSAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjkgMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTQwNAo+PgpzdHJlYW0KR2F0bTxiQXU+cSddJigqbWBvTXVaTlFuMEdCRy4+YityYFxGMVRkKFUqJ2FgJnRuYmtxWUBmKSx0RS1BKDdpOyo2JzJlMkYnbislLmZxLmBMayJqdEpEMWlnXGcnSHFCUWxfIVVrJi8lL0RKayxOMT4/IkFQKEVfJT11KmwnQEtoaGhNNUdjb2pYJ0YscFg/bE1gTkYvOyM7K184Ik9xP1swQmwhIjB1bUhCOjJ0blVoLnNjZGJzbGUoPmNdMGtDaFdtaTprYmhxcmQ2biQwcy5DQEotPSJJWCJ0JD9pTCxuLElCXFBjLStpUWkkV28iJFk5NTxBLSgwTjI3LmFfTDUobzZFIVBkVFpMOFlaW2EnZTdFZUAyZylCTEhdSjYsWTQuSjFoJGBRay5VIlwiX19USE5fQT9na19qWk1XTmtfVltJQDspUUkpZDRGZF9MUFA/Iz5XJ0tzSTpaOVFHWTpAbz5ubzQ8aDE5dCI+YDspPWMpblhoLFhMYDEpP2lWWEsnXU4mOT1raCJpWCgxZmE0SXFpWUZJY0NeKlt0M15cIzJSSFprJVVlWCcrcG40ODxEZHBOPzxiXyEybFZAOnBGITYtY0xgZD1SUVksTDtXNV4vbEViPC9nIjYuZFIuaTZnZztIVVRPUSdcP05HJjwobUZONDc1WSNEVzNrTCZqKGE5IStONHImQStCZE1iQWFZYSdPNzBGclJBRWZhZCxkQlJjOkhTMHBKOS1SbUdvZyMmZTJkQXVgQHJGNUBXKHRYKTdxc29OL3UvJGdJW3VnWSJpKVtZYT1vajMvKj9VbUhRUi9ITl5xRCclXS1GaipfKyxlMlQxQV4nc0VLTlhDPGBGKkhNZidmWGNrWjUtIlAzSkVhdFpUdSonRGdldDtDX0BRKzdmXDwnTEFXX1BTY0ksUiNOPEdRYjdTcztGRSVsL1lROl9GVTFidGA1UDQtWWBrOzdENCM9I2hyXypYRHIlTlNKUm1uMXRdV15APTVNb1ovR1c2akgvPUc6UXU3R2UiUlBOSmFPKictK1Q+I05SRyhWWTM+bGphWj0hO1ReK0lYbUFNYSYwc19CR1QiZT80K1RoMV1NZU9rVSpzJkJwJDppKFNEYURjb2o4a2ZAbEhZLmNxbWY4Tl9VRyc1ViswIUwtc29gcUkvK2NYVG86SCRlMCpsJmcrbVBMYmw1PWFqYVskTGdWLj5DPSlRLF9mYms0OFFDO1Y3MSopPkNVLnRpVS4lWnBgSVgnTzAoTkphZXJrVmEwMiVWPWJOJSlBTGMuNWpETiIjXlU0Z103cjBAWEIsMy8yTVNwOzRWS2wyNiE9Q1RDOXJfLWU1byxfSS5DTztqXSxjJS4rOUBNREBlOGIpJ01KRU4lZWlsZ2ZgZi0jTEs0TExZM3N0SzUzRjdRMkcwbXFSLERfPk1GVUoqNDNCO00iNzhITE05WCFlXkt0OipgTT0vMmNhIVFkJWlgTk1BQlNIUm1SSzN0RDQwaClmIyRkWzombTxBJEBoa1w4Uk5qJ288JSFcXXN0YShTSC0xKTxRSVtoLUAyaGFsQm1FJ1dmVkNoYE5CbSs+QEc8TEBTbHFQLUJBI2ljOD5vNWl1MExBT2VCLVRsP0hRM1QlLCU1U2E/Tksnbz5ZcmxUQG07RCc2ZHJmVFkpblRcZklZKV9iT0IlPEZiTTEmaScuajw7aGZOXjsqZ0VkYiJTXFdKayRjRyolTCFUN0lLRW0jb0ZAOzNTN0kxZEtXMTlTaUVpcztPWVFDQVBVcC9hY3NERTtjUkVRVG9zY10rUWUiKXVockVQQUJtZG1VMjJCaW1tJjRdJSZFLVZdUTJhVlpbZT9SKDlYNUNOJTVqOH4+ZW5kc3RyZWFtCmVuZG9iagoxMCAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAxMDMxCj4+CnN0cmVhbQpHYXUwQmdKWmNbJjpNbCtsbDM7QFkyc0hTW21LPjVKTE0mcj5AJiJKOF05N1pZVSFFT14rMjNzLFFndWk/dClvWnBFI3FpSFpmXktcLkpDQVsvZCpOSS9IVGU2cjVMZCxYRExuLShMPHNdK05gT1I3MERCNmo4LShNWlpqZiJbN14uSy8/MDtAS0hRUkgnW08kWzJUMidFZU5tLGdGdEBIL1ZdKDNgJUZHaSF1dHFTUFFtUiRDJG4nW2hFY0RwamEuc0AoRz0lUTo8NzxoJyZpcUNfc0xuIVsjXjM9N3M4QGY4PW1eNmpbKGFoS25gQiI5PjhuKkpEWGZFQ1Zwbjpia3FxLl00bFE4bkdJRFYoSy9hNG4sT0A5JS5tTWZDO2lIKyVbN1ooMi1lPDcrWWopYy81RHQrSlMrPCckWDVTRVtjckVOW0VTM1pQaT5SRG5AP3JKNldQYCJKTD9vcU45PnNqV0gqTk4pUFdWR14hOCNXalhlXGViblNyV1BkZ0BEI0piLmBKO0MlYjY2aiZtQmIxWFJDW3AmL29jYnEuWG9lMXAvaCY/XW4tRFlrVlcjMSUoYmhlOylPU15ObVpXO0phNlwpdU87O2MvKW50NT1jKExiPkJjKTZNXCxuXVhAaF5KKVZgMjUnLWEmPlI2LVRYaHFVOGkiTDBldFJnLy9pc0pcJFZoOidHaEldSzNAQiwrR18sUF4vXzNNKGJOLyk8Qj9DK0diZl1HTjoiYGJgWydgZT1BVWdgQ1hiPzl0LXFAPjFTQmhsaCJpJjMjXUA0YzxRZ0ZqSHFkPFBKYz46OHRUcjJLWlJhYUYtclZhNC4xakZdZj90YS0pWEguTmBjXDdXTWdeLTssQiU/SjhqQWo0MCJPMU9BR1lGZ1xxbUVfInFZbzxmKTleOWIhTTg0TDtKdF5eViJjJGs8P2U4JkBpYkREQWtFNl0/QGYkQShLZWNjJTp0J3RKSmBEJ1ttbS9gc1xPLTU0bEYoKT5XOydKW25eXWJlQ1BQI0pGJEFdK05JU1FKSXE7NTRQTCkhdF5YKGNDIi8sNCVoWVZkKkskRDpEK2ZGXV9rR1JdXllWKDkrJG5DQmJqSGEmLCNPV25xOixfIyo5VUwnVjAqQz8kRj5cNTk8K0QkYzhyWitFIjw2dVZUXV1KIyZsLEpMJUcqUCQkKCRUIU1CKjNyayhdMzAiOzdVMyQ/KixuJ1Y3PHBVPVwxPU8xQScsW29rcipvdUxSZzRJXGFZMDc0bjg0QyVLIiNkVE8yJ1E1Q3BbW04lQEddalpzTzxVUFFPOmoib0FrKWRaWjE3U3NZJi9DanVbJ2okYytVcG5zb1tUNi9zKzVfR0lOO2BoXCRwa2p+PmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDExCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMyMSAwMDAwMCBuIAowMDAwMDAwNTI0IDAwMDAwIG4gCjAwMDAwMDA3MjggMDAwMDAgbiAKMDAwMDAwMDc5NiAwMDAwMCBuIAowMDAwMDAxMDc2IDAwMDAwIG4gCjAwMDAwMDExNDEgMDAwMDAgbiAKMDAwMDAwMjYzNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzw0NDRhNGI0OTk3MDVlZDk0YjViZTU5Y2Q1ZjEyMDI0Nj48NDQ0YTRiNDk5NzA1ZWQ5NGI1YmU1OWNkNWYxMjAyNDY+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDcgMCBSCi9Sb290IDYgMCBSCi9TaXplIDExCj4+CnN0YXJ0eHJlZgozNzU5CiUlRU9GCg==" },
+};
+
+function downloadStoryPdf(storyId){
+  const s = STORY_PDFS[storyId];
+  if(!s){ showToast('Histoire introuvable'); return; }
+  const bin = atob(s.data);
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  const blob = new Blob([arr], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = s.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('📄 Histoire téléchargée');
+}
+
 function getHintForDefi(d){
   const t = (d.text || '').toLowerCase();
   const pts = d.pts || 0;
+
+  if(d.storyId || d.type === 'story' || /d[eé]fi histoire intense/.test(t))
+    return { short: '📖 Histoire intense', detail: "Prépare ton entrejambe — ça va être chaud." };
 
   // Ambiance plutôt que acte précis
   if(/pipe|fellation|sucer|bouche|gorge|avaler|cunnilingus|lécher|langue|69/.test(t))
@@ -2117,8 +2196,10 @@ function getHintForDefi(d){
     return { short: '📐 Position', detail: 'Le lit ne sera peut‑être pas nécessaire.' };
   if(/domina|domine|soumis|obéir|ordre|supplier|attache|menotte|lien|corde/.test(t))
     return { short: '⛓️ Contrôle', detail: 'Quelqu’un va mener la danse ce soir.' };
-  if(/sextoy|jouet|vibro|god/.test(t))
-    return { short: '✨ Surprise', detail: 'Un petit accessoire pourrait s’inviter.' };
+  if(/anal|anus|arrière|sillon|plug/.test(t))
+    return { short: '🌑 Plus loin', detail: 'Une zone plus intime va être explorée — doucement.' };
+  if(/sextoy|jouet|vibro|god|anneau|plug|oeuf|télécommand/.test(t))
+    return { short: '✨ Jouet', detail: 'Un accessoire va s’inviter — prépare ce que vous avez.' };
   if(/photo|selfie|envoie une photo|nude|nue|filme|vidéo|filmer/.test(t))
     return { short: '📱 Écran', detail: 'Ton téléphone (ou le sien) aura un rôle.' };
   if(/douche|bain/.test(t))
@@ -2163,6 +2244,9 @@ function acceptDefi(id){
   showToast('Défi accepté — 24h pour le relever ⏳');
   // Push au partenaire avec un indice fiable
   sendPushToPartner('✨ Défi accepté — ' + hint.short, hint.detail);
+  if(d.storyId && STORY_PDFS[d.storyId]){
+    showToast('📄 Histoire disponible — télécharge-la');
+  }
 }
 
 function refuseDefi(id){
@@ -2278,7 +2362,7 @@ function completeDefi(id){
   addHistory({ type:'defi', who: d.for, label: d.text, pts: d.pts, status:'completed' });
   state.defis = state.defis.filter(x => x.id !== id);
   persist(); render();
-  showToast(state.names[d.for] + ' gagne ' + d.pts + ' 🔥');
+  showToast(state.names[d.for] + ' gagne ' + d.pts + ' points');
   celebrate('🎉');
   sendPushToPartner('🎉 Défi réussi', d.text.slice(0, 80) + ' (+' + d.pts + ' 🔥)');
 }
@@ -2331,7 +2415,9 @@ function ensureDailyChallenge(){
     const pick = pool[Math.floor(Math.random() * pool.length)];
     state.defis.push({
       id: cryptoId(), text: pick.text, pts: pick.pts, for: role,
-      deadline: daysFromNow(1), daily: true
+      deadline: daysFromNow(1), daily: true,
+      storyId: pick.storyId || null,
+      type: pick.type || null
     });
     state[key] = { date: daysFromNow(0) };
     anyCreated = true;
@@ -5102,7 +5188,7 @@ function renderCalendar(){
     const expiredCount = monthDefiEvents.filter(h => h.status === 'expired').length;
     const ptsByPerson = { a: 0, b: 0 };
     monthDefiEvents.forEach(h => { if(h.status === 'completed') ptsByPerson[h.who] = (ptsByPerson[h.who] || 0) + h.pts; });
-    recap.innerHTML = `📊 Ce mois : ${completedCount} défi${completedCount !== 1 ? 's' : ''} relevé${completedCount !== 1 ? 's' : ''}, ${expiredCount} manqué${expiredCount !== 1 ? 's' : ''} — ${escapeHtml(state.names.a)} +${ptsByPerson.a || 0} 🔥, ${escapeHtml(state.names.b)} +${ptsByPerson.b || 0} 🔥`;
+    recap.innerHTML = `📊 Ce mois : ${completedCount} défi${completedCount !== 1 ? 's' : ''} relevé${completedCount !== 1 ? 's' : ''}, ${expiredCount} manqué${expiredCount !== 1 ? 's' : ''} — ${escapeHtml(state.names.a)} +${ptsByPerson.a || 0} pts, ${escapeHtml(state.names.b)} +${ptsByPerson.b || 0} pts`;
   }
 
   list.innerHTML = '';
