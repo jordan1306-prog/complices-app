@@ -1343,7 +1343,7 @@ function daysFromNow(n){
 }
 
 
-const REWARDS_CATALOG_VERSION = 3;
+const REWARDS_CATALOG_VERSION = 4;
 
 function buildDefaultRewards(){
   return [
@@ -1420,6 +1420,23 @@ function buildDefaultRewards(){
         { id: "tenue", text: "Je choisis ta tenue (ou rien)", pts: 15 },
         { id: "lieu", text: "Je choisis où dans la maison", pts: 10 },
         { id: "finnuit", text: "Jusqu'à la fin de la nuit", pts: 25 },
+      ]},
+    { id: cryptoId(), text: "Réveil coquin", pts: 55, emoji: "🌅",
+      options: [
+        { id: "bouche", text: "Avec la bouche", pts: 15 },
+        { id: "jouet", text: "Avec un jouet", pts: 15 },
+        { id: "lesdeux", text: "Bouche + jouet", pts: 25 },
+        { id: "orgasme", text: "Jusqu'à l'orgasme", pts: 20 },
+        { id: "lit", text: "Sans sortir du lit", pts: 5 },
+      ]},
+    { id: cryptoId(), text: "Sodomie", pts: 70, emoji: "🔥",
+      options: [
+        { id: "lente", text: "Très lente, à son rythme", pts: 10 },
+        { id: "lubrifiant", text: "Beaucoup de lubrifiant + préparation", pts: 5 },
+        { id: "doigt", text: "Préparation au doigt d'abord", pts: 10 },
+        { id: "jouet", text: "Avec un jouet", pts: 15 },
+        { id: "position", text: "Je choisis la position", pts: 10 },
+        { id: "orgasme", text: "Jusqu'à l'orgasme", pts: 20 },
       ]},
   ];
 }
