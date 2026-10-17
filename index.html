@@ -1343,7 +1343,7 @@ function daysFromNow(n){
 }
 
 
-const REWARDS_CATALOG_VERSION = 4;
+const REWARDS_CATALOG_VERSION = 5;
 
 function buildDefaultRewards(){
   return [
@@ -1429,15 +1429,8 @@ function buildDefaultRewards(){
         { id: "orgasme", text: "Jusqu'à l'orgasme", pts: 20 },
         { id: "lit", text: "Sans sortir du lit", pts: 5 },
       ]},
-    { id: cryptoId(), text: "Sodomie", pts: 70, emoji: "🔥",
-      options: [
-        { id: "lente", text: "Très lente, à son rythme", pts: 10 },
-        { id: "lubrifiant", text: "Beaucoup de lubrifiant + préparation", pts: 5 },
-        { id: "doigt", text: "Préparation au doigt d'abord", pts: 10 },
-        { id: "jouet", text: "Avec un jouet", pts: 15 },
-        { id: "position", text: "Je choisis la position", pts: 10 },
-        { id: "orgasme", text: "Jusqu'à l'orgasme", pts: 20 },
-      ]},
+    { id: cryptoId(), text: "Droit à la sodomie sur l'autre", pts: 70, emoji: "🔥",
+      options: [] },
   ];
 }
 
@@ -2058,10 +2051,14 @@ function renderDefis(){
     } else if(d.deadline){
       const daysLeft = Math.ceil((new Date(d.deadline + 'T23:59:59') - new Date()) / 86400000);
       const soonClass = daysLeft <= 1 ? ' soon' : '';
-      const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
-      deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
+      const deadlineTxt = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { weekday:'short', day:'2-digit', month:'short' });
+      if(d.weekly){
+        deadlineHtml = `<div class="defi-deadline${soonClass}">📅 Semaine suivante — jusqu'au ${deadlineTxt}</div>`;
+      } else {
+        deadlineHtml = `<div class="defi-deadline${soonClass}">À accepter avant le ${deadlineTxt}</div>`;
+      }
     }
-    const badge = d.daily ? '✨ Défi du jour — ' : (d.mystery ? '🎁 Fantasme — ' : '');
+    const badge = d.daily ? (d.weekly ? '📅 Défi de la semaine — ' : '✨ Défi du jour — ') : (d.mystery ? '🎁 Fantasme — ' : '');
     const statusTag = d.status === 'accepted'
       ? '<div class="defi-tag defi-tag-progress">⏳ En cours</div>'
       : '<div class="defi-tag defi-tag-new">🆕 En attente de ta réponse</div>';
@@ -2251,15 +2248,23 @@ function acceptDefi(id){
   const d = state.defis.find(x => x.id === id);
   if(!d) return;
   d.status = 'accepted';
-  d.acceptDeadline = Date.now() + 24 * 3600000;
-  // Stocker l'indice pour qu'il reste visible tant que le défi n'est pas fini
+  // Hebdo : jusqu'à la deadline (dimanche soir). Sinon 24h.
+  if(d.weekly && d.deadline){
+    d.acceptDeadline = new Date(d.deadline + 'T23:59:59').getTime();
+  } else {
+    d.acceptDeadline = Date.now() + 24 * 3600000;
+  }
   const hint = getHintForDefi(d);
   d.hint = hint.short;
   d.hintDetail = hint.detail;
-  d.hintForPartner = true; // le partenaire doit voir l'indice
+  d.hintForPartner = true;
   persist(); render();
-  showToast('Défi accepté — 24h pour le relever ⏳');
-  // Push au partenaire avec un indice fiable
+  if(d.weekly && d.deadline){
+    const dl = new Date(d.deadline + 'T00:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' });
+    showToast('Défi accepté — à faire avant dimanche (' + dl + ') ⏳');
+  } else {
+    showToast('Défi accepté — 24h pour le relever ⏳');
+  }
   sendPushToPartner('✨ Défi accepté — ' + hint.short, hint.detail);
   if(d.storyId && STORY_PDFS[d.storyId]){
     showToast('📄 Histoire disponible — télécharge-la');
@@ -2415,30 +2420,61 @@ function checkExpiredDefis(){
   }
 }
 
+function getLastSaturdayStr(){
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  const day = d.getDay(); // 0=dim ... 6=sam
+  const daysSinceSat = (day + 1) % 7;
+  d.setDate(d.getDate() - daysSinceSat);
+  return d.toISOString().slice(0, 10);
+}
+
+function getSundayAfterNextWeek(saturdayStr){
+  // Samedi d'arrivée → dimanche de la SEMAINE SUIVANTE (pas le lendemain)
+  // Ex: samedi 17 → deadline dimanche 25 (lun 19 → dim 25)
+  const d = new Date(saturdayStr + 'T12:00:00');
+  d.setDate(d.getDate() + 8);
+  return d.toISOString().slice(0, 10);
+}
+
 function ensureDailyChallenge(){
-  const freq = state.defiFrequency || 7;
-  const intervalDays = 7 / freq;
-  const now = Date.now();
+  // Défis "hebdo" : arrivent le samedi (1 par personne), à faire jusqu'au dimanche suivant
+  const saturday = getLastSaturdayStr();
+  const deadline = getSundayAfterNextWeek(saturday);
+  const today = daysFromNow(0);
+  // Ne créer qu'à partir du samedi de la semaine (pas avant)
+  if(today < saturday) return;
+
   let anyCreated = false;
   ['a', 'b'].forEach(role => {
     const key = role === 'a' ? 'dailyChallengeA' : 'dailyChallengeB';
-    const lastDate = state[key] && state[key].date ? state[key].date : '';
-    const lastMs = lastDate ? new Date(lastDate + 'T00:00:00').getTime() : 0;
-    const daysSince = (now - lastMs) / 86400000;
-    if(daysSince < intervalDays) return;
-    const already = state.defis.some(d => d.for === role && d.daily);
-    if(already) return;
+    const lastIssued = state[key] && state[key].date ? state[key].date : '';
+    // Déjà émis pour ce samedi ?
+    if(lastIssued === saturday) return;
+    // Encore un défi hebdo en cours pour ce rôle ?
+    const already = state.defis.some(d => d.for === role && d.daily && d.status !== 'done');
+    if(already){
+      state[key] = { date: saturday };
+      return;
+    }
     const pool = DAILY_POOL.concat(state.customDailyPool || []);
     const pick = pool[Math.floor(Math.random() * pool.length)];
     state.defis.push({
-      id: cryptoId(), text: pick.text, pts: pick.pts, for: role,
-      deadline: daysFromNow(1), daily: true,
+      id: cryptoId(),
+      text: pick.text,
+      pts: pick.pts,
+      for: role,
+      deadline: deadline,
+      daily: true,
+      weekly: true,
+      weekSaturday: saturday,
       storyId: pick.storyId || null,
       type: pick.type || null
     });
-    state[key] = { date: daysFromNow(0) };
+    state[key] = { date: saturday };
     anyCreated = true;
-    showToast('✨ Nouveau défi du jour pour ' + state.names[role]);
+    const dlLabel = new Date(deadline + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' });
+    showToast('✨ Défi de la semaine pour ' + state.names[role] + ' — à faire d\'ici ' + dlLabel);
   });
   if(anyCreated) persist();
 }
@@ -3000,7 +3036,7 @@ function renderTodayDefiBox(){
   box.innerHTML = `
     <div class="card" style="border:0.5px solid rgba(201,51,63,0.5); cursor:pointer;">
       <div class="info">
-        <div class="defi-tag defi-tag-new">✨ Défi du jour</div>
+        <div class="defi-tag defi-tag-new">📅 Défi de la semaine</div>
         <div class="t">${escapeHtml(d.text)}</div>
         <div class="m">+${d.pts} 🔥</div>
       </div>
