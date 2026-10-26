@@ -1029,6 +1029,9 @@
     <div id="story-library-view">
       <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">📖 Bibliothèque d'histoires</h3>
       <div class="sub" style="margin-bottom:14px;">Lancez une histoire à embranchements, à vivre à deux, message par message.</div>
+      <div id="solo-story-banner" style="display:none; margin-bottom:12px; padding:12px; border-radius:12px; border:0.5px solid rgba(201,51,63,0.45); background:rgba(201,51,63,0.08);"></div>
+      <button class="btn btn-rose" id="solo-story-btn" style="width:100%; margin-bottom:12px;">🔥 Histoire solo — donner une envie</button>
+      <div class="sub" style="margin-bottom:14px; font-size:11px; opacity:0.75;">Solo : l'app joue l'autre rôle, ton résultat peut partir au partenaire. Invite auto 1×/mois (décalée).</div>
       <div id="story-filters" class="assign" style="flex-wrap:wrap; margin-bottom:14px;"></div>
       <div id="story-list"></div>
       <button class="btn btn-ghost" id="toggle-story-create" style="width:100%; margin-top:8px;">+ Créer votre propre histoire</button>
@@ -1504,6 +1507,7 @@ const defaultState = () => ({
   coupleStartDate: '',
   photos: { a: '', b: '' },
   story: null,
+  soloStory: { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } },
   customScenarios: [],
   history: [],
   newDefiAssign: 'a',
@@ -1766,6 +1770,10 @@ function normalizeState(s){
   if(s.coupleStartDate === undefined) s.coupleStartDate = '';
   if(!s.photos) s.photos = { a: '', b: '' };
   if(s.story === undefined) s.story = null;
+  if(!s.soloStory) s.soloStory = { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } };
+  if(!s.soloStory.a) s.soloStory.a = { lastMonth: '' };
+  if(!s.soloStory.b) s.soloStory.b = { lastMonth: '' };
+  if(!s.soloStory.pendingInvite) s.soloStory.pendingInvite = { a: false, b: false };
   if(!s.customScenarios) s.customScenarios = [];
   s.defis.forEach(d => { if(d.reminded === undefined) d.reminded = false; });
   // Migrer la boutique vers le catalogue avec options
@@ -1792,6 +1800,7 @@ async function loadState(){
   checkExpiredDefis();
   checkExpiredPurchases();
   ensureDailyChallenge();
+  ensureSoloStoryInvite();
   document.getElementById('new-defi-deadline').value = daysFromNow(3);
   render();
   if(myRole && state.mysteryPing && state.mysteryPing[myRole]){
@@ -3455,6 +3464,165 @@ const STORY_LIBRARY = [
     }
   },
 ];
+
+const SOLO_HOT_LINES = [
+  "L'app murmure : continue… laisse monter.",
+  "Bonne pioche. Ça devient plus chaud.",
+  "L'autre aurait choisi ça — et toi, tu en redemandes.",
+  "La tension monte. Ne freine pas.",
+  "Encore un cran. Tu sens où ça mène.",
+  "Discret, mais très coquin. Parfait.",
+  "Ce choix fait grimper la température.",
+  "L'histoire te tire un peu plus loin…",
+];
+
+function currentYearMonth(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function isSoloInviteWindow(role){
+  // A : début de mois (1–12) · B : seconde quinzaine (15–28) — jamais en même temps
+  const day = new Date().getDate();
+  if(role === 'a') return day >= 1 && day <= 12;
+  if(role === 'b') return day >= 15 && day <= 28;
+  return false;
+}
+
+function ensureSoloStoryInvite(){
+  if(!state || !state.soloStory || !myRole) return;
+  const ym = currentYearMonth();
+  ['a', 'b'].forEach(role => {
+    if(!isSoloInviteWindow(role)) return;
+    const rec = state.soloStory[role] || { lastMonth: '' };
+    if(rec.lastMonth === ym) return;
+    state.soloStory.pendingInvite[role] = true;
+  });
+  // Toast seulement pour moi si invite en attente
+  if(state.soloStory.pendingInvite[myRole]){
+    // soft flag — banner will show
+  }
+}
+
+function pickHotChoice(choices){
+  if(!choices || !choices.length) return null;
+  let best = choices[choices.length - 1];
+  let bestScore = -999;
+  choices.forEach(c => {
+    let s = (c.pts || 0);
+    const l = (c.label || '').toLowerCase();
+    if(/plus|intense|profond|tout de suite|exige|sans pitié|fort|gorge|doigt|orgasme|prends|prendre|avide|fougue|hard|chaud/.test(l)) s += 12;
+    if(/doucement|tendre|parler|attendre|lentement|câlin|front/.test(l)) s -= 6;
+    if(s >= bestScore){ bestScore = s; best = c; }
+  });
+  return best;
+}
+
+function randomHotLine(){
+  return SOLO_HOT_LINES[Math.floor(Math.random() * SOLO_HOT_LINES.length)];
+}
+
+function startSoloStoryRandom(){
+  if(!(myRole === 'a' || myRole === 'b')){
+    showToast('Choisis d\'abord qui tu es');
+    return;
+  }
+  const pool = STORY_LIBRARY.slice();
+  if(!pool.length){ showToast('Aucune histoire disponible'); return; }
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  state.story = {
+    scenarioId: pick.id,
+    currentNodeId: pick.start,
+    history: [],
+    startedAt: Date.now(),
+    solo: true,
+    soloRole: myRole,
+    soloNarration: [],
+  };
+  // Marquer le mois si c'était l'invite mensuelle
+  const ym = currentYearMonth();
+  if(state.soloStory && state.soloStory.pendingInvite && state.soloStory.pendingInvite[myRole]){
+    state.soloStory.pendingInvite[myRole] = false;
+    state.soloStory[myRole] = { lastMonth: ym };
+  }
+  persist(); render();
+  showToast('🔥 Histoire solo : ' + pick.title);
+  // Si le premier nœud n'est pas mon tour, l'app joue
+  setTimeout(() => maybeSoloAppPlay(), 400);
+}
+
+function maybeSoloAppPlay(){
+  if(!state.story || !state.story.solo) return;
+  const scenario = getScenarioById(state.story.scenarioId);
+  if(!scenario) return;
+  const node = scenario.nodes[state.story.currentNodeId];
+  if(!node || node.isEnding) return;
+  const forRole = node.for;
+  if(forRole === 'both' || forRole === myRole || !forRole) return;
+  // C'est le "tour" du partenaire → l'app choisit chaud
+  const choice = pickHotChoice(node.choices || []);
+  if(!choice) return;
+  const line = randomHotLine();
+  state.story.soloNarration = state.story.soloNarration || [];
+  state.story.soloNarration.push(line);
+  state.story.appLastChoice = choice.label;
+  // petite pause visuelle puis choix
+  const playView = document.getElementById('story-play-view');
+  if(playView){
+    const tip = document.createElement('div');
+    tip.className = 'story-msg';
+    tip.style.opacity = '0.85';
+    tip.style.fontStyle = 'italic';
+    tip.textContent = '🤖 ' + line + (choice.label ? ' → « ' + choice.label + ' »' : '');
+    playView.appendChild(tip);
+  }
+  setTimeout(() => {
+    if(!state.story || !state.story.solo) return;
+    chooseStoryOption(choice.next, choice.pts, choice.who);
+    setTimeout(() => maybeSoloAppPlay(), 350);
+  }, 900);
+}
+
+function buildSoloDesireText(){
+  if(!state.story) return '';
+  const scenario = getScenarioById(state.story.scenarioId);
+  const title = scenario ? scenario.title : 'une histoire';
+  const cat = scenario ? (scenario.category || '') : '';
+  const node = scenario && scenario.nodes[state.story.currentNodeId];
+  const endBit = node && node.isEnding ? node.text.replace(/^Fin\s*—\s*/i, '') : '';
+  const who = state.names[myRole] || 'Ton/ta partenaire';
+  return who + ' a joué « ' + title + ' » (' + cat + ') en solo.\n\nEnvie : j\'aimerais qu\'on revive quelque chose dans cet esprit…\n' + (endBit ? '« ' + endBit.slice(0, 120) + ' »' : 'À toi de proposer la suite 🔥');
+}
+
+function sendSoloDesireToPartner(){
+  if(!state.story || !state.story.solo) return;
+  const text = buildSoloDesireText();
+  const scenario = getScenarioById(state.story.scenarioId);
+  // Ajoute dans la boîte à fantasmes du partenaire (ce que l'autre a noté pour moi = ma box)
+  // Ici : j'envoie une envie → ça va dans MA box pour que le partenaire la pioche ? 
+  // Mieux : push + entrée fantasme dans la box de celui qui JOUE pour que le partenaire la voie en pioche
+  // partner draws from my box when they draw mystery for themselves... 
+  // mysteryBoxA = fantasies involving A / put by couple
+  // When I send desire, add to the OTHER's mystery box as something about what I want done?
+  // Simple: add to partner's box as a medium fantasy text
+  const other = myRole === 'a' ? 'b' : 'a';
+  const boxKey = other === 'a' ? 'mysteryBoxA' : 'mysteryBoxB';
+  if(!state[boxKey]) state[boxKey] = [];
+  state[boxKey].unshift({
+    id: cryptoId(),
+    text: 'Envie solo : ' + (scenario ? scenario.title : 'histoire') + ' — « on pourrait rejouer ça… »',
+    level: (scenario && scenario.category === 'Hard') ? 'hard' : (scenario && scenario.category === 'Soft' ? 'soft' : 'medium'),
+    fromSolo: true
+  });
+  if(state[boxKey].length > 30) state[boxKey].pop();
+  sendPushToPartner('🔥 Une envie pour toi', (state.names[myRole] || 'Ton/ta partenaire') + ' a terminé une histoire solo. Une envie t\'attend.');
+  addHistory({ type: 'solo-story', who: myRole, label: 'Histoire solo → envie envoyée (' + (scenario ? scenario.title : '') + ')', pts: 5, status: 'completed' });
+  state.scores[myRole] = (state.scores[myRole] || 0) + 5;
+  state.story = null;
+  persist(); render();
+  showToast('Envie envoyée au partenaire 🔥 (+5)');
+}
+
 function getScenarioById(id){
   return STORY_LIBRARY.find(s => s.id === id) || (state.customScenarios || []).find(s => s.id === id);
 }
@@ -3489,6 +3657,10 @@ function chooseStoryOption(nextId, effectPts, effectWho){
     state.scores[effectWho] = (state.scores[effectWho] || 0) + effectPts;
   }
   persist(); render();
+  if(state.story.solo){
+    setTimeout(() => maybeSoloAppPlay(), 300);
+    return;
+  }
   const scenario = getScenarioById(state.story.scenarioId);
   const nextNode = scenario && scenario.nodes[nextId];
   if(nextNode && !nextNode.isEnding && nextNode.for && nextNode.for !== 'both' && nextNode.for !== myRole){
@@ -3504,10 +3676,22 @@ function renderHistoires(){
     libView.style.display = 'none';
     playView.style.display = 'block';
     renderStoryPlay();
+    if(state.story.solo) setTimeout(() => maybeSoloAppPlay(), 200);
   } else {
     libView.style.display = 'block';
     playView.style.display = 'none';
     renderStoryLibrary();
+    // Banner invite mensuelle
+    const banner = document.getElementById('solo-story-banner');
+    if(banner && myRole && state.soloStory && state.soloStory.pendingInvite && state.soloStory.pendingInvite[myRole]){
+      banner.style.display = 'block';
+      banner.innerHTML = '<div style="font-weight:600; color:var(--gold-soft); margin-bottom:6px;">🔥 Invitation du mois</div><div style="font-size:13px; margin-bottom:10px;">Pour faire monter la température : une histoire solo, l\'app joue avec toi. À la fin, tu peux envoyer une envie à ton/ta partenaire.</div><button class="btn btn-rose" id="solo-story-banner-btn" style="width:100%;">Lancer l\'histoire solo</button>';
+      const bb = document.getElementById('solo-story-banner-btn');
+      if(bb) bb.onclick = startSoloStoryRandom;
+    } else if(banner){
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+    }
   }
 }
 
@@ -3593,24 +3777,41 @@ function renderStoryPlay(){
 
   html += `<div class="story-msg">${escapeHtml(node.text)}</div>`;
 
+  if(state.story.solo && state.story.soloNarration && state.story.soloNarration.length){
+    const last = state.story.soloNarration[state.story.soloNarration.length - 1];
+    html += `<div class="story-msg" style="font-style:italic; opacity:0.9;">🤖 ${escapeHtml(last)}</div>`;
+  }
+
   if(node.isEnding){
-    html += `<button class="btn btn-gold" id="story-restart-btn" style="width:100%; margin-bottom:8px;">🔄 Recommencer</button>`;
-    html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Quitter et choisir une autre histoire</button>`;
+    if(state.story.solo){
+      html += `<button class="btn btn-rose" id="story-send-desire-btn" style="width:100%; margin-bottom:8px;">🔥 Envoyer l'envie au partenaire</button>`;
+      html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Garder pour soi / quitter</button>`;
+    } else {
+      html += `<button class="btn btn-gold" id="story-restart-btn" style="width:100%; margin-bottom:8px;">🔄 Recommencer</button>`;
+      html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Quitter et choisir une autre histoire</button>`;
+    }
   } else if(canAct){
     node.choices.forEach((choice, idx) => {
       html += `<button class="story-choice" data-idx="${idx}">${escapeHtml(choice.label)}</button>`;
     });
     html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%; margin-top:6px;">Quitter l'histoire</button>`;
   } else {
-    const waitingFor = node.for === 'a' ? state.names.a : state.names.b;
-    html += `<div class="empty">En attente du choix de ${escapeHtml(waitingFor)}...</div>`;
+    if(state.story.solo){
+      html += `<div class="empty">L'app joue le rôle de l'autre… 🔥</div>`;
+    } else {
+      const waitingFor = node.for === 'a' ? state.names.a : state.names.b;
+      html += `<div class="empty">En attente du choix de ${escapeHtml(waitingFor)}...</div>`;
+    }
     html += `<button class="btn btn-ghost" id="story-quit-btn" style="width:100%;">Quitter l'histoire</button>`;
   }
 
   playView.innerHTML = html;
 
   if(node.isEnding){
-    document.getElementById('story-restart-btn').onclick = restartStory;
+    const sendBtn = document.getElementById('story-send-desire-btn');
+    if(sendBtn) sendBtn.onclick = sendSoloDesireToPartner;
+    const restartBtn = document.getElementById('story-restart-btn');
+    if(restartBtn) restartBtn.onclick = restartStory;
   } else if(canAct){
     playView.querySelectorAll('.story-choice').forEach(btn => {
       btn.onclick = () => {
@@ -3623,6 +3824,8 @@ function renderStoryPlay(){
   const quitBtn = document.getElementById('story-quit-btn');
   if(quitBtn) quitBtn.onclick = quitStory;
 }
+
+document.getElementById('solo-story-btn')?.addEventListener('click', () => startSoloStoryRandom());
 
 document.getElementById('toggle-story-create').addEventListener('click', () => {
   const wrap = document.getElementById('story-create-wrap');
