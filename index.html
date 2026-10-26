@@ -2004,19 +2004,28 @@ function defiCategory(d){
 }
 
 function capOnePerCategory(list){
-  const picked = {};
+  // Hebdo : jusqu'à 2 défis "daily/weekly" visibles
+  // Mystère / manuel : 1 seul à la fois
+  const MAX = { daily: 2, mystery: 1, manual: 3 };
+  const buckets = { daily: [], mystery: [], manual: [] };
   list.forEach(d => {
     const cat = defiCategory(d);
-    const existing = picked[cat];
-    if(!existing){
-      picked[cat] = d;
-    } else {
-      const existingPriority = existing.status === 'accepted' ? 1 : 0;
-      const dPriority = d.status === 'accepted' ? 1 : 0;
-      if(dPriority >= existingPriority) picked[cat] = d;
-    }
+    if(!buckets[cat]) buckets[cat] = [];
+    buckets[cat].push(d);
   });
-  return Object.values(picked);
+  const out = [];
+  Object.keys(buckets).forEach(cat => {
+    const arr = buckets[cat].slice().sort((a, b) => {
+      // acceptés d'abord, puis les plus récents
+      const ap = a.status === 'accepted' ? 0 : 1;
+      const bp = b.status === 'accepted' ? 0 : 1;
+      if(ap !== bp) return ap - bp;
+      return 0;
+    });
+    const max = MAX[cat] != null ? MAX[cat] : 1;
+    out.push(...arr.slice(0, max));
+  });
+  return out;
 }
 
 function renderDefis(){
@@ -3063,12 +3072,11 @@ document.getElementById('start-date-input').addEventListener('change', e => {
 function renderTodayDefiBox(){
   const box = document.getElementById('today-defi-box');
   if(!box || !state || !myRole) { if(box) box.style.display = 'none'; return; }
-  const todays = state.defis.filter(d => d.daily && d.for === myRole && d.status !== 'accepted');
+  const todays = state.defis.filter(d => d.daily && d.for === myRole && d.status !== 'accepted').slice(0, 2);
   if(todays.length === 0){ box.style.display = 'none'; return; }
-  const d = todays[0];
   box.style.display = 'block';
-  box.innerHTML = `
-    <div class="card" style="border:0.5px solid rgba(201,51,63,0.5); cursor:pointer;">
+  box.innerHTML = todays.map(d => `
+    <div class="card" style="border:0.5px solid rgba(201,51,63,0.5); cursor:pointer; margin-bottom:8px;">
       <div class="info">
         <div class="defi-tag defi-tag-new">📅 Défi de la semaine</div>
         <div class="t">${escapeHtml(d.text)}</div>
@@ -3076,8 +3084,8 @@ function renderTodayDefiBox(){
       </div>
       <div style="color:var(--gold); font-size:20px;">›</div>
     </div>
-  `;
-  box.querySelector('.card').onclick = () => goToTab('defis');
+  `).join('');
+  box.querySelectorAll('.card').forEach(c => { c.onclick = () => goToTab('defis'); });
 }
 
 document.getElementById('play-now-btn')?.addEventListener('click', () => goToTab('defis'));
