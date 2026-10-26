@@ -2438,43 +2438,77 @@ function getSundayAfterNextWeek(saturdayStr){
 }
 
 function ensureDailyChallenge(){
-  // Défis "hebdo" : arrivent le samedi (1 par personne), à faire jusqu'au dimanche suivant
+  // Défis "hebdo" : 2 par personne le samedi, à faire jusqu'au dimanche de la semaine suivante
+  const WEEKLY_PER_PERSON = 2;
   const saturday = getLastSaturdayStr();
   const deadline = getSundayAfterNextWeek(saturday);
   const today = daysFromNow(0);
-  // Ne créer qu'à partir du samedi de la semaine (pas avant)
   if(today < saturday) return;
 
   let anyCreated = false;
   ['a', 'b'].forEach(role => {
     const key = role === 'a' ? 'dailyChallengeA' : 'dailyChallengeB';
-    const lastIssued = state[key] && state[key].date ? state[key].date : '';
-    // Déjà émis pour ce samedi ?
-    if(lastIssued === saturday) return;
-    // Encore un défi hebdo en cours pour ce rôle ?
-    const already = state.defis.some(d => d.for === role && d.daily && d.status !== 'done');
-    if(already){
-      state[key] = { date: saturday };
+    // Combien de défis hebdo déjà pour CE samedi ?
+    // (les anciens sans weekSaturday comptent aussi pour éviter les doublons)
+    const existing = state.defis.filter(d =>
+      d.for === role && d.daily && (d.weekly || d.daily) &&
+      (d.weekSaturday === saturday || (!d.weekSaturday && d.daily))
+    );
+    // Marquer les anciens avec la bonne semaine
+    existing.forEach(d => { if(!d.weekSaturday){ d.weekSaturday = saturday; d.weekly = true; d.deadline = d.deadline || deadline; } });
+    const need = WEEKLY_PER_PERSON - existing.length;
+    if(need <= 0){
+      state[key] = { date: saturday, count: WEEKLY_PER_PERSON };
       return;
     }
+
     const pool = DAILY_POOL.concat(state.customDailyPool || []);
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    state.defis.push({
-      id: cryptoId(),
-      text: pick.text,
-      pts: pick.pts,
-      for: role,
-      deadline: deadline,
-      daily: true,
-      weekly: true,
-      weekSaturday: saturday,
-      storyId: pick.storyId || null,
-      type: pick.type || null
-    });
-    state[key] = { date: saturday };
-    anyCreated = true;
-    const dlLabel = new Date(deadline + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' });
-    showToast('✨ Défi de la semaine pour ' + state.names[role] + ' — à faire d\'ici ' + dlLabel);
+    const usedTexts = new Set(existing.map(d => d.text));
+    // Mélanger le pool pour tirer des défis différents
+    const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+    let added = 0;
+    for(const pick of shuffled){
+      if(added >= need) break;
+      if(usedTexts.has(pick.text)) continue;
+      usedTexts.add(pick.text);
+      state.defis.push({
+        id: cryptoId(),
+        text: pick.text,
+        pts: pick.pts,
+        for: role,
+        deadline: deadline,
+        daily: true,
+        weekly: true,
+        weekSaturday: saturday,
+        storyId: pick.storyId || null,
+        type: pick.type || null
+      });
+      added++;
+      anyCreated = true;
+    }
+    // Si pool trop petit / trop de doublons, compléter même avec doublons de texte
+    while(added < need && pool.length){
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      state.defis.push({
+        id: cryptoId(),
+        text: pick.text,
+        pts: pick.pts,
+        for: role,
+        deadline: deadline,
+        daily: true,
+        weekly: true,
+        weekSaturday: saturday,
+        storyId: pick.storyId || null,
+        type: pick.type || null
+      });
+      added++;
+      anyCreated = true;
+    }
+    state[key] = { date: saturday, count: existing.length + added };
+    if(added > 0){
+      const dlLabel = new Date(deadline + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' });
+      showToast('✨ ' + added + ' défi(s) de la semaine pour ' + state.names[role] + ' — d\'ici ' + dlLabel);
+    }
   });
   if(anyCreated) persist();
 }
