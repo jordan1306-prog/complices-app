@@ -872,6 +872,7 @@
   <div class="home-quick-row">
     <button type="button" id="play-now-btn"><span class="hq-icon">🎯</span><span>Défis</span></button>
     <button type="button" id="quick-histoires-btn"><span class="hq-icon">📖</span><span>Histoires</span></button>
+    <button type="button" id="quick-qcm-btn"><span class="hq-icon">🌙</span><span>QCM soir</span></button>
     <button type="button" id="quick-boutique-btn"><span class="hq-icon">🎁</span><span>Boutique</span></button>
     <button type="button" id="quick-messages-btn"><span class="hq-icon">💬</span><span>Chat</span></button>
   </div>
@@ -885,6 +886,7 @@
     <button class="tab-btn" data-tab="achats">À réaliser</button>
     <button class="tab-btn" data-tab="messages">Chat</button>
     <button class="tab-btn" data-tab="histoires">Histoires</button>
+    <button class="tab-btn" data-tab="qcm">QCM soir</button>
     <button class="tab-btn" data-tab="profil-accueil">Profil</button>
     <button class="tab-btn" data-tab="calendrier">Calendrier</button>
     <button class="tab-btn" data-tab="historique">Historique</button>
@@ -1045,6 +1047,12 @@
     <div id="story-play-view" style="display:none;"></div>
   </section>
 
+
+  <section id="tab-qcm">
+    <h3 style="color:var(--gold-soft); font-family:'Cormorant Garamond',serif; font-size:20px; margin:0 0 4px;">🌙 QCM du soir</h3>
+    <div class="sub" style="margin-bottom:14px;">Un partenaire lance le questionnaire. Les deux répondent. L'app compose le plan de soirée — du film au hard, ou juste du repos.</div>
+    <div id="qcm-root"></div>
+  </section>
   <section id="tab-profil-accueil">
     <div id="profil-sub-main">
       <div id="profil-overview"></div>
@@ -1508,6 +1516,7 @@ const defaultState = () => ({
   photos: { a: '', b: '' },
   story: null,
   soloStory: { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } },
+  eveningQcm: null,
   customScenarios: [],
   history: [],
   newDefiAssign: 'a',
@@ -1770,6 +1779,7 @@ function normalizeState(s){
   if(s.coupleStartDate === undefined) s.coupleStartDate = '';
   if(!s.photos) s.photos = { a: '', b: '' };
   if(s.story === undefined) s.story = null;
+  if(s.eveningQcm === undefined) s.eveningQcm = null;
   if(!s.soloStory) s.soloStory = { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } };
   if(!s.soloStory.a) s.soloStory.a = { lastMonth: '' };
   if(!s.soloStory.b) s.soloStory.b = { lastMonth: '' };
@@ -1895,6 +1905,7 @@ function render(){
   renderDaysTogether();
   renderTodayDefiBox();
   renderHistoires();
+  try{ renderQcm(); }catch(e){ console.warn(e); }
   renderAssignPicker();
   renderMysteryList();
   renderDefis();
@@ -3099,8 +3110,405 @@ function renderTodayDefiBox(){
 
 document.getElementById('play-now-btn')?.addEventListener('click', () => goToTab('defis'));
 document.getElementById('quick-histoires-btn')?.addEventListener('click', () => goToTab('histoires'));
+document.getElementById('quick-qcm-btn')?.addEventListener('click', () => goToTab('qcm'));
 document.getElementById('quick-messages-btn')?.addEventListener('click', () => goToTab('messages'));
 document.getElementById('quick-boutique-btn')?.addEventListener('click', () => goToTab('boutique'));
+
+
+/* ========== QCM DU SOIR ========== */
+const QCM_QUESTIONS = [
+  { id: 'energie', text: 'Ton énergie ce soir ?', options: [
+    { id: '1', label: 'Épuisé·e', v: 1 },
+    { id: '2', label: 'Tranquille', v: 2 },
+    { id: '3', label: 'OK', v: 3 },
+    { id: '4', label: 'Motivé·e', v: 4 },
+    { id: '5', label: 'En feu', v: 5 },
+  ]},
+  { id: 'ecran', text: 'Envie d\'écran ?', options: [
+    { id: 'film', label: 'Un film', v: 'film' },
+    { id: 'serie', label: 'Une série', v: 'serie' },
+    { id: 'rien', label: 'Rien du tout', v: 'rien' },
+    { id: 'peu_importe', label: 'Peu importe', v: 'peu' },
+  ]},
+  { id: 'contact', text: 'Besoin de contact physique ?', options: [
+    { id: 'non', label: 'Non, plutôt d\'espace', v: 0 },
+    { id: 'calins', label: 'Câlins / proximité', v: 1 },
+    { id: 'plus', label: 'Plus que des câlins', v: 2 },
+    { id: 'beaucoup', label: 'Beaucoup de corps', v: 3 },
+  ]},
+  { id: 'intensite', text: 'Intensité sexuelle (0 = rien) ?', options: [
+    { id: '0', label: '0 — pas ce soir', v: 0 },
+    { id: '1', label: '1 — très soft', v: 1 },
+    { id: '2', label: '2 — doux', v: 2 },
+    { id: '3', label: '3 — medium', v: 3 },
+    { id: '4', label: '4 — chaud', v: 4 },
+    { id: '5', label: '5 — hard', v: 5 },
+  ]},
+  { id: 'role', text: 'Tu préfères plutôt…', options: [
+    { id: 'recevoir', label: 'Recevoir', v: 'recevoir' },
+    { id: 'faire', label: 'Faire', v: 'faire' },
+    { id: 'lesdeux', label: 'Les deux', v: 'lesdeux' },
+    { id: 'na', label: 'Pas concerné ce soir', v: 'na' },
+  ]},
+  { id: 'ambiance', text: 'Ambiance idéale ?', options: [
+    { id: 'tendre', label: 'Tendre', v: 'tendre' },
+    { id: 'joueur', label: 'Joueur·se', v: 'joueur' },
+    { id: 'dom', label: 'Dominant·e / soumis·e', v: 'dom' },
+    { id: 'surprise', label: 'Surprends-moi', v: 'surprise' },
+  ]},
+  { id: 'actes', text: 'Actes qui te tentent (choisis le principal) ?', options: [
+    { id: 'mains', label: 'Mains / massage', v: 'mains' },
+    { id: 'bouche', label: 'Bouche', v: 'bouche' },
+    { id: 'jouets', label: 'Jouets', v: 'jouets' },
+    { id: 'penetration', label: 'Pénétration', v: 'penetration' },
+    { id: 'rien', label: 'Rien de sexuel', v: 'rien' },
+  ]},
+  { id: 'anal', text: 'Anal ce soir ?', options: [
+    { id: 'non', label: 'Non', v: 0 },
+    { id: 'peut', label: 'Peut‑être', v: 1 },
+    { id: 'doux', label: 'Oui si très doux', v: 2 },
+    { id: 'oui', label: 'Oui', v: 3 },
+  ]},
+  { id: 'duree', text: 'Temps “ensemble actif” ?', options: [
+    { id: '15', label: '~15 min', v: 15 },
+    { id: '45', label: '30–45 min', v: 45 },
+    { id: 'long', label: 'Longtemps', v: 90 },
+    { id: 'onverra', label: 'On verra', v: 45 },
+  ]},
+  { id: 'lendemain', text: 'Demain matin ?', options: [
+    { id: 'tot', label: 'Lever tôt', v: 'tot' },
+    { id: 'cool', label: 'Matinée cool', v: 'cool' },
+    { id: 'libre', label: 'On s\'en fiche', v: 'libre' },
+  ]},
+  { id: 'priorite', text: 'Ce soir tu veux surtout…', options: [
+    { id: 'repos', label: 'Reposer', v: 'repos' },
+    { id: 'rire', label: 'Rire / léger', v: 'rire' },
+    { id: 'desire', label: 'Te sentir désiré·e', v: 'desire' },
+    { id: 'lacher', label: 'Te lâcher', v: 'lacher' },
+    { id: 'fusion', label: 'Fusion câline', v: 'fusion' },
+  ]},
+  { id: 'extras', text: 'Extra possible ?', options: [
+    { id: 'aucun', label: 'Rien de spécial', v: 'aucun' },
+    { id: 'bandeau', label: 'Yeux bandés OK', v: 'bandeau' },
+    { id: 'douche', label: 'Douche / bain à deux', v: 'douche' },
+    { id: 'canape', label: 'Canapé plutôt que lit', v: 'canape' },
+  ]},
+];
+
+function startEveningQcm(){
+  if(!(myRole === 'a' || myRole === 'b')){
+    showToast('Choisis d\'abord qui tu es');
+    return;
+  }
+  if(state.eveningQcm && state.eveningQcm.status === 'open'){
+    showToast('Un QCM est déjà en cours');
+    goToTab('qcm');
+    return;
+  }
+  state.eveningQcm = {
+    id: cryptoId(),
+    status: 'open',
+    launchedBy: myRole,
+    createdAt: Date.now(),
+    answers: { a: {}, b: {} },
+    step: { a: 0, b: 0 },
+    result: null
+  };
+  persist(); render();
+  sendPushToPartner('🌙 QCM du soir', (state.names[myRole] || 'Ton/ta partenaire') + ' t\'envoie le questionnaire pour ce soir.');
+  showToast('QCM envoyé — à vous de répondre');
+  goToTab('qcm');
+}
+
+function cancelEveningQcm(){
+  if(!state.eveningQcm) return;
+  if(!confirm('Annuler le QCM du soir ?')) return;
+  state.eveningQcm = null;
+  persist(); render();
+  showToast('QCM annulé');
+}
+
+function answerQcm(qid, optId){
+  if(!state.eveningQcm || state.eveningQcm.status !== 'open') return;
+  if(!(myRole === 'a' || myRole === 'b')) return;
+  const q = QCM_QUESTIONS.find(x => x.id === qid);
+  const opt = q && q.options.find(o => o.id === optId);
+  if(!q || !opt) return;
+  state.eveningQcm.answers[myRole][qid] = { id: optId, v: opt.v, label: opt.label };
+  // advance step to next unanswered
+  let step = 0;
+  for(let i = 0; i < QCM_QUESTIONS.length; i++){
+    if(!state.eveningQcm.answers[myRole][QCM_QUESTIONS[i].id]){ step = i; break; }
+    step = i + 1;
+  }
+  state.eveningQcm.step[myRole] = step;
+  const doneA = Object.keys(state.eveningQcm.answers.a).length >= QCM_QUESTIONS.length;
+  const doneB = Object.keys(state.eveningQcm.answers.b).length >= QCM_QUESTIONS.length;
+  if(doneA && doneB){
+    state.eveningQcm.result = computeEveningPlan(state.eveningQcm.answers.a, state.eveningQcm.answers.b);
+    state.eveningQcm.status = 'done';
+    sendPushToPartner('✨ Plan du soir prêt', 'Vos réponses sont croisées — découvrez le plan dans QCM soir.');
+    showToast('Plan du soir généré ✨');
+  }
+  persist(); render();
+}
+
+function ansV(answers, qid, fallback){
+  return answers[qid] ? answers[qid].v : fallback;
+}
+
+function computeEveningPlan(a, b){
+  const energie = Math.min(ansV(a,'energie',3), ansV(b,'energie',3));
+  const intensite = Math.min(ansV(a,'intensite',0), ansV(b,'intensite',0));
+  const contact = Math.min(ansV(a,'contact',0), ansV(b,'contact',0));
+  const anal = Math.min(ansV(a,'anal',0), ansV(b,'anal',0));
+  const duree = Math.min(ansV(a,'duree',45), ansV(b,'duree',45));
+  const ecranA = ansV(a,'ecran','peu');
+  const ecranB = ansV(b,'ecran','peu');
+  let ecran = 'rien';
+  if(ecranA === ecranB) ecran = ecranA;
+  else if(ecranA === 'peu') ecran = ecranB;
+  else if(ecranB === 'peu') ecran = ecranA;
+  else if(ecranA !== 'rien' && ecranB !== 'rien') ecran = 'film';
+  else ecran = 'rien';
+
+  const prioriteA = ansV(a,'priorite','fusion');
+  const prioriteB = ansV(b,'priorite','fusion');
+  const actesA = ansV(a,'actes','mains');
+  const actesB = ansV(b,'actes','mains');
+  const ambianceA = ansV(a,'ambiance','tendre');
+  const ambianceB = ansV(b,'ambiance','tendre');
+  const extrasA = ansV(a,'extras','aucun');
+  const extrasB = ansV(b,'extras','aucun');
+  const roleA = ansV(a,'role','lesdeux');
+  const roleB = ansV(b,'role','lesdeux');
+  const lendemain = (ansV(a,'lendemain','cool') === 'tot' || ansV(b,'lendemain','cool') === 'tot') ? 'tot' : 'cool';
+
+  // Family decision
+  let family = 'repos';
+  if(prioriteA === 'repos' || prioriteB === 'repos' || energie <= 1){
+    family = (contact >= 1) ? 'repos_calin' : 'repos';
+  } else if(intensite === 0){
+    if(ecran === 'film' || ecran === 'serie') family = 'ecran';
+    else if(contact >= 1) family = 'calins';
+    else family = 'repos';
+  } else if(intensite === 1){
+    family = (ecran !== 'rien') ? 'ecran_doux' : 'soft_massage';
+  } else if(intensite === 2){
+    family = 'soft_sex';
+  } else if(intensite === 3){
+    family = 'medium';
+  } else if(intensite >= 4){
+    family = (anal >= 2) ? 'hard_anal' : 'hard';
+  }
+
+  // Mix film + sex if both want some screen and intensite >= 2
+  if(intensite >= 2 && intensite <= 3 && (ecran === 'film' || ecran === 'serie') && energie >= 3){
+    family = 'mix_ecran_sex';
+  }
+  if(prioriteA === 'rire' && prioriteB === 'rire' && intensite <= 2){
+    family = ecran !== 'rien' ? 'ecran' : 'leger';
+  }
+
+  const steps = [];
+  let title = '';
+  let level = 'soft';
+
+  if(family === 'repos'){
+    title = 'Soirée repos';
+    level = 'repos';
+    steps.push('Pyjama / tenue confort');
+    steps.push('Chacun son rythme, zéro pression');
+    steps.push('Dodo dès que ça tire');
+  } else if(family === 'repos_calin'){
+    title = 'Repos + proximité';
+    level = 'repos';
+    steps.push('10 min de câlins ou main dans la main');
+    steps.push('Pas d\'objectif sexuel');
+    steps.push('Dodo ensemble si vous voulez');
+  } else if(family === 'ecran'){
+    title = ecran === 'serie' ? 'Soirée série' : 'Soirée film';
+    level = 'repos';
+    steps.push(ecran === 'serie' ? 'Choisissez 1–2 épisodes' : 'Choisissez un film (léger si énergie basse)');
+    steps.push('Canapé, couverture');
+    steps.push('Snack optionnel — juste être ensemble');
+  } else if(family === 'calins'){
+    title = 'Soirée câline';
+    level = 'soft';
+    steps.push('Canapé ou lit, corps proches');
+    steps.push('Câlins, bisous, discussion douce');
+    steps.push('S\'arrêter là — c\'est déjà le plan');
+  } else if(family === 'ecran_doux'){
+    title = 'Écran + douceur';
+    level = 'soft';
+    steps.push(ecran === 'serie' ? 'Un épisode' : 'Début de film');
+    steps.push('Pause câlins / bisous 10–15 min');
+    steps.push('Reprise écran ou dodo');
+  } else if(family === 'soft_massage'){
+    title = 'Soirée massage soft';
+    level = 'soft';
+    steps.push('15–20 min de massage (dos, nuque, jambes)');
+    steps.push('Huile si vous en avez');
+    steps.push('Fin en câlins — suite sexuelle optionnelle seulement si les deux veulent encore');
+  } else if(family === 'soft_sex'){
+    title = 'Soirée soft';
+    level = 'soft';
+    steps.push('Préliminaires lents (baisers, mains)');
+    if(actesA === 'bouche' || actesB === 'bouche') steps.push('Bouche bienvenue');
+    steps.push('Sexe tendre ou on s\'arrête aux préliminaires');
+    steps.push('Durée indicative : ~' + duree + ' min');
+  } else if(family === 'medium'){
+    title = 'Soirée medium';
+    level = 'medium';
+    steps.push('Montée progressive');
+    if(actesA === 'jouets' || actesB === 'jouets') steps.push('Jouet possible');
+    if(actesA === 'bouche' || actesB === 'bouche') steps.push('Bouche en préliminaires');
+    steps.push('Pénétration si envie commune');
+    if(ambianceA === 'dom' || ambianceB === 'dom') steps.push('Petit jeu de contrôle OK');
+    steps.push('Durée ~' + duree + ' min');
+  } else if(family === 'hard'){
+    title = 'Soirée hard';
+    level = 'hard';
+    steps.push('Échauffement réel — ne pas brûler les étapes');
+    if(actesA === 'jouets' || actesB === 'jouets') steps.push('Jouets autorisés');
+    if(ambianceA === 'dom' || ambianceB === 'dom') steps.push('Contrôle / ordres légers OK');
+    steps.push('Intensité haute, respect du rythme de chacun');
+    steps.push('Mot de sécurité si besoin');
+  } else if(family === 'hard_anal'){
+    title = 'Soirée hard (anal ouvert)';
+    level = 'hard';
+    steps.push('Beaucoup de lubrifiant + préparation');
+    steps.push('Rythme imposé par celui/celle qui reçoit');
+    steps.push('Sodomie possible — jamais forcée');
+    steps.push('Mot de sécurité obligatoire');
+  } else if(family === 'mix_ecran_sex'){
+    title = 'Mix écran + coquin';
+    level = 'medium';
+    steps.push((ecran === 'serie' ? '1 épisode' : 'Film') + ' d\'abord');
+    steps.push('Puis ~' + Math.min(duree, 45) + ' min coquines');
+    if(intensite >= 3) steps.push('Medium : bouche / sexe selon envie');
+    else steps.push('Soft : mains et baisers');
+    steps.push('Retour canapé possible après');
+  } else {
+    title = 'Soirée légère';
+    level = 'soft';
+    steps.push('Ambiance détendue');
+    steps.push('Un peu de contact si ça vient');
+    steps.push('Rien d\'imposé');
+  }
+
+  // extras
+  if(extrasA === 'bandeau' && extrasB === 'bandeau' && intensite >= 2)
+    steps.push('Yeux bandés OK pour un moment');
+  if((extrasA === 'douche' || extrasB === 'douche') && energie >= 2 && intensite >= 1)
+    steps.push('Douche ou bain à deux en option');
+  if(extrasA === 'canape' && extrasB === 'canape')
+    steps.push('Privilégier le canapé');
+  if(lendemain === 'tot')
+    steps.push('⚠️ Lever tôt demain — ne pas tirer trop tard');
+
+  // roles hint
+  let roleHint = '';
+  if(roleA === 'recevoir' && roleB === 'faire') roleHint = state.names.a + ' reçoit, ' + state.names.b + ' mène.';
+  else if(roleB === 'recevoir' && roleA === 'faire') roleHint = state.names.b + ' reçoit, ' + state.names.a + ' mène.';
+  else if(roleA === 'lesdeux' || roleB === 'lesdeux') roleHint = 'Rôles flexibles — alternez.';
+
+  return {
+    family, title, level, steps, roleHint,
+    meta: { energie, intensite, contact, anal, duree, ecran }
+  };
+}
+
+function renderQcm(){
+  const root = document.getElementById('qcm-root');
+  if(!root || !state) return;
+  if(!(myRole === 'a' || myRole === 'b')){
+    root.innerHTML = '<div class="empty">Choisis qui tu es pour utiliser le QCM.</div>';
+    return;
+  }
+  const qcm = state.eveningQcm;
+
+  if(!qcm){
+    root.innerHTML = `
+      <button class="btn btn-rose" id="qcm-start-btn" style="width:100%; margin-bottom:10px;">🌙 Lancer le QCM du soir</button>
+      <div class="sub">Ton/ta partenaire recevra une notif. Chacun répond de son côté. À la fin : un plan commun (film, repos, soft… ou hard).</div>`;
+    const b = document.getElementById('qcm-start-btn');
+    if(b) b.onclick = startEveningQcm;
+    return;
+  }
+
+  if(qcm.status === 'done' && qcm.result){
+    const r = qcm.result;
+    const levelColor = r.level === 'hard' ? 'var(--rose)' : (r.level === 'medium' ? 'var(--gold-soft)' : 'var(--cream)');
+    root.innerHTML = `
+      <div class="card" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <div class="story-cat" style="color:${levelColor}">${escapeHtml(r.level.toUpperCase())}</div>
+        <div style="font-size:20px; font-family:'Cormorant Garamond',serif; color:var(--gold-soft);">${escapeHtml(r.title)}</div>
+        ${r.roleHint ? '<div class="sub">' + escapeHtml(r.roleHint) + '</div>' : ''}
+        <ol style="margin:0; padding-left:18px; color:var(--cream); line-height:1.55; font-size:14px;">
+          ${r.steps.map(s => '<li style="margin-bottom:6px;">' + escapeHtml(s) + '</li>').join('')}
+        </ol>
+        <div class="sub" style="font-size:11px;">Intensité commune : ${r.meta.intensite}/5 · Énergie : ${r.meta.energie}/5</div>
+      </div>
+      <button class="btn btn-gold" id="qcm-accept-btn" style="width:100%; margin-top:12px;">✨ On part là-dessus</button>
+      <button class="btn btn-ghost" id="qcm-reset-btn" style="width:100%; margin-top:8px;">Nouveau QCM</button>`;
+    document.getElementById('qcm-accept-btn').onclick = () => {
+      addHistory({ type: 'qcm', who: myRole, label: 'Plan du soir : ' + r.title, pts: 8, status: 'completed' });
+      state.scores.a = (state.scores.a || 0) + 4;
+      state.scores.b = (state.scores.b || 0) + 4;
+      state.eveningQcm = null;
+      persist(); render();
+      showToast('Bon plan — +4 🔥 chacun');
+      sendPushToPartner('🌙 Plan accepté', r.title);
+    };
+    document.getElementById('qcm-reset-btn').onclick = () => {
+      state.eveningQcm = null;
+      persist(); render();
+    };
+    return;
+  }
+
+  // open — answering
+  const myAns = qcm.answers[myRole] || {};
+  const answered = Object.keys(myAns).length;
+  const total = QCM_QUESTIONS.length;
+  const other = myRole === 'a' ? 'b' : 'a';
+  const otherDone = Object.keys(qcm.answers[other] || {}).length >= total;
+  const meDone = answered >= total;
+
+  if(meDone){
+    root.innerHTML = `
+      <div class="card" style="flex-direction:column; gap:8px;">
+        <div style="font-weight:600; color:var(--gold-soft);">Tes réponses sont enregistrées ✓</div>
+        <div class="sub">${otherDone ? 'Calcul du plan…' : 'En attente de ' + escapeHtml(state.names[other]) + ' (' + Object.keys(qcm.answers[other]||{}).length + '/' + total + ')'}</div>
+      </div>
+      <button class="btn btn-ghost" id="qcm-cancel-btn" style="width:100%; margin-top:12px;">Annuler le QCM</button>`;
+    document.getElementById('qcm-cancel-btn').onclick = cancelEveningQcm;
+    return;
+  }
+
+  const qIndex = Math.min(answered, total - 1);
+  const q = QCM_QUESTIONS[qIndex];
+  root.innerHTML = `
+    <div class="sub" style="margin-bottom:8px;">Question ${qIndex + 1} / ${total}</div>
+    <div style="height:6px; background:var(--line); border-radius:4px; margin-bottom:14px; overflow:hidden;">
+      <div style="height:100%; width:${Math.round(100 * answered / total)}%; background:var(--rose);"></div>
+    </div>
+    <div style="font-size:16px; color:var(--cream); margin-bottom:14px; font-weight:600;">${escapeHtml(q.text)}</div>
+    <div id="qcm-options" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <button class="btn btn-ghost" id="qcm-cancel-btn" style="width:100%; margin-top:14px;">Annuler</button>`;
+  const optWrap = document.getElementById('qcm-options');
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost';
+    btn.style.width = '100%';
+    btn.style.textAlign = 'left';
+    btn.textContent = opt.label;
+    btn.onclick = () => answerQcm(q.id, opt.id);
+    optWrap.appendChild(btn);
+  });
+  document.getElementById('qcm-cancel-btn').onclick = cancelEveningQcm;
+}
 
 const STORY_LIBRARY = [
   // ========== SOFT ==========
@@ -4864,13 +5272,13 @@ document.getElementById('notif-send-defi-btn').addEventListener('click', () => {
 });
 
 const TAB_GROUPS = {
-  defis: 'jouer', secret: 'jouer', histoires: 'jouer',
+  defis: 'jouer', secret: 'jouer', histoires: 'jouer', qcm: 'jouer',
   boutique: 'recompenses', achats: 'recompenses',
   messages: 'ensemble',
   'profil-accueil': 'profil', calendrier: 'profil', historique: 'profil',
 };
 const GROUP_TABS = {
-  jouer: ['defis', 'secret', 'histoires'],
+  jouer: ['defis', 'secret', 'histoires', 'qcm'],
   recompenses: ['boutique', 'achats'],
   ensemble: ['messages'],
   profil: ['profil-accueil', 'calendrier', 'historique'],
@@ -5108,6 +5516,20 @@ function getNotificationItems(){
       });
     }
   });
+
+  // QCM du soir
+  if(state.eveningQcm && state.eveningQcm.status === 'open'){
+    const mine = Object.keys((state.eveningQcm.answers && state.eveningQcm.answers[myRole]) || {}).length;
+    const totalQ = typeof QCM_QUESTIONS !== 'undefined' ? QCM_QUESTIONS.length : 12;
+    if(mine < totalQ){
+      items.push({ text: '🌙 QCM du soir — à toi de répondre (' + mine + '/' + totalQ + ')', tab: 'qcm', persistent: true });
+    } else {
+      items.push({ text: '🌙 QCM — en attente de l\'autre', tab: 'qcm', persistent: true });
+    }
+  }
+  if(state.eveningQcm && state.eveningQcm.status === 'done'){
+    items.push({ text: '✨ Plan du soir prêt — à découvrir', tab: 'qcm', persistent: true });
+  }
 
   return items;
 }
