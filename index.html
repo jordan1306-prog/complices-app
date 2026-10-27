@@ -1517,6 +1517,8 @@ const defaultState = () => ({
   story: null,
   soloStory: { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } },
   eveningQcm: null,
+  lastEveningPlan: null,
+  qcmHistory: [],
   customScenarios: [],
   history: [],
   newDefiAssign: 'a',
@@ -1780,6 +1782,8 @@ function normalizeState(s){
   if(!s.photos) s.photos = { a: '', b: '' };
   if(s.story === undefined) s.story = null;
   if(s.eveningQcm === undefined) s.eveningQcm = null;
+  if(s.lastEveningPlan === undefined) s.lastEveningPlan = null;
+  if(!s.qcmHistory) s.qcmHistory = [];
   if(!s.soloStory) s.soloStory = { a: { lastMonth: '' }, b: { lastMonth: '' }, pendingInvite: { a: false, b: false } };
   if(!s.soloStory.a) s.soloStory.a = { lastMonth: '' };
   if(!s.soloStory.b) s.soloStory.b = { lastMonth: '' };
@@ -3117,81 +3121,82 @@ document.getElementById('quick-boutique-btn')?.addEventListener('click', () => g
 
 /* ========== QCM DU SOIR ========== */
 const QCM_QUESTIONS = [
-  { id: 'energie', text: 'Ton énergie ce soir ?', options: [
-    { id: '1', label: 'Épuisé·e', v: 1 },
-    { id: '2', label: 'Tranquille', v: 2 },
-    { id: '3', label: 'OK', v: 3 },
-    { id: '4', label: 'Motivé·e', v: 4 },
-    { id: '5', label: 'En feu', v: 5 },
+  // --- Crescendo : simple → chaud ---
+  { id: 'energie', text: 'Comment tu te sens ce soir ?', tease: 'On commence doucement…', options: [
+    { id: '1', label: 'Crevé·e, batterie faible', v: 1 },
+    { id: '2', label: 'Tranquille, sans pression', v: 2 },
+    { id: '3', label: 'Bien, ouvert·e', v: 3 },
+    { id: '4', label: 'Motivé·e, j\'ai de l\'énergie', v: 4 },
+    { id: '5', label: 'En feu — j\'ai envie de bouger', v: 5 },
   ]},
-  { id: 'ecran', text: 'Envie d\'écran ?', options: [
-    { id: 'film', label: 'Un film', v: 'film' },
-    { id: 'serie', label: 'Une série', v: 'serie' },
-    { id: 'rien', label: 'Rien du tout', v: 'rien' },
-    { id: 'peu_importe', label: 'Peu importe', v: 'peu' },
+  { id: 'lendemain', text: 'Et demain matin ?', tease: 'Histoire de calibrer la soirée.', options: [
+    { id: 'tot', label: 'Lever tôt — on garde de la marge', v: 'tot' },
+    { id: 'cool', label: 'Matinée cool possible', v: 'cool' },
+    { id: 'libre', label: 'On s\'en fiche totalement', v: 'libre' },
   ]},
-  { id: 'contact', text: 'Besoin de contact physique ?', options: [
-    { id: 'non', label: 'Non, plutôt d\'espace', v: 0 },
-    { id: 'calins', label: 'Câlins / proximité', v: 1 },
+  { id: 'priorite', text: 'Ce soir, tu as surtout envie de…', tease: 'Dis ce dont tu as vraiment besoin.', options: [
+    { id: 'repos', label: 'Décrocher et me reposer', v: 'repos' },
+    { id: 'rire', label: 'Rire, me détendre, rester léger', v: 'rire' },
+    { id: 'fusion', label: 'Me coller à toi, fusion câline', v: 'fusion' },
+    { id: 'desire', label: 'Me sentir désiré·e', v: 'desire' },
+    { id: 'lacher', label: 'Me lâcher pour de vrai', v: 'lacher' },
+  ]},
+  { id: 'ecran', text: 'Un écran dans le plan ?', tease: 'Film, série… ou autre chose.', options: [
+    { id: 'film', label: 'Oui — un film', v: 'film' },
+    { id: 'serie', label: 'Oui — une série', v: 'serie' },
+    { id: 'peu_importe', label: 'Si ça vient, OK', v: 'peu' },
+    { id: 'rien', label: 'Non — plutôt nous', v: 'rien' },
+  ]},
+  { id: 'contact', text: 'Et le contact, ce soir ?', tease: 'On se rapproche un peu…', options: [
+    { id: 'non', label: 'J\'ai besoin d\'espace', v: 0 },
+    { id: 'calins', label: 'Câlins, proximité, peau', v: 1 },
     { id: 'plus', label: 'Plus que des câlins', v: 2 },
-    { id: 'beaucoup', label: 'Beaucoup de corps', v: 3 },
+    { id: 'beaucoup', label: 'Beaucoup de corps — j\'ai faim de toi', v: 3 },
   ]},
-  { id: 'intensite', text: 'Intensité sexuelle (0 = rien) ?', options: [
-    { id: '0', label: '0 — pas ce soir', v: 0 },
-    { id: '1', label: '1 — très soft', v: 1 },
-    { id: '2', label: '2 — doux', v: 2 },
-    { id: '3', label: '3 — medium', v: 3 },
-    { id: '4', label: '4 — chaud', v: 4 },
-    { id: '5', label: '5 — hard', v: 5 },
+  { id: 'duree', text: 'Combien longtemps “ensemble actif” ?', tease: 'Sans chronomètre strict — juste une idée.', options: [
+    { id: '15', label: 'Un petit moment (~15 min)', v: 15 },
+    { id: '45', label: 'Un vrai créneau (30–45 min)', v: 45 },
+    { id: 'long', label: 'On prend le temps', v: 90 },
+    { id: 'onverra', label: 'On verra sur le moment', v: 45 },
   ]},
-  { id: 'role', text: 'Tu préfères plutôt…', options: [
-    { id: 'recevoir', label: 'Recevoir', v: 'recevoir' },
-    { id: 'faire', label: 'Faire', v: 'faire' },
-    { id: 'lesdeux', label: 'Les deux', v: 'lesdeux' },
-    { id: 'na', label: 'Pas concerné ce soir', v: 'na' },
+  { id: 'intensite', text: 'Niveau de chaleur (0 = rien de sexuel) ?', tease: 'Là, on parle désir…', options: [
+    { id: '0', label: '0 — pas ce soir, et c\'est OK', v: 0 },
+    { id: '1', label: '1 — très soft, tendre', v: 1 },
+    { id: '2', label: '2 — doux, qui monte un peu', v: 2 },
+    { id: '3', label: '3 — medium, clairement coquin', v: 3 },
+    { id: '4', label: '4 — chaud, j\'en veux', v: 4 },
+    { id: '5', label: '5 — hard, sans frein inutile', v: 5 },
   ]},
-  { id: 'ambiance', text: 'Ambiance idéale ?', options: [
-    { id: 'tendre', label: 'Tendre', v: 'tendre' },
-    { id: 'joueur', label: 'Joueur·se', v: 'joueur' },
-    { id: 'dom', label: 'Dominant·e / soumis·e', v: 'dom' },
+  { id: 'role', text: 'Tu préfères plutôt…', tease: 'Qui mène, qui reçoit ?', options: [
+    { id: 'recevoir', label: 'Recevoir — qu\'on s\'occupe de moi', v: 'recevoir' },
+    { id: 'faire', label: 'Faire — m\'occuper de toi', v: 'faire' },
+    { id: 'lesdeux', label: 'Les deux — on s\'échange', v: 'lesdeux' },
+    { id: 'na', label: 'Pas le sujet ce soir', v: 'na' },
+  ]},
+  { id: 'ambiance', text: 'L\'ambiance que tu veux…', tease: 'Le ton de la soirée.', options: [
+    { id: 'tendre', label: 'Tendre, presque romantique', v: 'tendre' },
+    { id: 'joueur', label: 'Joueur·se, complices', v: 'joueur' },
+    { id: 'dom', label: 'Contrôle / se laisser faire', v: 'dom' },
     { id: 'surprise', label: 'Surprends-moi', v: 'surprise' },
   ]},
-  { id: 'actes', text: 'Actes qui te tentent (choisis le principal) ?', options: [
-    { id: 'mains', label: 'Mains / massage', v: 'mains' },
-    { id: 'bouche', label: 'Bouche', v: 'bouche' },
-    { id: 'jouets', label: 'Jouets', v: 'jouets' },
+  { id: 'actes', text: 'Ce qui te tente le plus ?', tease: 'Sois honnête — c\'est pour vous deux.', options: [
+    { id: 'rien', label: 'Rien de sexuel ce soir', v: 'rien' },
+    { id: 'mains', label: 'Mains, massage, caresses', v: 'mains' },
+    { id: 'bouche', label: 'La bouche…', v: 'bouche' },
+    { id: 'jouets', label: 'Un jouet s\'invite', v: 'jouets' },
     { id: 'penetration', label: 'Pénétration', v: 'penetration' },
-    { id: 'rien', label: 'Rien de sexuel', v: 'rien' },
   ]},
-  { id: 'anal', text: 'Anal ce soir ?', options: [
-    { id: 'non', label: 'Non', v: 0 },
-    { id: 'peut', label: 'Peut‑être', v: 1 },
-    { id: 'doux', label: 'Oui si très doux', v: 2 },
-    { id: 'oui', label: 'Oui', v: 3 },
-  ]},
-  { id: 'duree', text: 'Temps “ensemble actif” ?', options: [
-    { id: '15', label: '~15 min', v: 15 },
-    { id: '45', label: '30–45 min', v: 45 },
-    { id: 'long', label: 'Longtemps', v: 90 },
-    { id: 'onverra', label: 'On verra', v: 45 },
-  ]},
-  { id: 'lendemain', text: 'Demain matin ?', options: [
-    { id: 'tot', label: 'Lever tôt', v: 'tot' },
-    { id: 'cool', label: 'Matinée cool', v: 'cool' },
-    { id: 'libre', label: 'On s\'en fiche', v: 'libre' },
-  ]},
-  { id: 'priorite', text: 'Ce soir tu veux surtout…', options: [
-    { id: 'repos', label: 'Reposer', v: 'repos' },
-    { id: 'rire', label: 'Rire / léger', v: 'rire' },
-    { id: 'desire', label: 'Te sentir désiré·e', v: 'desire' },
-    { id: 'lacher', label: 'Te lâcher', v: 'lacher' },
-    { id: 'fusion', label: 'Fusion câline', v: 'fusion' },
-  ]},
-  { id: 'extras', text: 'Extra possible ?', options: [
+  { id: 'extras', text: 'Un petit extra ?', tease: 'Détail qui change tout.', options: [
     { id: 'aucun', label: 'Rien de spécial', v: 'aucun' },
-    { id: 'bandeau', label: 'Yeux bandés OK', v: 'bandeau' },
-    { id: 'douche', label: 'Douche / bain à deux', v: 'douche' },
     { id: 'canape', label: 'Canapé plutôt que lit', v: 'canape' },
+    { id: 'douche', label: 'Douche ou bain à deux', v: 'douche' },
+    { id: 'bandeau', label: 'Yeux bandés — je joue le jeu', v: 'bandeau' },
+  ]},
+  { id: 'anal', text: 'Et plus loin — anal ce soir ?', tease: 'Dernière question. Que du terrain commun.', options: [
+    { id: 'non', label: 'Non', v: 0 },
+    { id: 'peut', label: 'Peut‑être, on verra', v: 1 },
+    { id: 'doux', label: 'Oui, si c\'est très doux', v: 2 },
+    { id: 'oui', label: 'Oui — j\'y pense', v: 3 },
   ]},
 ];
 
@@ -3215,7 +3220,7 @@ function startEveningQcm(){
     result: null
   };
   persist(); render();
-  sendPushToPartner('🌙 QCM du soir', (state.names[myRole] || 'Ton/ta partenaire') + ' t\'envoie le questionnaire pour ce soir.');
+  sendPushToPartner('🌙 Ce soir, à toi de répondre', (state.names[myRole] || 'Ton/ta partenaire') + ' t\'a envoyé le QCM du soir — 12 questions, un plan rien que pour vous.');
   showToast('QCM envoyé — à vous de répondre');
   goToTab('qcm');
 }
@@ -3228,26 +3233,48 @@ function cancelEveningQcm(){
   showToast('QCM annulé');
 }
 
-function answerQcm(qid, optId){
+async function answerQcm(qid, optId){
   if(!state.eveningQcm || state.eveningQcm.status !== 'open') return;
   if(!(myRole === 'a' || myRole === 'b')) return;
   const q = QCM_QUESTIONS.find(x => x.id === qid);
   const opt = q && q.options.find(o => o.id === optId);
   if(!q || !opt) return;
+
+  // Fusionner avec Firebase pour ne pas écraser les réponses de l'autre
+  try{
+    const snap = await getDoc(stateDocRef);
+    if(snap.exists()){
+      const fresh = normalizeState(snap.data());
+      if(fresh.eveningQcm && state.eveningQcm && fresh.eveningQcm.id === state.eveningQcm.id){
+        state.eveningQcm.answers.a = Object.assign({}, fresh.eveningQcm.answers.a || {}, state.eveningQcm.answers.a || {});
+        state.eveningQcm.answers.b = Object.assign({}, fresh.eveningQcm.answers.b || {}, state.eveningQcm.answers.b || {});
+        if(fresh.eveningQcm.status === 'done' && fresh.eveningQcm.result){
+          state.eveningQcm = fresh.eveningQcm;
+          state.lastEveningPlan = fresh.eveningQcm.result;
+          persist(); render();
+          return;
+        }
+      }
+    }
+  }catch(e){ console.warn('QCM merge', e); }
+
+  if(!state.eveningQcm.answers[myRole]) state.eveningQcm.answers[myRole] = {};
   state.eveningQcm.answers[myRole][qid] = { id: optId, v: opt.v, label: opt.label };
-  // advance step to next unanswered
   let step = 0;
   for(let i = 0; i < QCM_QUESTIONS.length; i++){
     if(!state.eveningQcm.answers[myRole][QCM_QUESTIONS[i].id]){ step = i; break; }
     step = i + 1;
   }
   state.eveningQcm.step[myRole] = step;
-  const doneA = Object.keys(state.eveningQcm.answers.a).length >= QCM_QUESTIONS.length;
-  const doneB = Object.keys(state.eveningQcm.answers.b).length >= QCM_QUESTIONS.length;
+  const doneA = Object.keys(state.eveningQcm.answers.a || {}).length >= QCM_QUESTIONS.length;
+  const doneB = Object.keys(state.eveningQcm.answers.b || {}).length >= QCM_QUESTIONS.length;
   if(doneA && doneB){
-    state.eveningQcm.result = computeEveningPlan(state.eveningQcm.answers.a, state.eveningQcm.answers.b);
+    const plan = computeEveningPlan(state.eveningQcm.answers.a, state.eveningQcm.answers.b);
+    state.eveningQcm.result = plan;
     state.eveningQcm.status = 'done';
-    sendPushToPartner('✨ Plan du soir prêt', 'Vos réponses sont croisées — découvrez le plan dans QCM soir.');
+    state.eveningQcm.completedAt = Date.now();
+    pushQcmHistory(plan, { accepted: false });
+    sendPushToPartner('🔥 Votre plan du soir est prêt', 'Les réponses sont croisées. Ouvre QCM soir — il y a de quoi avoir envie.');
     showToast('Plan du soir généré ✨');
   }
   persist(); render();
@@ -3419,6 +3446,84 @@ function computeEveningPlan(a, b){
   };
 }
 
+
+function pushQcmHistory(plan, meta){
+  if(!state || !plan) return;
+  if(!state.qcmHistory) state.qcmHistory = [];
+  const entry = {
+    id: cryptoId(),
+    ts: Date.now(),
+    title: plan.title || 'Plan du soir',
+    level: plan.level || '',
+    steps: (plan.steps || []).slice(),
+    roleHint: plan.roleHint || '',
+    meta: plan.meta || null,
+    accepted: !!(meta && meta.accepted)
+  };
+  // éviter doublon si même titre dans les 2 min
+  const last = state.qcmHistory[0];
+  if(last && last.title === entry.title && (entry.ts - last.ts) < 120000){
+    state.qcmHistory[0] = entry;
+  } else {
+    state.qcmHistory.unshift(entry);
+  }
+  if(state.qcmHistory.length > 30) state.qcmHistory.length = 30;
+  state.lastEveningPlan = plan;
+}
+function ensureQcmResult(){
+  if(!state || !state.eveningQcm) return;
+  const q = state.eveningQcm;
+  if(!q.answers) return;
+  const doneA = Object.keys(q.answers.a || {}).length >= QCM_QUESTIONS.length;
+  const doneB = Object.keys(q.answers.b || {}).length >= QCM_QUESTIONS.length;
+  if(doneA && doneB){
+    if(!q.result) q.result = computeEveningPlan(q.answers.a, q.answers.b);
+    q.status = 'done';
+    state.lastEveningPlan = q.result;
+  }
+}
+
+
+function renderQcmHistoryList(){
+  const wrap = document.getElementById('qcm-history-wrap');
+  if(!wrap || !state) return;
+  const list = state.qcmHistory || [];
+  if(!list.length){
+    wrap.innerHTML = '<div class="sub">Pas encore d\'historique de plans.</div>';
+    return;
+  }
+  let html = '<div class="home-section-title" style="margin-top:8px;">Historique des plans</div>';
+  list.slice(0, 12).forEach(h => {
+    const when = new Date(h.ts).toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+    const lvl = (h.level || '').toUpperCase();
+    const stepsPreview = (h.steps || []).slice(0, 2).map(s => escapeHtml(s)).join(' · ');
+    html += `<div class="card" style="flex-direction:column; align-items:stretch; gap:4px; margin-bottom:8px; cursor:pointer;" data-qcm-hist="${h.id}">
+      <div style="display:flex; justify-content:space-between; gap:8px;">
+        <div style="font-weight:600; color:var(--gold-soft);">${escapeHtml(h.title)}</div>
+        <div class="sub" style="margin:0; white-space:nowrap;">${when}</div>
+      </div>
+      <div class="sub" style="margin:0;">${escapeHtml(lvl)}${h.accepted ? ' · validé' : ''}</div>
+      <div class="sub" style="margin:0; font-size:11px;">${stepsPreview}${(h.steps||[]).length > 2 ? '…' : ''}</div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('[data-qcm-hist]').forEach(card => {
+    card.onclick = () => {
+      const id = card.getAttribute('data-qcm-hist');
+      const h = (state.qcmHistory || []).find(x => x.id === id);
+      if(!h) return;
+      state.lastEveningPlan = {
+        title: h.title,
+        level: h.level,
+        steps: h.steps,
+        roleHint: h.roleHint,
+        meta: h.meta
+      };
+      persist(); render();
+      showToast('Plan rappelé');
+    };
+  });
+}
 function renderQcm(){
   const root = document.getElementById('qcm-root');
   if(!root || !state) return;
@@ -3426,14 +3531,41 @@ function renderQcm(){
     root.innerHTML = '<div class="empty">Choisis qui tu es pour utiliser le QCM.</div>';
     return;
   }
+  ensureQcmResult();
   const qcm = state.eveningQcm;
+
+  // Plan encore visible via lastEveningPlan si QCM archivé
+  if(!qcm && state.lastEveningPlan){
+    const r = state.lastEveningPlan;
+    const levelColor = r.level === 'hard' ? 'var(--rose)' : (r.level === 'medium' ? 'var(--gold-soft)' : 'var(--cream)');
+    root.innerHTML = `
+      <div class="sub" style="margin-bottom:8px;">Dernier plan du soir (toujours dispo)</div>
+      <div class="card" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <div class="story-cat" style="color:${levelColor}">${escapeHtml((r.level||'').toUpperCase())} · pour vous deux</div>
+        <div style="font-size:20px; font-family:'Cormorant Garamond',serif; color:var(--gold-soft);">${escapeHtml(r.title || '')}</div>
+        <ol style="margin:0; padding-left:18px; color:var(--cream); line-height:1.55; font-size:14px;">
+          ${(r.steps||[]).map(s => '<li style="margin-bottom:6px;">' + escapeHtml(s) + '</li>').join('')}
+        </ol>
+      </div>
+      <button class="btn btn-rose" id="qcm-start-btn" style="width:100%; margin-top:12px;">🌙 Nouveau QCM du soir</button>
+      <button class="btn btn-ghost" id="qcm-clear-plan-btn" style="width:100%; margin-top:8px;">Effacer ce plan</button>`;
+    const b = document.getElementById('qcm-start-btn');
+    if(b) b.onclick = startEveningQcm;
+    const c = document.getElementById('qcm-clear-plan-btn');
+    if(c) c.onclick = () => { state.lastEveningPlan = null; persist(); render(); };
+    root.innerHTML += '<div id="qcm-history-wrap" style="margin-top:18px;"></div>';
+    renderQcmHistoryList();
+    return;
+  }
 
   if(!qcm){
     root.innerHTML = `
       <button class="btn btn-rose" id="qcm-start-btn" style="width:100%; margin-bottom:10px;">🌙 Lancer le QCM du soir</button>
-      <div class="sub">Ton/ta partenaire recevra une notif. Chacun répond de son côté. À la fin : un plan commun (film, repos, soft… ou hard).</div>`;
+      <div class="sub">Tu envoies le questionnaire. Chacun répond en privé. Les questions montent doucement… et à la fin l'app compose un plan commun — film, repos, câlins, ou beaucoup plus chaud.</div>
+      <div id="qcm-history-wrap"></div>`;
     const b = document.getElementById('qcm-start-btn');
     if(b) b.onclick = startEveningQcm;
+    renderQcmHistoryList();
     return;
   }
 
@@ -3442,8 +3574,9 @@ function renderQcm(){
     const levelColor = r.level === 'hard' ? 'var(--rose)' : (r.level === 'medium' ? 'var(--gold-soft)' : 'var(--cream)');
     root.innerHTML = `
       <div class="card" style="flex-direction:column; align-items:stretch; gap:10px;">
-        <div class="story-cat" style="color:${levelColor}">${escapeHtml(r.level.toUpperCase())}</div>
+        <div class="story-cat" style="color:${levelColor}">${escapeHtml(r.level.toUpperCase())} · pour vous deux</div>
         <div style="font-size:20px; font-family:'Cormorant Garamond',serif; color:var(--gold-soft);">${escapeHtml(r.title)}</div>
+        <div class="sub" style="font-style:italic;">Voici ce que vos envies ont en commun ce soir…</div>
         ${r.roleHint ? '<div class="sub">' + escapeHtml(r.roleHint) + '</div>' : ''}
         <ol style="margin:0; padding-left:18px; color:var(--cream); line-height:1.55; font-size:14px;">
           ${r.steps.map(s => '<li style="margin-bottom:6px;">' + escapeHtml(s) + '</li>').join('')}
@@ -3451,20 +3584,25 @@ function renderQcm(){
         <div class="sub" style="font-size:11px;">Intensité commune : ${r.meta.intensite}/5 · Énergie : ${r.meta.energie}/5</div>
       </div>
       <button class="btn btn-gold" id="qcm-accept-btn" style="width:100%; margin-top:12px;">✨ On part là-dessus</button>
-      <button class="btn btn-ghost" id="qcm-reset-btn" style="width:100%; margin-top:8px;">Nouveau QCM</button>`;
+      <button class="btn btn-ghost" id="qcm-reset-btn" style="width:100%; margin-top:8px;">Nouveau QCM</button>
+      <div id="qcm-history-wrap" style="margin-top:18px;"></div>`;
     document.getElementById('qcm-accept-btn').onclick = () => {
       addHistory({ type: 'qcm', who: myRole, label: 'Plan du soir : ' + r.title, pts: 8, status: 'completed' });
       state.scores.a = (state.scores.a || 0) + 4;
       state.scores.b = (state.scores.b || 0) + 4;
+      pushQcmHistory(r, { accepted: true });
       state.eveningQcm = null;
       persist(); render();
-      showToast('Bon plan — +4 🔥 chacun');
+      showToast('Plan gardé dans l\'historique — +4 🔥 chacun');
       sendPushToPartner('🌙 Plan accepté', r.title);
     };
     document.getElementById('qcm-reset-btn').onclick = () => {
+      state.lastEveningPlan = r;
       state.eveningQcm = null;
       persist(); render();
+      startEveningQcm();
     };
+    renderQcmHistoryList();
     return;
   }
 
@@ -3489,11 +3627,13 @@ function renderQcm(){
 
   const qIndex = Math.min(answered, total - 1);
   const q = QCM_QUESTIONS[qIndex];
+  const heat = qIndex < 4 ? 'douce' : (qIndex < 8 ? 'ça monte…' : 'plus intime');
   root.innerHTML = `
-    <div class="sub" style="margin-bottom:8px;">Question ${qIndex + 1} / ${total}</div>
+    <div class="sub" style="margin-bottom:8px;">Question ${qIndex + 1} / ${total} · <span style="color:var(--gold-soft);">${heat}</span></div>
     <div style="height:6px; background:var(--line); border-radius:4px; margin-bottom:14px; overflow:hidden;">
-      <div style="height:100%; width:${Math.round(100 * answered / total)}%; background:var(--rose);"></div>
+      <div style="height:100%; width:${Math.round(100 * answered / total)}%; background:linear-gradient(90deg,var(--gold-soft),var(--rose));"></div>
     </div>
+    ${q.tease ? '<div class="sub" style="font-style:italic; margin-bottom:8px; color:var(--rose-powder);">' + escapeHtml(q.tease) + '</div>' : ''}
     <div style="font-size:16px; color:var(--cream); margin-bottom:14px; font-weight:600;">${escapeHtml(q.text)}</div>
     <div id="qcm-options" style="display:flex; flex-direction:column; gap:8px;"></div>
     <button class="btn btn-ghost" id="qcm-cancel-btn" style="width:100%; margin-top:14px;">Annuler</button>`;
@@ -6035,10 +6175,30 @@ async function pollForNewDefis(){
         storyTurnForMe = true;
       }
     }
+    const prevQcmStatus = state.eveningQcm && state.eveningQcm.status;
+    // Fusion answers QCM si les deux devices ont répondu
+    if(state.eveningQcm && fresh.eveningQcm && state.eveningQcm.id === fresh.eveningQcm.id){
+      fresh.eveningQcm.answers = fresh.eveningQcm.answers || { a:{}, b:{} };
+      fresh.eveningQcm.answers.a = Object.assign({}, state.eveningQcm.answers.a || {}, fresh.eveningQcm.answers.a || {});
+      fresh.eveningQcm.answers.b = Object.assign({}, state.eveningQcm.answers.b || {}, fresh.eveningQcm.answers.b || {});
+      const da = Object.keys(fresh.eveningQcm.answers.a).length >= QCM_QUESTIONS.length;
+      const db = Object.keys(fresh.eveningQcm.answers.b).length >= QCM_QUESTIONS.length;
+      if(da && db){
+        if(!fresh.eveningQcm.result) fresh.eveningQcm.result = computeEveningPlan(fresh.eveningQcm.answers.a, fresh.eveningQcm.answers.b);
+        fresh.eveningQcm.status = 'done';
+        fresh.lastEveningPlan = fresh.eveningQcm.result;
+      }
+    }
+    if(fresh.eveningQcm && fresh.eveningQcm.status === 'done' && fresh.eveningQcm.result){
+      fresh.lastEveningPlan = fresh.eveningQcm.result;
+    }
     state = fresh;
     checkExpiredDefis();
     checkExpiredPurchases();
     ensureDailyChallenge();
+    if(prevQcmStatus !== 'done' && state.eveningQcm && state.eveningQcm.status === 'done'){
+      showToast('✨ Plan du soir prêt — ouvre QCM soir');
+    }
     newForMe.forEach(d => {
       showToast('✨ Nouveau défi pour toi : ' + d.text);
       if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
