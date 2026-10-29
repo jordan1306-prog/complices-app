@@ -2471,24 +2471,26 @@ function getSundayAfterNextWeek(saturdayStr){
 }
 
 function ensureDailyChallenge(){
-  // Défis "hebdo" : 2 par personne le samedi, à faire jusqu'au dimanche de la semaine suivante
+  // Défis hebdo : UNIQUEMENT le samedi (2 par personne), deadline = dimanche semaine suivante
   const WEEKLY_PER_PERSON = 2;
+  const now = new Date();
+  // 0=dim ... 6=sam — pas de création en semaine
+  if(now.getDay() !== 6) return;
+
   const saturday = getLastSaturdayStr();
   const deadline = getSundayAfterNextWeek(saturday);
   const today = daysFromNow(0);
-  if(today < saturday) return;
 
   let anyCreated = false;
   ['a', 'b'].forEach(role => {
     const key = role === 'a' ? 'dailyChallengeA' : 'dailyChallengeB';
-    // Combien de défis hebdo déjà pour CE samedi ?
-    // (les anciens sans weekSaturday comptent aussi pour éviter les doublons)
+    // Déjà émis pour ce samedi ?
+    const lastIssued = state[key] && state[key].date ? state[key].date : '';
+    if(lastIssued === saturday && (state[key].count || 0) >= WEEKLY_PER_PERSON) return;
+
     const existing = state.defis.filter(d =>
-      d.for === role && d.daily && (d.weekly || d.daily) &&
-      (d.weekSaturday === saturday || (!d.weekSaturday && d.daily))
+      d.for === role && d.weekly && d.weekSaturday === saturday
     );
-    // Marquer les anciens avec la bonne semaine
-    existing.forEach(d => { if(!d.weekSaturday){ d.weekSaturday = saturday; d.weekly = true; d.deadline = d.deadline || deadline; } });
     const need = WEEKLY_PER_PERSON - existing.length;
     if(need <= 0){
       state[key] = { date: saturday, count: WEEKLY_PER_PERSON };
