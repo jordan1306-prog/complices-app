@@ -4685,7 +4685,8 @@ function confirmRewardPurchase(){
     owedBy,
     deadline: Date.now() + totalMs,
     status: 'pending',
-    message: note || null
+    message: note || null,
+    cost: total
   });
   persist(); render();
   document.getElementById('reward-config-panel').classList.remove('active');
@@ -4787,6 +4788,11 @@ function renderPurchases(){
         validateBtn.onclick = () => validatePurchase(p.id);
         card.appendChild(validateBtn);
       } else {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-ghost';
+        cancelBtn.textContent = '🗑️ Annuler l\'achat';
+        cancelBtn.onclick = () => cancelPurchase(p.id);
+        card.appendChild(cancelBtn);
         const refuseBtn = document.createElement('button');
         refuseBtn.className = 'btn btn-danger';
         refuseBtn.textContent = '❌ Signaler un refus';
@@ -4796,6 +4802,36 @@ function renderPurchases(){
       boughtList.appendChild(card);
     });
   }
+}
+
+function cancelPurchase(id){
+  const p = state.purchases.find(x => x.id === id);
+  if(!p) return;
+  if(p.boughtBy !== myRole){
+    showToast('Seul l\'acheteur peut annuler');
+    return;
+  }
+  if(p.status !== 'pending'){
+    showToast('Cet achat ne peut plus être annulé');
+    return;
+  }
+  if(!confirm('Annuler cet achat ? Les flammes seront remboursées.')) return;
+  let refund = typeof p.cost === 'number' ? p.cost : 0;
+  // Anciens achats sans cost : retrouver le montant dans l'historique
+  if(!refund && state.history){
+    const hit = state.history.find(h => h.type === 'reward' && h.who === p.boughtBy && h.label === p.text && h.pts < 0);
+    if(hit) refund = Math.abs(hit.pts);
+  }
+  if(refund > 0){
+    state.scores[p.boughtBy] = (state.scores[p.boughtBy] || 0) + refund;
+    addHistory({ type:'purchase', who: p.boughtBy, label: p.text + ' (annulé — remboursement)', pts: refund, status:'cancelled' });
+  } else {
+    addHistory({ type:'purchase', who: p.boughtBy, label: p.text + ' (annulé)', pts: 0, status:'cancelled' });
+  }
+  state.purchases = state.purchases.filter(x => x.id !== id);
+  persist(); render();
+  showToast(refund > 0 ? ('Achat annulé — +' + refund + ' 🔥 remboursés') : 'Achat annulé');
+  sendPushToPartner('🗑️ Achat annulé', (state.names[p.boughtBy] || '') + ' a annulé : ' + (p.text || '').slice(0, 80));
 }
 
 function reportPurchaseRefusal(id){
