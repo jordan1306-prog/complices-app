@@ -325,6 +325,40 @@
   .card .info{ flex:1; min-width:0; }
   .card .info .t{ font-size:15px; font-weight:600; color: var(--cream); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
   .card .info .m{ font-size:12px; color: var(--rose-powder); margin-top:2px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+  .card.purchase-card{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .card.purchase-card .info .t{
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+  }
+  .card.purchase-card .purchase-msg{
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(201,51,63,0.12);
+    border: 0.5px solid rgba(234,136,144,0.35);
+    color: var(--gold-soft);
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.45;
+    white-space: normal;
+  }
+  .card.purchase-card .purchase-actions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card.purchase-card .purchase-actions .btn{
+    flex: 1 1 auto;
+    min-width: 120px;
+    white-space: normal;
+    text-align: center;
+  }
   .pts{
     font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px;
     color: var(--gold); white-space:nowrap;
@@ -4693,8 +4727,13 @@ function confirmRewardPurchase(){
   if(msgEl) msgEl.value = '';
   showToast(state.names[who] + ' — ' + total + ' 🔥');
   celebrate('🎁');
-  const pushBody = state.names[who] + ' attend : ' + label.slice(0, 70) + (note ? ' — « ' + note.slice(0, 80) + ' »' : '');
-  sendPushToPartner('🎁 Nouvel achat', pushBody);
+  const deadlineLabel = hours > 0 || minutes > 0
+    ? ((hours ? hours + 'h' : '') + (minutes ? (hours ? minutes + 'min' : minutes + ' min') : ''))
+    : '';
+  let pushBody = state.names[who] + ' a acheté pour toi : ' + label.slice(0, 90);
+  if(deadlineLabel) pushBody += ' — à faire en ' + deadlineLabel;
+  if(note) pushBody += ' — « ' + note.slice(0, 100) + ' »';
+  sendPushToPartner('🎁 À faire pour toi', pushBody);
   // Message aussi dans le chat si possible
   if(note && auth.currentUser){
     try{
@@ -4711,6 +4750,20 @@ function confirmRewardPurchase(){
 function redeemReward(id, who){
   // compat ancienne API → ouvre le configurateur
   openRewardConfig(id);
+}
+
+function formatPurchaseDeadline(ms){
+  if(!ms || ms <= 0) return 'Délai dépassé';
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if(h >= 24){
+    const d = Math.floor(h / 24);
+    const rh = h % 24;
+    return d + 'j ' + rh + 'h restantes';
+  }
+  if(h > 0) return h + 'h ' + String(m).padStart(2,'0') + 'min restantes';
+  return m + ' min restantes';
 }
 
 function renderPurchases(){
@@ -4730,14 +4783,14 @@ function renderPurchases(){
   } else {
     owed.forEach(p => {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'card purchase-card';
       const remaining = p.deadline - Date.now();
       const soonClass = remaining < 3 * 3600000 ? ' soon' : '';
       const statusTxt = p.status === 'done'
         ? '<div class="defi-deadline" style="color:var(--gold-soft);">En attente de validation par ' + escapeHtml(state.names[p.boughtBy]) + '</div>'
-        : `<div class="defi-deadline${soonClass}">⏳ ${formatCountdown(remaining)}</div>`;
+        : `<div class="defi-deadline${soonClass}">⏳ ${formatPurchaseDeadline(remaining)}</div>`;
       const msgHtml = p.message
-        ? `<div class="m" style="color:var(--gold-soft); font-style:italic; margin-top:4px;">💬 ${escapeHtml(p.message)}</div>`
+        ? `<div class="purchase-msg">💬 ${escapeHtml(p.message)}</div>`
         : '';
       card.innerHTML = `
         <div class="info">
@@ -4748,11 +4801,14 @@ function renderPurchases(){
         </div>
       `;
       if(p.status === 'pending'){
+        const actions = document.createElement('div');
+        actions.className = 'purchase-actions';
         const doneBtn = document.createElement('button');
         doneBtn.className = 'btn btn-gold';
         doneBtn.textContent = '✅ Fait';
         doneBtn.onclick = () => markPurchaseDone(p.id);
-        card.appendChild(doneBtn);
+        actions.appendChild(doneBtn);
+        card.appendChild(actions);
       }
       owedList.appendChild(card);
     });
@@ -4765,13 +4821,13 @@ function renderPurchases(){
   } else {
     bought.forEach(p => {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'card purchase-card';
       const remaining = p.deadline - Date.now();
       const statusTxt = p.status === 'done'
         ? '<div class="defi-deadline" style="color:var(--gold-soft);">Marqué comme fait — à toi de valider</div>'
-        : `<div class="defi-deadline">⏳ ${formatCountdown(remaining)} pour ${escapeHtml(state.names[p.owedBy])}</div>`;
+        : `<div class="defi-deadline">⏳ ${formatPurchaseDeadline(remaining)} pour ${escapeHtml(state.names[p.owedBy])}</div>`;
       const msgHtml = p.message
-        ? `<div class="m" style="color:var(--gold-soft); font-style:italic; margin-top:4px;">💬 ${escapeHtml(p.message)}</div>`
+        ? `<div class="purchase-msg">💬 ${escapeHtml(p.message)}</div>`
         : '';
       card.innerHTML = `
         <div class="info">
@@ -4781,24 +4837,29 @@ function renderPurchases(){
           ${statusTxt}
         </div>
       `;
+      const actions = document.createElement('div');
+      actions.className = 'purchase-actions';
       if(p.status === 'done'){
         const validateBtn = document.createElement('button');
         validateBtn.className = 'btn btn-gold';
         validateBtn.textContent = '✅ Valider';
         validateBtn.onclick = () => validatePurchase(p.id);
-        card.appendChild(validateBtn);
+        actions.appendChild(validateBtn);
       } else {
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-ghost';
         cancelBtn.textContent = '🗑️ Annuler l\'achat';
         cancelBtn.onclick = () => cancelPurchase(p.id);
-        card.appendChild(cancelBtn);
+        actions.appendChild(cancelBtn);
         const refuseBtn = document.createElement('button');
         refuseBtn.className = 'btn btn-danger';
+        refuseBtn.style.fontSize = '13px';
+        refuseBtn.style.padding = '9px 14px';
         refuseBtn.textContent = '❌ Signaler un refus';
         refuseBtn.onclick = () => reportPurchaseRefusal(p.id);
-        card.appendChild(refuseBtn);
+        actions.appendChild(refuseBtn);
       }
+      card.appendChild(actions);
       boughtList.appendChild(card);
     });
   }
