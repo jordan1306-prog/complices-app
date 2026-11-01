@@ -1257,6 +1257,8 @@
       <button type="button" class="btn btn-ghost" data-deadline="6h0" style="font-size:11px; padding:6px 10px;">6 h</button>
       <button type="button" class="btn btn-ghost" data-deadline="24h0" style="font-size:11px; padding:6px 10px;">24 h</button>
     </div>
+    <div style="font-size:12px; color:var(--gold-soft); margin:4px 0 6px; font-weight:600;">💬 Message au partenaire (optionnel)</div>
+    <textarea id="reward-config-message" placeholder="Ex : ce soir, quand tu rentres… / prends ton temps / j'ai trop envie…" rows="3" style="width:100%; margin-bottom:12px; background:var(--bg-2); border:0.5px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--cream); font-size:13px; font-family:Manrope,sans-serif; resize:vertical;"></textarea>
     <button class="btn btn-gold" id="reward-config-confirm" style="width:100%; margin-bottom:8px;">Acheter</button>
     <button class="btn btn-ghost" id="reward-config-cancel" style="width:100%;">Annuler</button>
   </div>
@@ -4613,6 +4615,8 @@ function openRewardConfig(id){
 
   document.getElementById('reward-config-hours').value = '2';
   document.getElementById('reward-config-mins').value = '0';
+  const msgEl = document.getElementById('reward-config-message');
+  if(msgEl) msgEl.value = '';
   updateRewardConfigTotal();
   document.getElementById('reward-config-panel').classList.add('active');
 }
@@ -4672,19 +4676,35 @@ function confirmRewardPurchase(){
   const owedBy = who === 'a' ? 'b' : 'a';
   state.scores[who] -= total;
   addHistory({ type:'reward', who, label, pts: -total });
+  const msgEl = document.getElementById('reward-config-message');
+  const note = (msgEl && msgEl.value || '').trim().slice(0, 280);
   state.purchases.push({
     id: cryptoId(),
     text: label,
     boughtBy: who,
     owedBy,
     deadline: Date.now() + totalMs,
-    status: 'pending'
+    status: 'pending',
+    message: note || null
   });
   persist(); render();
   document.getElementById('reward-config-panel').classList.remove('active');
+  if(msgEl) msgEl.value = '';
   showToast(state.names[who] + ' — ' + total + ' 🔥');
   celebrate('🎁');
-  sendPushToPartner('🎁 Nouvel achat', state.names[who] + ' attend : ' + label.slice(0, 80));
+  const pushBody = state.names[who] + ' attend : ' + label.slice(0, 70) + (note ? ' — « ' + note.slice(0, 80) + ' »' : '');
+  sendPushToPartner('🎁 Nouvel achat', pushBody);
+  // Message aussi dans le chat si possible
+  if(note && auth.currentUser){
+    try{
+      addDoc(collection(db, 'messages'), {
+        type: 'text',
+        text: '🎁 Achat : ' + label + '\n💬 ' + note,
+        senderEmail: auth.currentUser.email,
+        ts: serverTimestamp()
+      });
+    }catch(e){ console.warn('msg achat chat', e); }
+  }
 }
 
 function redeemReward(id, who){
@@ -4715,10 +4735,14 @@ function renderPurchases(){
       const statusTxt = p.status === 'done'
         ? '<div class="defi-deadline" style="color:var(--gold-soft);">En attente de validation par ' + escapeHtml(state.names[p.boughtBy]) + '</div>'
         : `<div class="defi-deadline${soonClass}">⏳ ${formatCountdown(remaining)}</div>`;
+      const msgHtml = p.message
+        ? `<div class="m" style="color:var(--gold-soft); font-style:italic; margin-top:4px;">💬 ${escapeHtml(p.message)}</div>`
+        : '';
       card.innerHTML = `
         <div class="info">
           <div class="t">${escapeHtml(p.text)}</div>
           <div class="m">Acheté par ${escapeHtml(state.names[p.boughtBy])}</div>
+          ${msgHtml}
           ${statusTxt}
         </div>
       `;
@@ -4745,10 +4769,14 @@ function renderPurchases(){
       const statusTxt = p.status === 'done'
         ? '<div class="defi-deadline" style="color:var(--gold-soft);">Marqué comme fait — à toi de valider</div>'
         : `<div class="defi-deadline">⏳ ${formatCountdown(remaining)} pour ${escapeHtml(state.names[p.owedBy])}</div>`;
+      const msgHtml = p.message
+        ? `<div class="m" style="color:var(--gold-soft); font-style:italic; margin-top:4px;">💬 ${escapeHtml(p.message)}</div>`
+        : '';
       card.innerHTML = `
         <div class="info">
           <div class="t">${escapeHtml(p.text)}</div>
           <div class="m">Dû par ${escapeHtml(state.names[p.owedBy])}</div>
+          ${msgHtml}
           ${statusTxt}
         </div>
       `;
