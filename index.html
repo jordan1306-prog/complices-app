@@ -4839,22 +4839,22 @@ function renderPurchases(){
       `;
       const actions = document.createElement('div');
       actions.className = 'purchase-actions';
-      if(p.status === 'done'){
-        const validateBtn = document.createElement('button');
-        validateBtn.className = 'btn btn-gold';
-        validateBtn.textContent = '✅ Valider';
-        validateBtn.onclick = () => validatePurchase(p.id);
-        actions.appendChild(validateBtn);
-      } else {
+      // Toujours pouvoir valider (même si le partenaire n'a pas encore cliqué « Fait »)
+      const validateBtn = document.createElement('button');
+      validateBtn.className = 'btn btn-gold';
+      validateBtn.textContent = p.status === 'done' ? '✅ Valider' : '✅ Valider (c\'est fait)';
+      validateBtn.onclick = () => validatePurchase(p.id);
+      actions.appendChild(validateBtn);
+      if(p.status === 'pending'){
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-ghost';
         cancelBtn.textContent = '🗑️ Annuler l\'achat';
         cancelBtn.onclick = () => cancelPurchase(p.id);
         actions.appendChild(cancelBtn);
         const refuseBtn = document.createElement('button');
-        refuseBtn.className = 'btn btn-danger';
-        refuseBtn.style.fontSize = '13px';
-        refuseBtn.style.padding = '9px 14px';
+        refuseBtn.className = 'btn btn-ghost';
+        refuseBtn.style.color = 'var(--danger)';
+        refuseBtn.style.borderColor = 'rgba(224,85,74,0.45)';
         refuseBtn.textContent = '❌ Signaler un refus';
         refuseBtn.onclick = () => reportPurchaseRefusal(p.id);
         actions.appendChild(refuseBtn);
@@ -4919,13 +4919,19 @@ function markPurchaseDone(id){
 function validatePurchase(id){
   const p = state.purchases.find(x => x.id === id);
   if(!p) return;
+  if(p.boughtBy !== myRole){
+    showToast('Seul l\'acheteur peut valider');
+    return;
+  }
+  if(p.status === 'pending' && !confirm('Confirmer que c\'est fait et valider cet achat ?')) return;
   addHistory({ type:'purchase', who: p.owedBy, label: p.text + ' (validé)', pts: 0, status:'completed' });
   state.purchases = state.purchases.filter(x => x.id !== id);
   persist(); render();
   showToast('Achat validé ✅');
   celebrate('✅');
-  sendPushToPartner('✅ Validé', p.text.slice(0, 100) + ' — validé par ' + state.names[p.owedBy === 'a' ? 'b' : 'a']);
+  sendPushToPartner('✅ Validé', p.text.slice(0, 100) + ' — validé');
 }
+
 
 function checkExpiredPurchases(){
   const now = Date.now();
