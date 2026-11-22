@@ -2507,15 +2507,16 @@ function getSundayAfterNextWeek(saturdayStr){
 }
 
 function ensureDailyChallenge(){
-  // Défis hebdo : UNIQUEMENT le samedi (2 par personne), deadline = dimanche semaine suivante
+  // Défis hebdo : 2 par personne, émis le samedi (rattrapage si l'app n'a pas été ouverte ce jour-là)
+  // Deadline = dimanche de la semaine suivante
   const WEEKLY_PER_PERSON = 2;
-  const now = new Date();
-  // 0=dim ... 6=sam — pas de création en semaine
-  if(now.getDay() !== 6) return;
-
   const saturday = getLastSaturdayStr();
   const deadline = getSundayAfterNextWeek(saturday);
   const today = daysFromNow(0);
+  // Pas avant le samedi du cycle
+  if(today < saturday) return;
+  // Plus de nouveaux défis une fois la deadline passée
+  if(today > deadline) return;
 
   let anyCreated = false;
   ['a', 'b'].forEach(role => {
